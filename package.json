@@ -6,7 +6,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "check": "node scripts/check.mjs"
+    "check": "node check.mjs"
   },
   "engines": { "node": ">=18" },
   "dependencies": { "express": "4.21.2" }
