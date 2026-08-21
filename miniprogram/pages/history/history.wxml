@@ -1,0 +1,24 @@
+<view class="page-shell safe-page history-page">
+  <view class="history-head">
+    <view><text class="eyebrow">PRIVATE JOURNAL</text><text class="section-title">留下的日子</text></view>
+    <button class="add-button" bindtap="addEntry">＋ 记录</button>
+  </view>
+  <text class="history-note">所有记录默认仅自己可见。长按一条记录可以删除。</text>
+  <view wx:if="{{loading}}" class="loading-copy">正在翻开记录</view>
+  <view wx:if="{{error}}" class="form-error">{{error}}</view>
+  <view wx:if="{{!loading && entries.length}}" class="timeline">
+    <view wx:for="{{entries}}" wx:key="id" class="timeline-row" data-index="{{index}}" bindlongpress="removeEntry">
+      <view class="timeline-date"><text>{{item.dateLabel}}</text></view>
+      <view class="paper-card history-card">
+        <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />
+        <text class="history-content">{{item.content || '今天 +1'}}</text>
+        <view class="entry-tags"><text>{{item.moodLabel}}</text><text>{{item.categoryLabel}}</text></view>
+      </view>
+    </view>
+  </view>
+  <view wx:if="{{!loading && !entries.length}}" class="paper-card empty-state">
+    <text class="section-title">这里会慢慢长出你的故事。</text>
+    <text class="muted">今天先留下一句话。</text>
+    <button class="primary-button empty-action" bindtap="addEntry">记录今天 +1</button>
+  </view>
+</view>

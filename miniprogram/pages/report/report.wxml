@@ -1,0 +1,30 @@
+<view class="page-shell safe-page report-page">
+  <text class="eyebrow">THE LAST 7 DAYS</text>
+  <view class="display-title report-title"><text>回望，不是为了评判。</text></view>
+  <text class="report-intro">只是看看，这一周的时间去了哪里，哪些感受值得被听见。</text>
+  <view wx:if="{{loading}}" class="loading-copy">正在整理这一周</view>
+  <view wx:if="{{error}}" class="form-error">{{error}}</view>
+  <block wx:if="{{!loading && report}}">
+    <view class="report-period">{{report.start}} 至 {{report.end}}</view>
+    <view class="report-numbers">
+      <view><text class="report-number">{{report.recordedDays}}</text><text>有记录的日子</text></view>
+      <view><text class="report-number">{{report.entryCount}}</text><text>留下的片刻</text></view>
+    </view>
+    <view class="paper-card report-card">
+      <text class="section-title">这一周的心情</text>
+      <view wx:if="{{report.moodRows.length}}" class="mood-bars">
+        <view wx:for="{{report.moodRows}}" wx:key="key" class="mood-row">
+          <text>{{item.label}}</text><view class="mood-track"><view style="width: {{item.width}}%"></view></view><text>{{item.count}}</text>
+        </view>
+      </view>
+      <text wx:else class="muted empty-copy">写下第一条记录后，这里会出现心情分布。</text>
+    </view>
+    <view class="paper-card report-card">
+      <text class="section-title">时间的关键词</text>
+      <text wx:if="{{report.topCategory}}" class="top-category">{{report.topCategory}}</text>
+      <text wx:if="{{report.topCategory}}" class="muted">这是本周记录中出现最多的主题。</text>
+      <text wx:else class="muted empty-copy">暂时还没有足够的记录。</text>
+    </view>
+    <button wx:if="{{!report.hasData}}" class="primary-button report-action" bindtap="recordToday">从今天开始记录</button>
+  </block>
+</view>

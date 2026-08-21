@@ -1,0 +1,33 @@
+<view class="page-shell auth-page">
+  <view class="brand-row">
+    <image class="brand-logo" src="/images/lifescale-icon.png" mode="aspectFill" />
+    <view><text class="brand-name">人生刻度</text><text class="brand-note">LIFESCALE</text></view>
+  </view>
+
+  <view class="auth-copy">
+    <text class="eyebrow">邮箱验证码登录</text>
+    <view class="display-title auth-title"><text>从一个安静的此刻开始。</text></view>
+    <text class="muted auth-intro">不需要密码。我们会向你的邮箱发送 6 位验证码。</text>
+  </view>
+
+  <view class="paper-card auth-card">
+    <view class="field">
+      <text class="field-label">邮箱地址</text>
+      <input class="input" type="text" value="{{email}}" bindinput="onEmailInput" placeholder="name@example.com" disabled="{{sent}}" />
+    </view>
+    <button wx:if="{{!sent}}" class="primary-button auth-action" bindtap="sendCode" loading="{{sending}}" disabled="{{sending}}">发送验证码</button>
+
+    <block wx:else>
+      <view class="field">
+        <text class="field-label">6 位验证码</text>
+        <input class="input code-input" type="number" maxlength="6" value="{{code}}" bindinput="onCodeInput" placeholder="000000" focus="{{sent}}" />
+      </view>
+      <button class="primary-button auth-action" bindtap="verifyCode" loading="{{verifying}}" disabled="{{verifying}}">验证并继续</button>
+      <button class="text-button" bindtap="sendCode" disabled="{{seconds > 0 || sending}}">{{seconds > 0 ? seconds + ' 秒后重新发送' : '重新发送验证码'}}</button>
+      <text class="delivery-note">验证码通常几分钟内到达，请同时检查垃圾邮件。</text>
+    </block>
+    <view wx:if="{{error}}" class="form-error">{{error}}</view>
+  </view>
+
+  <view class="privacy-note">继续即表示你同意<navigator url="/pages/legal/legal?type=terms">服务条款</navigator>和<navigator url="/pages/legal/legal?type=privacy">隐私政策</navigator>。</view>
+</view>

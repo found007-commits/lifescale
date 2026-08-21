@@ -1,0 +1,33 @@
+<view class="page-shell onboarding-page">
+  <text class="eyebrow">第一次设定</text>
+  <view class="display-title onboarding-title"><text>请认真写下，</text><text>你想怎样生活。</text></view>
+  <text class="onboarding-intro">LifeScale 的目标不是预测终点，而是让你看见有限的时间，并把今天留给真正重要的人和事。</text>
+
+  <view class="warning-card">
+    <text class="warning-label">填写前请注意</text>
+    <text>出生日期和目标年龄会决定你的人生刻度。保存后锁定一年，锁定期内无法删除或修改，请务必核对准确。</text>
+  </view>
+
+  <view class="paper-card onboarding-form">
+    <view class="field">
+      <text class="field-label">怎么称呼你（选填）</text>
+      <input class="input" value="{{displayName}}" bindinput="onNameInput" maxlength="30" placeholder="你的名字或昵称" />
+    </view>
+    <view class="field">
+      <text class="field-label">出生日期</text>
+      <picker mode="date" value="{{birthDate}}" end="{{maxDate}}" bindchange="onBirthChange">
+        <view class="picker-field"><text>{{birthDate || '请选择出生日期'}}</text><text>›</text></view>
+      </picker>
+    </view>
+    <view class="field">
+      <text class="field-label">希望活到的年龄</text>
+      <input class="input" type="number" value="{{targetAge}}" bindinput="onAgeInput" placeholder="最少 30 岁" />
+      <text class="field-help">可自由填写 {{minimumAge}}-150 岁。这是你设定的人生目标，不是寿命预测。</text>
+    </view>
+    <checkbox-group bindchange="onConfirmChange">
+      <label class="confirm-row"><checkbox value="confirmed" checked="{{confirmed}}" color="#123f31" /><text>我已认真核对以上重要数据，并理解保存后将锁定一年。</text></label>
+    </checkbox-group>
+    <view wx:if="{{error}}" class="form-error">{{error}}</view>
+    <button class="primary-button save-profile" bindtap="saveProfile" loading="{{saving}}" disabled="{{saving}}">确认并进入 LifeScale</button>
+  </view>
+</view>

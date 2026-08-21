@@ -1,0 +1,26 @@
+<view class="page-shell safe-page settings-page">
+  <text class="eyebrow">MY LIFESCALE</text>
+  <view class="display-title settings-title"><text>我的人生刻度</text></view>
+  <view wx:if="{{loading}}" class="loading-copy">正在读取资料</view>
+  <view wx:if="{{error}}" class="form-error">{{error}}</view>
+  <block wx:if="{{!loading && profile}}">
+    <view class="paper-card profile-card">
+      <text class="profile-name">{{profile.display_name || 'LifeScale 用户'}}</text>
+      <text class="muted">{{email}}</text>
+      <view class="profile-grid">
+        <view><text>出生日期</text><text>{{profile.birth_date}}</text></view>
+        <view><text>目标年龄</text><text>{{profile.target_age}} 岁</text></view>
+        <view><text>目标日期</text><text>{{profile.target_date}}</text></view>
+      </view>
+      <view class="lock-note"><text>核心人生刻度已锁定</text><text>锁定至 {{lockDate}}。到期后可重新设定，并再次锁定一年。</text></view>
+    </view>
+    <view class="settings-list paper-card">
+      <button data-type="privacy" bindtap="openLegal"><text>隐私政策</text><text>›</text></button>
+      <button data-type="terms" bindtap="openLegal"><text>服务条款</text><text>›</text></button>
+      <button data-type="third" bindtap="openLegal"><text>第三方服务说明</text><text>›</text></button>
+    </view>
+    <button class="secondary-button signout-button" bindtap="signOut">退出登录</button>
+    <button class="danger-button delete-button" bindtap="removeAccount" disabled="{{deleting}}">永久注销账户</button>
+    <text class="account-note">注销会立即删除账户及全部个人数据。此操作无法撤销。</text>
+  </block>
+</view>

@@ -1,0 +1,11 @@
+.auth-page { padding-top: 64rpx; }
+.auth-copy { margin-top: 100rpx; }
+.auth-title { margin-top: 28rpx; font-size: 54rpx; }
+.auth-intro { display: block; margin-top: 26rpx; line-height: 1.75; }
+.auth-card { margin-top: 56rpx; padding: 18rpx 30rpx 34rpx; }
+.auth-action { margin-top: 34rpx; }
+.code-input { letter-spacing: 18rpx; font-size: 38rpx; font-weight: 700; }
+.text-button { margin-top: 24rpx; background: transparent; color: #365f50; font-size: 24rpx; }
+.text-button[disabled] { color: #99aaa2; }
+.delivery-note { display: block; margin-top: 12rpx; color: #7f9188; font-size: 21rpx; line-height: 1.55; text-align: center; }
+.privacy-note { margin: 34rpx 20rpx 0; }

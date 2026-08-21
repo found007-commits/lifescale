@@ -1,0 +1,11 @@
+<view class="page-shell legal-page">
+  <text class="eyebrow">LIFESCALE</text>
+  <view class="display-title legal-title"><text>{{document.title}}</text></view>
+  <text class="updated">{{document.updated}}</text>
+  <view class="legal-sections">
+    <view wx:for="{{document.sections}}" wx:key="heading" class="legal-section">
+      <text class="section-title">{{item.heading}}</text>
+      <text>{{item.body}}</text>
+    </view>
+  </view>
+</view>

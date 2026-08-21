@@ -1,0 +1,16 @@
+{
+  "appid": "touristappid",
+  "projectname": "lifescale-miniprogram",
+  "compileType": "miniprogram",
+  "miniprogramRoot": "./",
+  "setting": {
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "urlCheck": true,
+    "checkInvalidKey": true
+  },
+  "simulatorType": "wechat",
+  "condition": {}
+}

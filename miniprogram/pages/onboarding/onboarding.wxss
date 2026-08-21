@@ -1,0 +1,8 @@
+.onboarding-page { padding-top: 52rpx; }
+.onboarding-title { margin-top: 26rpx; font-size: 62rpx; }
+.onboarding-intro { display: block; margin-top: 28rpx; color: #476b5d; line-height: 1.75; }
+.warning-card { margin-top: 42rpx; padding: 30rpx; border-left: 7rpx solid #d99b2f; background: rgba(217, 155, 47, .1); color: #365f50; line-height: 1.7; }
+.warning-label { display: block; margin-bottom: 8rpx; color: #9c6814; font-weight: 700; }
+.onboarding-form { margin-top: 34rpx; padding: 12rpx 30rpx 34rpx; }
+.confirm-row { margin-top: 34rpx; display: grid; grid-template-columns: 46rpx 1fr; gap: 16rpx; color: #476b5d; font-size: 23rpx; line-height: 1.65; }
+.save-profile { margin-top: 34rpx; }

@@ -1,0 +1,7 @@
+.legal-page { padding-top: 50rpx; }
+.legal-title { margin-top: 25rpx; font-size: 58rpx; }
+.updated { display: block; margin-top: 18rpx; color: #7f9188; font-size: 21rpx; }
+.legal-sections { margin-top: 48rpx; }
+.legal-section { padding: 34rpx 0; border-top: 2rpx solid rgba(18,63,49,.12); }
+.legal-section .section-title { display: block; margin-bottom: 18rpx; font-size: 34rpx; }
+.legal-section > text:last-child { color: #476b5d; line-height: 1.85; }

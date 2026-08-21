@@ -1,0 +1,48 @@
+<view class="landing-page">
+  <view class="landing-nav">
+    <view class="brand-row">
+      <image class="brand-logo" src="/images/lifescale-icon.png" mode="aspectFill" />
+      <view><text class="brand-name">人生刻度</text><text class="brand-note">LIFESCALE</text></view>
+    </view>
+    <button class="mini-login" bindtap="goLogin" hover-class="button-press">登录</button>
+  </view>
+
+  <view class="landing-hero">
+    <text class="eyebrow">把时间还给自己</text>
+    <view class="display-title hero-title"><text>看见余生，</text><text>认真今天。</text></view>
+    <text class="hero-copy">看见仍可书写的时间，留下今天真实发生的事。</text>
+    <button class="primary-button hero-button" bindtap="goLogin" hover-class="button-press">邮箱登录</button>
+  </view>
+
+  <view class="preview-card paper-card">
+    <text class="eyebrow">先看一眼</text>
+    <text class="section-title">我的人生刻度</text>
+    <view class="field">
+      <text class="field-label">出生日期</text>
+      <picker mode="date" value="{{birthDate}}" end="{{maxDate}}" bindchange="onBirthChange">
+        <view class="picker-field"><text>{{birthDate || '请选择出生日期'}}</text><text>›</text></view>
+      </picker>
+    </view>
+    <view class="field">
+      <text class="field-label">希望活到的年龄</text>
+      <input class="input" type="number" value="{{targetAge}}" bindinput="onAgeInput" placeholder="最少 30 岁" />
+      <text class="field-help">可自由填写 {{minimumAge}}-150 岁。这是人生目标，不是寿命预测。</text>
+    </view>
+    <button class="secondary-button preview-button" bindtap="previewScale" hover-class="button-press">预览刻度</button>
+
+    <view wx:if="{{preview}}" class="preview-result">
+      <text>仍可认真生活的日子</text>
+      <text class="preview-number">{{preview.remainingDays}}</text>
+      <text>天</text>
+      <button class="primary-button" bindtap="goLogin" hover-class="button-press">保存我的人生刻度</button>
+    </view>
+  </view>
+
+  <view class="landing-manifesto">
+    <text class="eyebrow">LIFESCALE</text>
+    <view class="display-title manifesto-title"><text>不是倒数生命，</text><text>而是把今天留下。</text></view>
+    <view class="manifesto-line"><text>记录今天</text><text>一句话、一张图，也足够。</text></view>
+    <view class="manifesto-line"><text>回望七天</text><text>看见情绪、关系和时间去向。</text></view>
+    <view class="manifesto-line"><text>默认私密</text><text>你的记录只属于你。</text></view>
+  </view>
+</view>

@@ -1,0 +1,17 @@
+.landing-page { min-height: 100vh; padding-bottom: 100rpx; overflow: hidden; }
+.landing-nav { padding: calc(28rpx + env(safe-area-inset-top)) 34rpx 20rpx; display: flex; align-items: center; justify-content: space-between; }
+.mini-login { margin: 0; min-width: 116rpx; min-height: 64rpx; border: 2rpx solid rgba(18, 63, 49, .22); border-radius: 34rpx; background: transparent; color: #123f31; font-size: 24rpx; line-height: 64rpx; }
+.landing-hero { min-height: 720rpx; padding: 110rpx 40rpx 70rpx; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
+.hero-title { margin-top: 34rpx; font-size: 88rpx; }
+.hero-copy { max-width: 600rpx; margin-top: 42rpx; color: #476b5d; font-size: 30rpx; line-height: 1.75; }
+.hero-button { width: 270rpx; margin: 52rpx 0 0; }
+.preview-card { margin: 0 28rpx; padding: 42rpx 34rpx; }
+.preview-card .section-title { display: block; margin-top: 14rpx; }
+.preview-button { margin-top: 34rpx; }
+.preview-result { margin-top: 30rpx; padding: 38rpx 26rpx; border-radius: 24rpx; background: #123f31; color: #fbfaf6; text-align: center; }
+.preview-number { display: block; margin: 12rpx 0 4rpx; color: #d99b2f; font-family: "Songti SC", serif; font-size: 94rpx; line-height: 1; }
+.preview-result .primary-button { margin-top: 34rpx; background: #d99b2f; box-shadow: none; }
+.landing-manifesto { margin-top: 90rpx; padding: 80rpx 38rpx; background: #123f31; color: #f3efe5; }
+.manifesto-title { margin: 26rpx 0 60rpx; font-size: 60rpx; }
+.manifesto-line { padding: 30rpx 0; border-top: 2rpx solid rgba(243, 239, 229, .13); display: grid; grid-template-columns: 170rpx 1fr; gap: 20rpx; color: #b8c9c0; line-height: 1.6; }
+.manifesto-line text:first-child { color: #f3efe5; font-weight: 650; }

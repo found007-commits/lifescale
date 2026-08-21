@@ -1,0 +1,15 @@
+.settings-page { padding-top: 50rpx; }
+.settings-title { margin-top: 25rpx; font-size: 58rpx; }
+.profile-card { margin-top: 42rpx; padding: 32rpx; }
+.profile-name { display: block; margin-bottom: 8rpx; font-family: "Songti SC", serif; font-size: 40rpx; }
+.profile-grid { margin-top: 32rpx; border-top: 2rpx solid rgba(18,63,49,.1); }
+.profile-grid view { padding: 22rpx 0; border-bottom: 2rpx solid rgba(18,63,49,.1); display: flex; justify-content: space-between; color: #7f9188; }
+.profile-grid view text:last-child { color: #234f40; font-weight: 650; }
+.lock-note { margin-top: 28rpx; padding: 24rpx; border-radius: 20rpx; background: rgba(217,155,47,.1); color: #6f5529; font-size: 22rpx; line-height: 1.65; }
+.lock-note text:first-child { display: block; margin-bottom: 6rpx; color: #9c6814; font-weight: 700; }
+.settings-list { margin-top: 24rpx; padding: 0 28rpx; }
+.settings-list button { min-height: 92rpx; padding: 0; border-bottom: 2rpx solid rgba(18,63,49,.09); background: transparent; color: #234f40; display: flex; align-items: center; justify-content: space-between; font-size: 26rpx; }
+.settings-list button:last-child { border-bottom: 0; }
+.signout-button { margin-top: 34rpx; }
+.delete-button { margin-top: 18rpx; }
+.account-note { display: block; margin-top: 16rpx; color: #8b716c; font-size: 20rpx; line-height: 1.6; text-align: center; }

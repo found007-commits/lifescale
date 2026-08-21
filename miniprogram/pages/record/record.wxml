@@ -1,0 +1,29 @@
+<view class="page-shell record-page">
+  <text class="eyebrow">TODAY · 只属于你</text>
+  <view class="display-title record-title"><text>今天，发生了什么？</text></view>
+  <text class="record-intro">无需写得漂亮。一句话、一张图，或者只是此刻的心情。</text>
+
+  <view class="paper-card composer">
+    <textarea class="textarea" value="{{content}}" bindinput="onContentInput" maxlength="2000" placeholder="写下你想记住的片刻……" auto-height="false" />
+    <view wx:if="{{image}}" class="image-preview">
+      <image src="{{image.tempFilePath}}" mode="aspectFill" />
+      <button bindtap="removeImage">移除</button>
+    </view>
+    <button wx:else class="photo-button" bindtap="chooseImage">＋ 添加一张照片</button>
+
+    <view class="choice-block">
+      <text class="field-label">此刻的心情</text>
+      <view class="choice-row">
+        <button wx:for="{{moods}}" wx:key="value" class="choice-pill {{mood === item.value ? 'active' : ''}}" data-value="{{item.value}}" bindtap="chooseMood">{{item.label}}</button>
+      </view>
+    </view>
+    <view class="choice-block">
+      <text class="field-label">这段时间属于</text>
+      <view class="choice-row">
+        <button wx:for="{{categories}}" wx:key="value" class="choice-pill {{category === item.value ? 'active' : ''}}" data-value="{{item.value}}" bindtap="chooseCategory">{{item.label}}</button>
+      </view>
+    </view>
+    <view wx:if="{{error}}" class="form-error">{{error}}</view>
+    <button class="primary-button save-entry" bindtap="saveEntry" loading="{{saving}}" disabled="{{saving}}">仅自己可见，保存今天</button>
+  </view>
+</view>

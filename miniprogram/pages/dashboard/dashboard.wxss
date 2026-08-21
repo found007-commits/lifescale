@@ -1,0 +1,27 @@
+.dashboard-page { padding-top: 50rpx; }
+.today-title { margin: 24rpx 0; font-size: 55rpx; }
+.today-header .muted { display: block; line-height: 1.7; }
+.life-card { margin-top: 42rpx; padding: 50rpx 30rpx 30rpx; border-radius: 38rpx; background: #123f31; color: #f3efe5; }
+.dial { width: 390rpx; height: 390rpx; margin: 0 auto; padding: 18rpx; border-radius: 50%; }
+.dial-inner { width: 100%; height: 100%; border: 2rpx dashed rgba(243,239,229,.28); border-radius: 50%; background: #123f31; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #b8c9c0; font-size: 20rpx; letter-spacing: 4rpx; }
+.dial-number { margin: 12rpx 0; color: #f3efe5; font-family: "Songti SC", serif; font-size: 74rpx; font-weight: 600; letter-spacing: -2rpx; line-height: 1; }
+.metric-grid { margin-top: 42rpx; display: grid; grid-template-columns: 1fr 1fr; border-top: 2rpx solid rgba(243,239,229,.12); border-left: 2rpx solid rgba(243,239,229,.12); }
+.metric-grid view { padding: 24rpx; border-right: 2rpx solid rgba(243,239,229,.12); border-bottom: 2rpx solid rgba(243,239,229,.12); color: #9eb3a8; font-size: 21rpx; }
+.metric-value { display: block; margin-top: 8rpx; color: #f3efe5; font-size: 28rpx; font-weight: 650; }
+.today-button { width: 100%; margin-top: 30rpx; padding: 22rpx 24rpx; border-radius: 28rpx; background: #d99b2f; color: #123f31; display: grid; grid-template-columns: 82rpx 1fr; align-items: center; text-align: left; }
+.today-button.done { background: #dbe4dd; }
+.today-plus { font-family: "Songti SC", serif; font-size: 54rpx; font-weight: 700; }
+.today-main { display: block; font-size: 27rpx; font-weight: 700; }
+.today-note { display: block; margin-top: 7rpx; font-size: 20rpx; opacity: .72; }
+.recent-head { margin: 76rpx 0 28rpx; display: flex; align-items: flex-end; justify-content: space-between; }
+.recent-head .section-title { display: block; margin-top: 10rpx; font-size: 40rpx; }
+.view-all { margin: 0; padding: 0; background: transparent; color: #365f50; font-size: 23rpx; }
+.recent-list { display: grid; gap: 24rpx; }
+.entry-card { padding: 26rpx; }
+.entry-image { width: 100%; height: 330rpx; margin-bottom: 22rpx; border-radius: 22rpx; }
+.entry-meta { display: flex; justify-content: space-between; color: #83958c; font-size: 20rpx; }
+.entry-content { display: block; margin: 20rpx 0; color: #234f40; font-family: "Songti SC", serif; font-size: 32rpx; line-height: 1.6; }
+.entry-tags { display: flex; gap: 12rpx; }
+.entry-tags text { padding: 8rpx 16rpx; border-radius: 999rpx; background: #eee9dc; color: #476b5d; font-size: 19rpx; }
+.empty-state .muted { display: block; margin-top: 16rpx; }
+.empty-action { margin-top: 30rpx; }

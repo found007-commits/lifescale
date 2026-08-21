@@ -1,0 +1,14 @@
+.record-page { padding-top: 50rpx; }
+.record-title { margin-top: 25rpx; font-size: 58rpx; }
+.record-intro { display: block; margin-top: 24rpx; color: #476b5d; line-height: 1.7; }
+.composer { margin-top: 42rpx; padding: 30rpx; }
+.composer .textarea { border: 0; background: transparent; padding: 10rpx 0; }
+.photo-button { margin: 24rpx 0 0; border: 2rpx dashed rgba(18,63,49,.24); background: transparent; color: #365f50; font-size: 24rpx; }
+.image-preview { position: relative; margin-top: 22rpx; }
+.image-preview image { width: 100%; height: 390rpx; border-radius: 22rpx; }
+.image-preview button { position: absolute; top: 16rpx; right: 16rpx; min-width: 90rpx; background: rgba(15,28,23,.8); color: white; font-size: 20rpx; }
+.choice-block { margin-top: 38rpx; }
+.choice-row { display: flex; flex-wrap: wrap; gap: 14rpx; }
+.choice-pill { width: auto; min-height: 64rpx; margin: 0; padding: 0 24rpx; border-radius: 999rpx; background: #eee9dc; color: #476b5d; font-size: 22rpx; line-height: 64rpx; }
+.choice-pill.active { background: #123f31; color: #fbfaf6; }
+.save-entry { margin-top: 38rpx; }

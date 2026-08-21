@@ -1,0 +1,17 @@
+.history-page { padding-top: 48rpx; }
+.history-head { display: flex; align-items: flex-end; justify-content: space-between; }
+.history-head .section-title { display: block; margin-top: 10rpx; }
+.add-button { width: auto; margin: 0; padding: 0 26rpx; border-radius: 999rpx; background: #123f31; color: #fbfaf6; font-size: 23rpx; }
+.history-note { display: block; margin-top: 20rpx; color: #7f9188; font-size: 21rpx; line-height: 1.6; }
+.timeline { margin-top: 46rpx; }
+.timeline-row { padding: 0 0 40rpx 30rpx; border-left: 2rpx solid rgba(18,63,49,.15); position: relative; }
+.timeline-row::before { content: ""; position: absolute; left: -8rpx; top: 10rpx; width: 14rpx; height: 14rpx; border-radius: 50%; background: #d99b2f; }
+.timeline-date { margin-bottom: 15rpx; color: #476b5d; font-size: 22rpx; }
+.history-card { padding: 24rpx; }
+.history-card image { width: 100%; height: 340rpx; border-radius: 20rpx; }
+.history-content { display: block; margin: 20rpx 0; color: #234f40; font-family: "Songti SC", serif; font-size: 31rpx; line-height: 1.65; white-space: pre-wrap; }
+.entry-tags { display: flex; gap: 12rpx; }
+.entry-tags text { padding: 8rpx 16rpx; border-radius: 999rpx; background: #eee9dc; color: #476b5d; font-size: 19rpx; }
+.empty-state { margin-top: 54rpx; }
+.empty-state .muted { display: block; margin-top: 18rpx; }
+.empty-action { margin-top: 30rpx; }

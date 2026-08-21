@@ -1,0 +1,16 @@
+.report-page { padding-top: 50rpx; }
+.report-title { margin-top: 26rpx; font-size: 54rpx; }
+.report-intro { display: block; margin-top: 24rpx; color: #476b5d; line-height: 1.75; }
+.report-period { margin-top: 46rpx; color: #7f9188; font-size: 22rpx; }
+.report-numbers { margin-top: 22rpx; display: grid; grid-template-columns: 1fr 1fr; gap: 20rpx; }
+.report-numbers view { padding: 32rpx 24rpx; border-radius: 26rpx; background: #123f31; color: #b8c9c0; text-align: center; font-size: 21rpx; }
+.report-number { display: block; margin-bottom: 8rpx; color: #d99b2f; font-family: "Songti SC", serif; font-size: 62rpx; line-height: 1; }
+.report-card { margin-top: 24rpx; padding: 32rpx; }
+.report-card .section-title { display: block; font-size: 37rpx; }
+.mood-bars { margin-top: 30rpx; display: grid; gap: 22rpx; }
+.mood-row { display: grid; grid-template-columns: 100rpx 1fr 36rpx; gap: 16rpx; align-items: center; color: #476b5d; font-size: 22rpx; }
+.mood-track { height: 14rpx; border-radius: 999rpx; background: #e5dfd2; overflow: hidden; }
+.mood-track view { height: 100%; border-radius: inherit; background: #d99b2f; }
+.top-category { display: block; margin: 26rpx 0 10rpx; color: #d99b2f; font-family: "Songti SC", serif; font-size: 66rpx; }
+.empty-copy { display: block; margin-top: 26rpx; line-height: 1.65; }
+.report-action { margin-top: 30rpx; }

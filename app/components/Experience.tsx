@@ -17,7 +17,7 @@ const pageCopy = {
     birth: "出生日期", age: "希望活到的年龄", preview: "预览我的人生刻度", save: "保存我的人生刻度",
     remaining: "仍可认真生活的日子", disclaimer: "这不是死亡预测，而是你为自己设定的人生时间目标。",
     walked: "已经走过", years: "年", days: "天", private: "默认私密", sync: "跨设备同步", report: "7天回望",
-    pillarsTitle: "不是倒数生命，而是把今天留下。", pillars: ["每天用一段话或一张照片记录今天。", "从7天报告里看见情绪、关系和时间去向。", "重要数据由你确认，私密记录只属于你。"],
+    pillarsTitle: ["不是倒数生命，", "而是把今天留下。"], pillars: ["每天用一段话或一张照片记录今天。", "从7天报告里看见情绪、关系和时间去向。", "重要数据由你确认，私密记录只属于你。"],
     product: "进入品牌官网", theme: "切换明暗模式",
   },
   en: {
@@ -27,7 +27,7 @@ const pageCopy = {
     birth: "Date of birth", age: "Age you hope to reach", preview: "Preview my LifeScale", save: "Save my LifeScale",
     remaining: "days still yours to shape", disclaimer: "This is not a prediction of death. It is a personal life target you set for yourself.",
     walked: "Days lived", years: "years", days: "days", private: "Private by default", sync: "Cross-device sync", report: "7-day reflection",
-    pillarsTitle: "Not counting down a life. Keeping today.", pillars: ["Keep today with a sentence or a photo.", "See moods, relationships and attention in a 7-day report.", "You confirm your core data. Your private records remain yours."],
+    pillarsTitle: ["Not counting down a life.", "Keeping today."], pillars: ["Keep today with a sentence or a photo.", "See moods, relationships and attention in a 7-day report.", "You confirm your core data. Your private records remain yours."],
     product: "Brand website", theme: "Toggle color theme",
   },
 } as const;
@@ -106,7 +106,7 @@ export function Experience({ initialLocale }: { initialLocale: Locale; country: 
       <section className="time-ribbon" id="today"><span>365</span><p>{locale === "zh" ? "每一年，不只是经过。" : "A year should be more than time passing."}</p><b>+1 TODAY</b></section>
 
       <section className="product-principles" id="report">
-        <div><p className="kicker">LIFESCALE</p><h2>{t.pillarsTitle}</h2></div>
+        <div><p className="kicker">LIFESCALE</p><h2>{t.pillarsTitle.map((line) => <span key={line}>{line}</span>)}</h2></div>
         <ol>{t.pillars.map((item, index) => <li key={item}><span>0{index + 1}</span><p>{item}</p></li>)}</ol>
       </section>
 
