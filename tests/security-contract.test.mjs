@@ -14,12 +14,16 @@ test("email OTP is the only enabled login method", async () => {
   assert.match(config, /facebook:\s*false/);
 });
 
-test("database migration enforces ownership and the one-year target lock", async () => {
-  const sql = await source("supabase/migrations/20260821000000_lifescale_core.sql");
+test("database migrations enforce ownership and a permanent core-target lock", async () => {
+  const [sql, permanentLock] = await Promise.all([
+    source("supabase/migrations/20260821000000_lifescale_core.sql"),
+    source("supabase/migrations/20260821193000_permanent_core_target_lock.sql"),
+  ]);
   assert.match(sql, /enable row level security/);
   assert.match(sql, /auth\.uid\(\)/);
-  assert.match(sql, /enforce_profile_target_lock/);
-  assert.match(sql, /now\(\) \+ interval '1 year'/);
+  assert.match(permanentLock, /enforce_profile_target_lock/);
+  assert.match(permanentLock, /can only be confirmed once/);
+  assert.doesNotMatch(permanentLock, /interval '1 year'/);
   assert.match(sql, /actual_death_date/);
   assert.match(sql, /storage\.objects/);
   assert.match(sql, /bucket_id = 'entry-media'/);

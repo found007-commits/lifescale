@@ -8,6 +8,7 @@ import { useTheme } from "../../lib/use-theme";
 import { AuthPanel } from "./AuthPanel";
 import { Brand } from "./Brand";
 import { Dashboard } from "./Dashboard";
+import { TargetAgeField } from "./TargetAgeField";
 
 const pageCopy = {
   zh: {
@@ -37,7 +38,7 @@ export function Experience({ initialLocale }: { initialLocale: Locale; country: 
   const [locale, setLocale] = useState<Locale>(initialLocale);
   const [authOpen, setAuthOpen] = useState(false);
   const [birthDate, setBirthDate] = useState("");
-  const [targetAge, setTargetAge] = useState(90);
+  const [targetAge, setTargetAge] = useState("90");
   const [previewed, setPreviewed] = useState(false);
   const { theme, setTheme } = useTheme();
   const t = pageCopy[locale];
@@ -45,18 +46,19 @@ export function Experience({ initialLocale }: { initialLocale: Locale; country: 
   const today = todayInTimeZone(timezone);
   const currentAge = birthDate ? ageOnDate(birthDate, today) : 0;
   const minimumAge = Math.max(30, currentAge + 1);
+  const numericTargetAge = Number.parseInt(targetAge, 10);
 
   const metrics = useMemo(() => {
-    if (!birthDate || targetAge < minimumAge || targetAge > 150) return null;
-    try { return calculateLifeMetrics({ birthDate, targetAge, timeZone: timezone }); } catch { return null; }
-  }, [birthDate, minimumAge, targetAge, timezone]);
+    if (!birthDate || !Number.isInteger(numericTargetAge) || numericTargetAge < minimumAge || numericTargetAge > 150) return null;
+    try { return calculateLifeMetrics({ birthDate, targetAge: numericTargetAge, timeZone: timezone }); } catch { return null; }
+  }, [birthDate, minimumAge, numericTargetAge, timezone]);
 
   if (isPending) return <main className="app-loading full">LifeScale</main>;
   if (session?.user) return <Dashboard session={session} />;
 
   function openAuthWithDraft() {
     if (metrics) {
-      window.localStorage.setItem("lifescale:preview-draft", JSON.stringify({ birthDate, targetAge, targetDate: targetDateFromAge(birthDate, targetAge), locale, timezone }));
+      window.localStorage.setItem("lifescale:preview-draft", JSON.stringify({ birthDate, targetAge: numericTargetAge, targetDate: targetDateFromAge(birthDate, numericTargetAge), locale, timezone }));
     }
     setAuthOpen(true);
   }
@@ -88,7 +90,7 @@ export function Experience({ initialLocale }: { initialLocale: Locale; country: 
           <div className="preview-card-heading"><span>FREE PREVIEW</span><strong>{t.preview}</strong></div>
           <div className="preview-inputs">
             <label>{t.birth}<input type="date" max={today} value={birthDate} onChange={(event) => { setBirthDate(event.target.value); setPreviewed(false); }} /></label>
-            <label>{t.age}<div className="age-field"><input type="number" min={minimumAge} max={150} inputMode="numeric" value={targetAge} onChange={(event) => { setTargetAge(Number(event.target.value)); setPreviewed(false); }} /><span>{locale === "zh" ? "岁" : "years"}</span></div></label>
+            <TargetAgeField locale={locale} minimumAge={minimumAge} value={targetAge} onChange={(value) => { setTargetAge(value); setPreviewed(false); }} />
           </div>
           {!previewed || !metrics ? (
             <button className="primary-button preview-submit" disabled={!metrics} onClick={() => setPreviewed(true)}>{t.preview}</button>
