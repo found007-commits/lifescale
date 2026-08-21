@@ -1,0 +1,16 @@
+project_id = "lifescale"
+
+[auth]
+site_url = "https://app.lifescale.space"
+additional_redirect_urls = ["http://localhost:3000", "https://app.lifescale.space"]
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = false
+otp_expiry = 600
+otp_length = 6
+
+[storage]
+file_size_limit = "10MiB"

@@ -1,153 +1,131 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { authClient } from "../../lib/auth-client";
+import type { CSSProperties } from "react";
+import type { Session } from "@supabase/supabase-js";
+import Image from "next/image";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { signOut } from "../../lib/auth-client";
+import { calculateLifeMetrics } from "../../lib/life-calculations";
+import { deleteEntry, loadLifeScaleData, updateProfile } from "../../lib/lifescale-data";
+import { calculateStreak } from "../../lib/report-calculations";
+import type { Checkin, LifeEntry, LifeProfile, Locale } from "../../lib/types";
+import { useTheme } from "../../lib/use-theme";
 import { Brand } from "./Brand";
+import { CoreTargetEditor } from "./CoreTargetEditor";
+import { EntryComposer } from "./EntryComposer";
+import { Onboarding } from "./Onboarding";
+import { ReportView } from "./ReportView";
 
-type Profile = { birthDate: string | null; targetAge: number; locale: string; country: string | null; timezone: string };
-type LifeRecord = { id: string; title: string; content: string; mood: string; occurredOn: string; createdAt?: string };
+type Tab = "home" | "history" | "report" | "profile";
+const moodLabels: Record<string, string> = { calm: "平静", happy: "开心", grateful: "感恩", tired: "疲惫", sad: "难过", anxious: "焦虑", hopeful: "充满希望" };
+const categoryLabels: Record<string, string> = { daily: "日常", family: "家人", work: "工作", growth: "成长", health: "健康", travel: "旅行", reflection: "感悟", other: "其他" };
 
-function daysRemaining(profile: Profile | null) {
-  if (!profile?.birthDate) return null;
-  const end = new Date(`${profile.birthDate}T12:00:00`);
-  end.setFullYear(end.getFullYear() + profile.targetAge);
-  return Math.max(0, Math.ceil((end.getTime() - Date.now()) / 86_400_000));
-}
-
-export function Dashboard({ session }: { session: { user: { name: string; email: string; image?: string | null } } }) {
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [records, setRecords] = useState<LifeRecord[]>([]);
-  const [tab, setTab] = useState<"today" | "moments" | "settings">("today");
+export function Dashboard({ session }: { session: Session }) {
+  const [profile, setProfile] = useState<LifeProfile | null>(null);
+  const [entries, setEntries] = useState<LifeEntry[]>([]);
+  const [checkins, setCheckins] = useState<Checkin[]>([]);
   const [loading, setLoading] = useState(true);
-  const [composer, setComposer] = useState(false);
-  const [notice, setNotice] = useState("");
-  const [draft, setDraft] = useState({ title: "", content: "", mood: "calm", occurredOn: new Date().toISOString().slice(0, 10) });
-  const [settings, setSettings] = useState({ birthDate: "", targetAge: 90, locale: "en", country: "", timezone: "UTC" });
+  const [error, setError] = useState("");
+  const [tab, setTab] = useState<Tab>("home");
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<LifeEntry | null>(null);
+  const [toast, setToast] = useState("");
+  const { theme, setTheme } = useTheme();
+
+  const refresh = useCallback(async () => {
+    try {
+      const data = await loadLifeScaleData(session.user.id);
+      setProfile(data.profile); setEntries(data.entries); setCheckins(data.checkins); setError("");
+    } catch (caught) { setError(caught instanceof Error ? caught.message : "无法加载云端数据。"); }
+  }, [session.user.id]);
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/profile").then((r) => r.json() as Promise<{ profile: Profile }>),
-      fetch("/api/records").then((r) => r.json() as Promise<{ records: LifeRecord[] }>),
-    ])
-      .then(([p, r]) => {
-        setProfile(p.profile);
-        setSettings({
-          birthDate: p.profile.birthDate ?? "",
-          targetAge: p.profile.targetAge ?? 90,
-          locale: p.profile.locale ?? "en",
-          country: p.profile.country ?? "",
-          timezone: p.profile.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
-        });
-        setRecords(r.records ?? []);
-      }).finally(() => setLoading(false));
-  }, []);
+    let active = true;
+    void loadLifeScaleData(session.user.id).then((data) => {
+      if (!active) return;
+      setProfile(data.profile); setEntries(data.entries); setCheckins(data.checkins); setError("");
+    }).catch((caught: unknown) => {
+      if (active) setError(caught instanceof Error ? caught.message : "无法加载云端数据。");
+    }).finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [session.user.id]);
+  useEffect(() => { if (!toast) return; const timer = window.setTimeout(() => setToast(""), 3200); return () => window.clearTimeout(timer); }, [toast]);
 
-  const remaining = useMemo(() => daysRemaining(profile), [profile]);
-  const livedDays = profile?.birthDate ? Math.max(0, Math.floor((Date.now() - new Date(profile.birthDate).getTime()) / 86_400_000)) : 0;
-  const progress = remaining === null ? 0.34 : Math.min(0.99, livedDays / Math.max(1, livedDays + remaining));
+  const metrics = useMemo(() => profile ? calculateLifeMetrics({ birthDate: profile.birth_date, targetAge: profile.target_age, targetDate: profile.target_date, timeZone: profile.timezone }) : null, [profile]);
+  const streak = metrics ? calculateStreak(checkins, metrics.today) : 0;
+  const checkedToday = Boolean(metrics && checkins.some((item) => item.checkin_date === metrics.today));
 
-  async function saveProfile(event: React.FormEvent) {
-    event.preventDefault();
-    const response = await fetch("/api/profile", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(settings) });
-    if (response.ok) { setProfile({ ...settings, birthDate: settings.birthDate || null, country: settings.country || null }); setNotice("Your LifeScale has been updated."); }
+  if (loading) return <main className="app-loading full"><Brand /><p>正在同步你的 LifeScale…</p></main>;
+  if (error && !profile) return <main className="app-loading full"><Brand /><p>{error}</p><button className="outline-button" onClick={() => { setLoading(true); void refresh().finally(() => setLoading(false)); }}>重新加载</button></main>;
+  if (!profile) return <Onboarding session={session} onComplete={(next) => { setProfile(next); setTab("home"); }} />;
+  if (!metrics) return <main className="app-loading full">无法计算人生刻度，请检查核心资料。</main>;
+
+  const activeProfile = profile;
+  const activeMetrics = metrics;
+  const locale: Locale = activeProfile.locale === "en" ? "en" : "zh";
+  const en = locale === "en";
+  const displayName = activeProfile.display_name || session.user.email?.split("@")[0] || "LifeScale";
+  const ringStyle = { "--progress": `${Math.max(3, activeMetrics.progressPercent * 3.6)}deg` } as CSSProperties;
+
+  async function switchMode() {
+    const next = activeProfile.display_mode === "gentle" ? "clear" : "gentle";
+    try { setProfile(await updateProfile(activeProfile.id, { display_mode: next })); } catch (caught) { setToast(caught instanceof Error ? caught.message : "切换失败。"); }
   }
 
-  async function saveMoment(event: React.FormEvent) {
-    event.preventDefault();
-    const response = await fetch("/api/records", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(draft) });
-    const result = await response.json() as { record: LifeRecord };
-    if (response.ok) { setRecords((current) => [result.record, ...current]); setDraft({ ...draft, title: "", content: "" }); setComposer(false); setNotice("This moment is safely kept."); }
+  async function remove(entry: LifeEntry) {
+    if (!window.confirm(en ? "Delete this entry and its images? This cannot be undone." : "确定删除这条记录及其图片吗？此操作无法撤销。")) return;
+    try { await deleteEntry(entry); await refresh(); setToast(en ? "Entry deleted." : "记录已删除。"); } catch (caught) { setToast(caught instanceof Error ? caught.message : (en ? "Could not delete the entry." : "删除失败。")); }
   }
 
-  async function removeRecord(id: string) {
-    if (!confirm("Delete this moment? This cannot be undone.")) return;
-    const response = await fetch(`/api/records?id=${encodeURIComponent(id)}`, { method: "DELETE" });
-    if (response.ok) setRecords((current) => current.filter((record) => record.id !== id));
+  async function savePreferences(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    try {
+      const updated = await updateProfile(activeProfile.id, { display_name: String(data.get("display_name") || "").trim() || null, locale: String(data.get("locale")) as Locale, timezone: String(data.get("timezone")), display_mode: String(data.get("display_mode")) as "gentle" | "clear" });
+      setProfile(updated); setToast(en ? "Preferences saved." : "个人资料已保存。");
+    } catch (caught) { setToast(caught instanceof Error ? caught.message : (en ? "Could not save your preferences." : "保存失败。")); }
+  }
+
+  function exportData() {
+    const safeEntries = entries.map(({ entry_media, ...entry }) => ({ ...entry, media: (entry_media || []).map((media) => ({ id: media.id, entry_id: media.entry_id, user_id: media.user_id, storage_path: media.storage_path, media_type: media.media_type, created_at: media.created_at })) }));
+    const blob = new Blob([JSON.stringify({ exported_at: new Date().toISOString(), profile: activeProfile, entries: safeEntries, checkins }, null, 2)], { type: "application/json" });
+    const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `lifescale-export-${activeMetrics.today}.json`; link.click(); URL.revokeObjectURL(link.href);
   }
 
   async function deleteAccount() {
-    if (!confirm("Permanently delete your LifeScale account and every saved moment?")) return;
-    if (!confirm("This cannot be undone. Delete everything now?")) return;
-    const response = await fetch("/api/account/delete", { method: "POST" });
-    if (response.ok) window.location.href = "/";
+    if (!window.confirm(en ? "This permanently deletes your account, cloud data and images. Continue?" : "这会永久注销账号并删除云端资料与图片。确定继续吗？")) return;
+    const confirmation = window.prompt(en ? "Type DELETE to confirm permanent deletion:" : "请输入 DELETE 确认永久注销：");
+    if (confirmation !== "DELETE") return;
+    const response = await fetch("/api/account/delete", { method: "DELETE", headers: { Authorization: `Bearer ${session.access_token}` } });
+    const result = await response.json().catch(() => ({})) as { error?: string };
+    if (!response.ok) { setToast(result.error || (en ? "Account deletion failed. Please try again." : "注销失败，请稍后再试。")); return; }
+    await signOut(); window.location.reload();
   }
 
   return (
     <main className="app-shell">
-      <header className="app-header">
-        <Brand compact />
-        <nav className="app-nav" aria-label="App navigation">
-          <button className={tab === "today" ? "active" : ""} onClick={() => setTab("today")}>Today</button>
-          <button className={tab === "moments" ? "active" : ""} onClick={() => setTab("moments")}>Moments</button>
-          <button className={tab === "settings" ? "active" : ""} onClick={() => setTab("settings")}>Settings</button>
-        </nav>
-        <button className="avatar-button" onClick={() => setTab("settings")} aria-label="Open settings">
-          {session.user.image ? <img src={session.user.image} alt="" /> : session.user.name.slice(0, 1).toUpperCase()}
-        </button>
-      </header>
+      <aside className="app-sidebar"><Brand /><p className="sidebar-promise">{en ? "See the life ahead. Make today count." : "看见余生，认真今天。"}</p><nav aria-label={en ? "Product navigation" : "产品导航"}><button className={tab === "home" ? "active" : ""} onClick={() => setTab("home")}><span>◌</span>{en ? "Life scale" : "人生刻度"}</button><button className={tab === "history" ? "active" : ""} onClick={() => setTab("history")}><span>＋</span>{en ? "Journal" : "人生记录"}</button><button className={tab === "report" ? "active" : ""} onClick={() => setTab("report")}><span>↗</span>{en ? "7-day report" : "7天报告"}</button><button className={tab === "profile" ? "active" : ""} onClick={() => setTab("profile")}><span>○</span>{en ? "Profile & data" : "个人与数据"}</button></nav><a className="brand-site-link" href="https://lifescale.space">{en ? "Brand website" : "返回品牌官网"} ↗</a><button className="sidebar-account" onClick={() => setTab("profile")}><b>{displayName.slice(0, 1).toUpperCase()}</b><span><strong>{displayName}</strong><small>{session.user.email}</small></span></button></aside>
 
-      {notice && <button className="toast" onClick={() => setNotice("")}>{notice}<span>×</span></button>}
-      {loading ? <div className="app-loading">Preparing your time…</div> : null}
+      <div className="app-workspace">
+        <header className="workspace-header"><div><strong>{tab === "home" ? (en ? "My life scale" : "我的人生刻度") : tab === "history" ? (en ? "Life journal" : "人生记录") : tab === "report" ? (en ? "7-day report" : "7天报告") : (en ? "Profile & data" : "个人与数据")}</strong><small>{en ? "Cloud synced" : "云端同步"} · {profile.timezone}</small></div><div className="workspace-actions"><button className="theme-button" aria-label={en ? "Toggle theme" : "切换主题"} onClick={() => setTheme(theme === "light" ? "dark" : "light")}>{theme === "light" ? "◐" : "☼"}</button><button className="mode-toggle" onClick={switchMode}>{profile.display_mode === "gentle" ? (en ? "Gentle" : "温和模式") : (en ? "Clear" : "清醒模式")}</button><button className="primary-button" onClick={() => { setEditingEntry(null); setComposerOpen(true); }}>{en ? "Record today +1" : "记录今天 +1"}</button></div></header>
 
-      {!loading && tab === "today" && (
-        <section className="today-grid">
-          <div className="today-copy">
-            <p className="kicker">THURSDAY · A DAY OF YOUR OWN</p>
-            <h1>Good morning,<br /><em>{session.user.name.split(" ")[0]}.</em></h1>
-            <p>Today doesn’t need to be extraordinary to matter.</p>
-            <button className="primary-button large" onClick={() => setComposer(true)}>＋ Keep this moment</button>
-          </div>
-          <div className="life-dial-card">
-            <div className="life-dial" style={{ "--progress": `${progress * 360}deg` } as React.CSSProperties}>
-              <div className="life-dial-inner">
-                <span>{remaining === null ? "—" : remaining.toLocaleString()}</span>
-                <small>{remaining === null ? "set your birth date" : "days to shape"}</small>
-              </div>
-            </div>
-            {remaining === null ? (
-              <button className="text-button" onClick={() => setTab("settings")}>Set up your LifeScale →</button>
-            ) : <p className="dial-caption">You have already lived <strong>{livedDays.toLocaleString()}</strong> days. This one is yours too.</p>}
-          </div>
-          <aside className="latest-card">
-            <p className="kicker">RECENT LIGHT</p>
-            {records[0] ? <><h2>{records[0].title}</h2><p>{records[0].content || "A moment worth remembering."}</p><time>{records[0].occurredOn}</time></> : <><h2>Your first page is waiting.</h2><p>Keep one detail from today — a sentence is enough.</p></>}
-          </aside>
-        </section>
-      )}
+        {tab === "home" ? <section className={`dashboard-page ${profile.display_mode}-mode`}><header className="dashboard-intro"><p className="kicker">TODAY · {metrics.today}</p><h1>{metrics.isBonusChapter ? (en ? "Bonus time — another day gained." : "生命加时，今天又赚到一天。") : (en ? "Today is worth remembering." : "今天，也值得被记住。")}</h1><p>{en ? "This is a life-time goal you set for yourself, never a death prediction." : "这不是死亡预测，而是你为自己设定的人生时间目标。"}</p></header><div className="life-focus"><div className="life-dial" style={ringStyle}><div className="life-dial-inner"><small>{metrics.isBonusChapter ? (en ? "BONUS TIME" : "生命加时") : profile.display_mode === "gentle" ? (en ? "YOURS TO WRITE" : "仍可书写") : (en ? "DAYS LEFT" : "剩余天数")}</small><strong>{(metrics.isBonusChapter ? metrics.bonusDays : metrics.remainingDays).toLocaleString()}</strong><span>{metrics.isBonusChapter ? "BONUS DAYS" : "DAYS"}</span></div></div><div className="life-summary"><p>{metrics.isBonusChapter ? (en ? "Your target date has passed. LifeScale is now adding every day you live." : "目标日期已经走过，LifeScale 正在为你正向累计每一天。") : (en ? `${metrics.remainingYears} years, ${metrics.remainingMonths} months and ${metrics.remainingRemainderDays} days to your goal.` : `距目标还有 ${metrics.remainingYears} 年 ${metrics.remainingMonths} 个月 ${metrics.remainingRemainderDays} 天。`)}</p><dl><div><dt>{en ? "Days lived" : "已走过"}</dt><dd>{metrics.livedDays.toLocaleString()} {en ? "days" : "天"}</dd></div><div><dt>{en ? "Life progress" : "生命进度"}</dt><dd>{metrics.progressPercent.toFixed(2)}%</dd></div><div><dt>{en ? "Weeks left" : "剩余周数"}</dt><dd>{metrics.remainingWeeks.toLocaleString()} {en ? "weeks" : "周"}</dd></div><div><dt>{en ? "Next birthday" : "下次生日"}</dt><dd>{en ? `in ${metrics.nextBirthdayDays} days` : `${metrics.nextBirthdayDays} 天后`}</dd></div></dl><button className={`today-checkin ${checkedToday ? "done" : ""}`} onClick={() => { setEditingEntry(null); setComposerOpen(true); }}><span>{checkedToday ? "✓" : "+1"}</span><strong>{checkedToday ? (en ? "Today is already recorded" : "今天已经留下记录") : (en ? "Record today +1" : "记录今天 +1")}</strong><small>{checkedToday ? (en ? `${streak}-day streak · ${checkins.length} total days` : `连续 ${streak} 天 · 累计 ${checkins.length} 天`) : (en ? "One sentence or one photo is enough" : "一句话、一张图，也足够")}</small></button></div></div><section className="recent-section"><div className="section-bar"><div><p className="kicker">RECENT DAYS</p><h2>{en ? "Days you have kept" : "最近留下的日子"}</h2></div><button className="change-email" onClick={() => setTab("history")}>{en ? "View all" : "查看全部"} →</button></div>{entries.length ? <div className="recent-row">{entries.slice(0, 3).map((entry) => <EntryCard entry={entry} locale={locale} key={entry.id} />)}</div> : <div className="recent-empty"><strong>{en ? "Your first entry starts today." : "你的第一条记录，会从今天开始。"}</strong><button className="primary-button" onClick={() => setComposerOpen(true)}>{en ? "Record today +1" : "记录今天 +1"}</button></div>}</section></section> : null}
 
-      {!loading && tab === "moments" && (
-        <section className="moments-view">
-          <div className="section-heading"><div><p className="kicker">YOUR PRIVATE ARCHIVE</p><h1>Moments that stayed.</h1></div><button className="primary-button" onClick={() => setComposer(true)}>＋ New moment</button></div>
-          {records.length === 0 ? <div className="empty-state"><span>○</span><h2>Nothing has to be big to belong here.</h2><p>Save a thought, a person, a place, or one good thing from today.</p><button onClick={() => setComposer(true)}>Keep my first moment</button></div> : (
-            <div className="records-grid">{records.map((record) => <article className={`record-card mood-${record.mood}`} key={record.id}><div className="record-top"><time>{record.occurredOn}</time><button onClick={() => removeRecord(record.id)} aria-label="Delete moment">×</button></div><h2>{record.title}</h2><p>{record.content}</p><span className="mood-label">{record.mood}</span></article>)}</div>
-          )}
-        </section>
-      )}
+        {tab === "history" ? <section className="workspace-page"><header className="section-heading"><div><p className="kicker">LIFE JOURNAL</p><h1>{en ? "These days did not pass for nothing." : "这些日子，都没有白白经过。"}</h1></div><button className="primary-button" onClick={() => { setEditingEntry(null); setComposerOpen(true); }}>{en ? "New entry" : "新建记录"}</button></header>{entries.length ? <div className="records-grid">{entries.map((entry) => <article className="record-card" key={entry.id}><EntryCard entry={entry} locale={locale} /><div className="record-actions"><button onClick={() => { setEditingEntry(entry); setComposerOpen(true); }}>{en ? "Edit" : "编辑"}</button><button onClick={() => void remove(entry)}>{en ? "Delete" : "删除"}</button></div></article>)}</div> : <div className="empty-state"><strong>{en ? "No entries yet" : "还没有记录"}</strong><p>{en ? "You do not need a long journal. One honest sentence is enough." : "不必写长日记，留下一句话就可以。"}</p><button className="primary-button" onClick={() => setComposerOpen(true)}>{en ? "Record today +1" : "记录今天 +1"}</button></div>}</section> : null}
 
-      {!loading && tab === "settings" && (
-        <section className="settings-view">
-          <div className="section-heading"><div><p className="kicker">YOUR LIFESCALE</p><h1>Make it yours.</h1></div></div>
-          <div className="settings-grid">
-            <form className="settings-card" onSubmit={saveProfile}>
-              <h2>Life horizon</h2><p>Choose the horizon that feels meaningful to you. This is a personal reflection, not a prediction.</p>
-              <label>Birth date<input type="date" value={settings.birthDate} onChange={(e) => setSettings({ ...settings, birthDate: e.target.value })} /></label>
-              <label>Life horizon<select value={settings.targetAge} onChange={(e) => setSettings({ ...settings, targetAge: Number(e.target.value) })}>{[70, 75, 80, 85, 90, 95, 100].map((age) => <option key={age} value={age}>{age} years</option>)}</select></label>
-              <label>Language<select value={settings.locale} onChange={(e) => setSettings({ ...settings, locale: e.target.value })}><option value="en">English</option><option value="zh">简体中文</option><option value="es">Español</option><option value="ja">日本語</option></select></label>
-              <button className="primary-button" type="submit">Save changes</button>
-            </form>
-            <div className="settings-card account-card">
-              <h2>Account & data</h2><p>{session.user.email}</p>
-              <a className="settings-action" href="/api/account/export">Download my data <span>↓</span></a>
-              <a className="settings-action" href="/privacy">Read privacy notice <span>→</span></a>
-              <a className="settings-action" href="/third-parties">Third-party services <span>→</span></a>
-              <button className="settings-action" onClick={() => authClient.signOut({ fetchOptions: { onSuccess: () => { window.location.href = "/"; } } })}>Sign out <span>→</span></button>
-              <button className="delete-action" onClick={deleteAccount}>Permanently delete account</button>
-            </div>
-          </div>
-        </section>
-      )}
+        {tab === "report" ? <ReportView profile={profile} entries={entries} checkins={checkins} locale={locale} /> : null}
 
-      {composer && <div className="modal-backdrop" role="presentation"><form className="composer" onSubmit={saveMoment}><button className="modal-close" type="button" onClick={() => setComposer(false)}>×</button><p className="kicker">KEEP THIS MOMENT</p><h2>What would you like to remember?</h2><label>Title<input autoFocus required maxLength={120} value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} placeholder="A small detail from today" /></label><label>In your own words<textarea maxLength={4000} rows={5} value={draft.content} onChange={(e) => setDraft({ ...draft, content: e.target.value })} placeholder="What made it worth keeping?" /></label><div className="composer-row"><label>Date<input type="date" value={draft.occurredOn} onChange={(e) => setDraft({ ...draft, occurredOn: e.target.value })} /></label><label>Feeling<select value={draft.mood} onChange={(e) => setDraft({ ...draft, mood: e.target.value })}><option value="bright">Bright</option><option value="calm">Calm</option><option value="tender">Tender</option><option value="heavy">Heavy</option></select></label></div><button className="primary-button large" type="submit">Keep this moment</button></form></div>}
+        {tab === "profile" ? <section className="workspace-page"><header className="section-heading"><div><p className="kicker">PROFILE & DATA</p><h1>{en ? "Your profile. Your data." : "你的资料，你的数据。"}</h1></div></header><div className="settings-grid"><CoreTargetEditor profile={profile} onUpdated={setProfile} /><section className="settings-card"><h2>{en ? "Preferences" : "个人偏好"}</h2><form onSubmit={savePreferences}><label>{en ? "Display name" : "显示名称"}<input name="display_name" defaultValue={profile.display_name || ""} maxLength={80} /></label><label>{en ? "Language" : "语言"}<select name="locale" defaultValue={profile.locale}><option value="zh">简体中文</option><option value="en">English</option></select></label><label>{en ? "Time zone" : "时区"}<input name="timezone" defaultValue={profile.timezone} /></label><label>{en ? "Display mode" : "显示模式"}<select name="display_mode" defaultValue={profile.display_mode}><option value="gentle">{en ? "Gentle" : "温和模式"}</option><option value="clear">{en ? "Clear" : "清醒模式"}</option></select></label><button className="primary-button settings-wide-button">{en ? "Save preferences" : "保存个人资料"}</button></form></section><section className="settings-card account-card"><h2>{en ? "Privacy & data" : "隐私与数据"}</h2><p>{en ? "Entries are private by default. Every database request is checked against your identity and row-level permissions." : "记录默认私密；所有数据库访问都通过用户身份和行级权限校验。"}</p><button className="settings-action" onClick={exportData}><span>{en ? "Export all data" : "导出全部数据"}</span><b>JSON ↓</b></button><a className="settings-action" href="/privacy"><span>{en ? "Privacy notice" : "隐私说明"}</span><b>→</b></a><a className="settings-action" href="/terms"><span>{en ? "Terms" : "用户协议"}</span><b>→</b></a><a className="settings-action" href="/third-parties"><span>{en ? "Third-party services" : "第三方服务清单"}</span><b>→</b></a><button className="settings-action" onClick={() => void signOut()}><span>{en ? "Sign out" : "退出登录"}</span><b>→</b></button><button className="settings-action danger" onClick={() => void deleteAccount()}><span>{en ? "Permanently delete account and data" : "永久注销账号并删除数据"}</span><b>×</b></button></section></div></section> : null}
+      </div>
+      {composerOpen ? <EntryComposer userId={profile.id} timezone={profile.timezone} locale={locale} entry={editingEntry} onClose={() => { setComposerOpen(false); setEditingEntry(null); }} onSaved={async () => { await refresh(); setToast(en ? "Today did not simply pass. You kept it." : "今天没有只是过去，而是被你留下了。"); }} /> : null}
+      {toast ? <div className="toast" role="status">{toast}</div> : null}
     </main>
   );
+}
+
+function EntryCard({ entry, locale }: { entry: LifeEntry; locale: Locale }) {
+  const en = locale === "en";
+  const mood = en ? { calm: "Calm", happy: "Happy", grateful: "Grateful", tired: "Tired", sad: "Sad", anxious: "Anxious", hopeful: "Hopeful" }[entry.mood] : moodLabels[entry.mood];
+  const category = en ? { daily: "Daily life", family: "Family", work: "Work", growth: "Growth", health: "Health", travel: "Travel", reflection: "Reflection", other: "Other" }[entry.category] : categoryLabels[entry.category];
+  return <article className="entry-card"><div className="entry-meta"><span>{new Date(entry.entry_date).toLocaleDateString(en ? "en-US" : "zh-CN", { month: "long", day: "numeric", weekday: "short" })}</span><span>{entry.visibility === "private" ? (en ? "Only me" : "仅自己可见") : (en ? "Public" : "公开")}</span></div>{entry.entry_media?.[0]?.signed_url ? <Image src={entry.entry_media[0].signed_url} alt={en ? "Journal image" : "记录图片"} width={720} height={480} unoptimized /> : null}<p>{entry.content || (en ? "Today +1" : "今天 +1")}</p><div className="entry-tags"><span>{mood}</span><span>{category}</span></div></article>;
 }

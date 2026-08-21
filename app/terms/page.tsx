@@ -1,13 +1,15 @@
 import { LegalPage } from "../components/LegalPage";
 
 export default function TermsPage() {
-  return <LegalPage eyebrow="A CLEAR AGREEMENT" title="Terms of Service">
-    <p className="legal-lead">LifeScale is a reflection and journaling service. It is not medical advice, a life-expectancy prediction, or an emergency service.</p>
-    <h2>Your account</h2><p>You must provide accurate account information, protect access to your account and use the service lawfully. You are responsible for the content you save. Do not upload unlawful content or material that infringes another person’s rights.</p>
-    <h2>The life scale</h2><p>All countdown figures are mathematical illustrations based solely on the birth date and horizon you choose. They do not estimate or predict how long anyone will live and should never be used for health, financial or safety decisions.</p>
-    <h2>Your content</h2><p>You retain ownership of your records. You give LifeScale only the limited permission needed to store, process, display and synchronize them for you. We do not obtain rights to sell your private records.</p>
-    <h2>Availability</h2><p>We work to provide a reliable service but cannot guarantee uninterrupted availability. Features may change as the product develops. We may restrict abusive access to protect users and infrastructure.</p>
-    <h2>Ending use</h2><p>You may export your records or delete your account at any time. We may suspend accounts that materially violate these terms, with notice when reasonably possible.</p>
-    <h2>Contact</h2><p>Questions about these terms can be sent to <a href="mailto:support@lifescale.space">support@lifescale.space</a>.</p>
+  return <LegalPage eyebrow="一份清晰的约定" title="服务条款">
+    <p className="legal-lead">人生刻度是一项自我觉察与人生记录服务，不提供医疗建议，不预测寿命，也不是紧急救助服务。</p>
+    <h2>你的账号</h2><p>你应提供准确的账号信息、妥善保护账号访问方式，并依法使用本服务。你需要对保存的内容负责，不得上传违法内容或侵害他人权利的材料。</p>
+    <h2>人生刻度</h2><p>所有倒计时数字都仅根据你自行提供的出生日期和目标年龄进行数学计算，不代表对任何人寿命的估计或预测，也不应作为健康、财务或安全决策依据。</p>
+    <h2>首次设定与修改限制</h2><p>出生日期、目标年龄或目标日期经二次确认后会锁定一年。锁定期结束后重新设定会再次锁定一年。你仍可按照隐私说明导出数据、提出合法权利请求或注销整个账号。</p>
+    <h2>你的内容</h2><p>你始终拥有自己记录的权利。资料与记录会保存在云端并在登录设备间同步。所有记录默认私密，只有你主动选择时才会公开。我们不会取得出售你私密记录的权利。</p>
+    <h2>生命加时</h2><p>到达自主设定的目标日期后，产品会进入“生命加时”并正向累计。系统绝不会因为到达目标日期而自动把用户标记为死亡。</p>
+    <h2>服务可用性</h2><p>我们会努力提供稳定服务，但无法保证服务永不中断。产品功能可能随着发展而变化。为保护用户与基础设施，我们可能限制滥用行为。</p>
+    <h2>停止使用</h2><p>你可以随时导出记录或删除账号。对于严重违反条款的账号，我们可能暂停服务，并在合理可行时提前通知。</p>
+    <h2>联系我们</h2><p>有关条款的问题可发送至 <a href="mailto:support@lifescale.space">support@lifescale.space</a>。</p>
   </LegalPage>;
 }

@@ -1,25 +1,20 @@
-import { desc, eq } from "drizzle-orm";
-import { getDb } from "../../../../db";
-import { lifeProfiles, lifeRecords } from "../../../../db/schema";
-import { currentUser } from "../../../../lib/session";
+import { getSupabaseServerClient } from "../../../../lib/supabase/server";
 
-export async function GET() {
-  const user = await currentUser();
-  if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
-  const db = getDb();
-  const [profiles, records] = await Promise.all([
-    db.select().from(lifeProfiles).where(eq(lifeProfiles.userId, user.id)).limit(1),
-    db.select().from(lifeRecords).where(eq(lifeRecords.userId, user.id)).orderBy(desc(lifeRecords.occurredOn)),
+export async function GET(request: Request) {
+  const header = request.headers.get("authorization") || "";
+  const token = header.startsWith("Bearer ") ? header.slice(7) : null;
+  if (!token) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  const client = getSupabaseServerClient(token);
+  const { data: userData, error: userError } = await client.auth.getUser(token);
+  if (userError || !userData.user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  const userId = userData.user.id;
+  const [profile, entries, checkins, reports] = await Promise.all([
+    client.from("profiles").select("*").eq("id", userId).maybeSingle(),
+    client.from("life_entries").select("*, entry_media(*)").eq("user_id", userId).order("entry_date"),
+    client.from("checkins").select("*").eq("user_id", userId).order("checkin_date"),
+    client.from("life_reports").select("*").eq("user_id", userId).order("created_at"),
   ]);
-  return new Response(JSON.stringify({
-    exportedAt: new Date().toISOString(),
-    account: { name: user.name, email: user.email },
-    profile: profiles[0] ?? null,
-    records,
-  }, null, 2), {
-    headers: {
-      "content-type": "application/json; charset=utf-8",
-      "content-disposition": "attachment; filename=lifescale-export.json",
-    },
-  });
+  const firstError = profile.error || entries.error || checkins.error || reports.error;
+  if (firstError) return Response.json({ error: firstError.message }, { status: 500 });
+  return Response.json({ exported_at: new Date().toISOString(), account: { id: userId, email: userData.user.email }, profile: profile.data, entries: entries.data, checkins: checkins.data, reports: reports.data });
 }
