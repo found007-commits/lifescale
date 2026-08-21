@@ -12,9 +12,9 @@ import { Dashboard } from "./Dashboard";
 const pageCopy = {
   zh: {
     nav: ["生命刻度", "今天 +1", "7天报告", "隐私"],
-    signIn: "注册 / 登录", eyebrow: "人生时间账户", hero: "看见余生，认真今天。", emotion: "把余生，活成自己的作品。",
+    signIn: "注册 / 登录", eyebrow: "人生时间账户", hero: "看见余生，认真今天。", emotion: "把每个今天，好好留下。",
     intro: "看见仍可书写的时间，留下今天真实发生的事，也把重要的人与心愿好好珍藏。",
-    birth: "出生日期", age: "希望活到的年龄", preview: "预览我的人生刻度", save: "保存我的人生刻度",
+    birth: "出生日期", age: "希望活到的年龄", preview: "预览我的余生刻度", save: "保存我的余生刻度",
     remaining: "仍可认真生活的日子", disclaimer: "这不是死亡预测，而是你为自己设定的人生时间目标。",
     walked: "已经走过", years: "年", days: "天", private: "默认私密", sync: "跨设备同步", report: "7天回望",
     pillarsTitle: ["不是倒数生命，", "而是把今天留下。"], pillars: ["每天用一段话或一张照片记录今天。", "从7天报告里看见情绪、关系和时间去向。", "重要数据由你确认，私密记录只属于你。"],

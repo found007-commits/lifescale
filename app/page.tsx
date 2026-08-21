@@ -4,8 +4,8 @@ import { Experience } from "./components/Experience";
 import { detectLocale } from "../lib/i18n";
 
 export const metadata: Metadata = {
-  title: "LifeScale 人生刻度 — 把余生，活成自己的作品",
-  description: "看见时间、记录人生、珍惜关系，把重要的故事与牵挂好好留下。",
+  title: "余生有刻 LifeScale｜看见余生，认真今天",
+  description: "余生有刻帮助你看见人生进度、记录每个值得留下的今天，并逐步建立属于自己的人生档案。",
 };
 
 export default async function Home() {

@@ -28,7 +28,7 @@ button { color: inherit; }
 .outline-button, .light-button { border: 1px solid var(--green); border-radius: 999px; padding: 11px 22px; background: transparent; cursor: pointer; transition: .2s ease; }
 .outline-button:hover { background: var(--green); color: white; }
 
-/* Brand — existing mark and proportions retained */
+/* Brand: existing mark and proportions retained */
 .brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; width: max-content; }
 .brand-mark { width: 42px; height: 42px; border-radius: 14px; background: var(--paper); box-shadow: 0 10px 24px rgba(20,61,47,.12); display: grid; place-items: center; position: relative; }
 .brand-mark::before { content: ""; width: 27px; height: 27px; border-radius: 50%; background: var(--green); box-shadow: inset 0 0 0 5px var(--green-2); }
@@ -125,7 +125,7 @@ button { color: inherit; }
 .node-c { right: 72px; top: 43px; }
 .feature-4 .feature-art { background: var(--green); display: grid; place-items: center; padding: 55px; }
 .feature-4 blockquote { margin: 0; color: white; max-width: 560px; text-align: center; font: 500 39px/1.35 var(--serif); }
-.feature-4 blockquote::after { content: "人生刻度 · 把重要的好好留下"; display: block; margin-top: 35px; color: var(--gold); font: 700 8px/1 var(--font-geist-sans); letter-spacing: .19em; }
+.feature-4 blockquote::after { content: "余生有刻 · 看见余生，认真今天"; display: block; margin-top: 35px; color: var(--gold); font: 700 8px/1 var(--font-geist-sans); letter-spacing: .19em; }
 
 .steps-section { padding: 110px max(36px, calc((100vw - 1320px)/2)); background: #e9e5db; display: grid; grid-template-columns: .95fr 1.05fr; gap: 120px; }
 .steps-section h2 { margin: 0; max-width: 580px; font: 500 clamp(48px, 4.6vw, 70px)/1.07 var(--serif); letter-spacing: -.035em; text-wrap: balance; }

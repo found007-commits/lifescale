@@ -9,11 +9,12 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://app.lifescale.space"),
   title: {
-    default: "LifeScale 人生刻度 — 把余生，活成自己的作品",
-    template: "%s · LifeScale",
+    default: "余生有刻 LifeScale｜看见余生，认真今天",
+    template: "%s｜余生有刻",
   },
-  description: "看见时间、记录人生、珍惜关系，把重要的故事与牵挂好好留下。",
+  description: "余生有刻帮助你看见人生进度、记录每个值得留下的今天，并逐步建立属于自己的人生档案。",
   icons: {
     icon: "/lifescale-icon.png",
     shortcut: "/lifescale-icon.png",
@@ -22,7 +23,19 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "LifeScale",
+    title: "余生有刻",
+  },
+  openGraph: {
+    type: "website",
+    title: "余生有刻 LifeScale｜看见余生，认真今天",
+    description: "看见人生进度，记录每个值得留下的今天，建立属于自己的人生档案。",
+    images: [{ url: "/og.png", width: 1730, height: 909, alt: "余生有刻：看见余生，认真今天。" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "余生有刻 LifeScale｜看见余生，认真今天",
+    description: "看见人生进度，记录每个值得留下的今天，建立属于自己的人生档案。",
+    images: ["/og.png"],
   },
 };
 

@@ -6,7 +6,7 @@ import { getSupabaseBrowserClient, isSupabaseConfigured } from "../../lib/supaba
 
 const messages = {
   zh: {
-    eyebrow: "邮箱注册 / 登录", title: "从此刻开始。", intro: "输入邮箱，我们会发送六位验证码。首次登录后，你将郑重设定属于自己的人生刻度。",
+    eyebrow: "邮箱注册 / 登录", title: "从此刻开始。", intro: "输入邮箱，我们会发送六位验证码。首次登录后，你将郑重设定属于自己的余生刻度。",
     email: "你的邮箱地址", send: "发送验证码", sending: "正在发送…", sent: "六位验证码已发送，请查看邮箱。", code: "六位验证码",
     verify: "验证并继续", verifying: "正在验证…", change: "更换邮箱", resend: "重新发送", configured: "邮件服务正在配置，请稍后再试。",
     sendError: "验证码发送失败，请稍后再试。", verifyError: "验证码不正确或已过期，请重新获取。", legalA: "继续即表示你同意",

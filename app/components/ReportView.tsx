@@ -46,7 +46,7 @@ export function ReportView({ profile, entries, checkins, locale }: { profile: Li
 
   return (
     <section className="report-page">
-      <header className="section-heading"><div><p className="kicker">7 DAY REPORT</p><h1>{en ? "Where did your time go this week?" : "这一周，时间去了哪里？"}</h1></div><p>{report.start} — {report.end}</p></header>
+      <header className="section-heading"><div><p className="kicker">7 DAY REPORT</p><h1>{en ? "Where did your time go this week?" : "这一周，时间去了哪里？"}</h1></div><p>{report.start} 至 {report.end}</p></header>
       <div className="report-hero"><div><span>{en ? "Recorded days" : "有记录的日子"}</span><strong>{report.recordedDays}<small>/ 7</small></strong><p>{en ? "Today did not simply pass. You kept it." : "今天没有只是过去，而是被你留下了。"}</p></div><div><span>{en ? "Current streak" : "当前连续"}</span><strong>{report.currentStreak}<small>{en ? " days" : "天"}</small></strong></div><div><span>{en ? "Total entries" : "记录总数"}</span><strong>{report.entryCount}<small>{en ? "" : "条"}</small></strong></div></div>
       <div className="report-grid">
         <section className="report-block"><h2>{en ? "Your mood this week" : "这一周的心情"}</h2>{Object.keys(report.moods).length ? <div className="mood-bars">{Object.entries(report.moods).sort((a, b) => b[1] - a[1]).map(([mood, count]) => <div key={mood}><span>{moodNames[mood as keyof typeof moodNames]}</span><i><b style={{ width: `${(count / moodTotal) * 100}%` }} /></i><small>{count}</small></div>)}</div> : <p className="empty-copy">{en ? "Your mood distribution will appear after your first entry." : "有了第一条记录后，这里会出现你的心情分布。"}</p>}</section>

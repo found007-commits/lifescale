@@ -32,3 +32,15 @@ test("local storage is limited to preview, theme and draft state", async () => {
   assert.doesNotMatch(await source("app/components/Dashboard.tsx"), /localStorage/);
   assert.doesNotMatch(await source("lib/lifescale-data.ts"), /localStorage/);
 });
+
+test("the web app presents the 余生有刻 product brand", async () => {
+  const [brand, layout, manifest, experience] = await Promise.all([
+    source("app/components/Brand.tsx"),
+    source("app/layout.tsx"),
+    source("app/manifest.ts"),
+    source("app/components/Experience.tsx"),
+  ]);
+  for (const file of [brand, layout, manifest]) assert.match(file, /余生有刻/);
+  assert.match(layout, /看见余生，认真今天/);
+  assert.doesNotMatch(`${brand}\n${layout}\n${manifest}\n${experience}`, /人生刻度/);
+});

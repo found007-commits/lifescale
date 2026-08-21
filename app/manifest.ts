@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "LifeScale 人生刻度",
-    short_name: "LifeScale",
+    name: "余生有刻 LifeScale",
+    short_name: "余生有刻",
     description: "看见余生，认真今天。记录、回望并珍藏重要的人生时刻。",
     start_url: "/",
     display: "standalone",
