@@ -14,7 +14,7 @@
 
 1. 在微信开发者工具选择“导入项目”。
 2. 目录选择本仓库的 `miniprogram` 文件夹。
-3. 将 `project.config.json` 中的 `touristappid` 换成正式小程序 AppID。
+3. 项目已配置正式小程序 AppID：`wxa1ad4ff408b7727d`。
 4. 在微信公众平台配置 request 合法域名：
    - `https://app.lifescale.space`
    - `https://utcgiopwbfcmnryerynr.supabase.co`
@@ -26,7 +26,7 @@
 
 ## 发布前仍需要
 
-- 使用正式小程序 AppID。
+- 已配置正式小程序 AppID：`wxa1ad4ff408b7727d`。
 - 在公众平台填写隐私保护指引。
 - 完成小程序备案、类目和版本审核。
 - 配置上述两个服务器域名。
