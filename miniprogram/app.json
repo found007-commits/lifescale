@@ -13,7 +13,7 @@
   "window": {
     "navigationBarBackgroundColor": "#f3efe5",
     "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "人生刻度",
+    "navigationBarTitleText": "余生有刻",
     "backgroundColor": "#f3efe5",
     "backgroundTextStyle": "dark"
   },
@@ -23,7 +23,7 @@
     "backgroundColor": "#fbfaf6",
     "borderStyle": "white",
     "list": [
-      { "pagePath": "pages/dashboard/dashboard", "text": "人生刻度" },
+      { "pagePath": "pages/dashboard/dashboard", "text": "余生有刻" },
       { "pagePath": "pages/history/history", "text": "记录" },
       { "pagePath": "pages/report/report", "text": "7天报告" },
       { "pagePath": "pages/settings/settings", "text": "我的" }

@@ -1,7 +1,7 @@
 <view class="page-shell auth-page">
   <view class="brand-row">
     <image class="brand-logo" src="/images/lifescale-icon.png" mode="aspectFill" />
-    <view><text class="brand-name">人生刻度</text><text class="brand-note">LIFESCALE</text></view>
+    <view><text class="brand-name">余生有刻</text><text class="brand-note">LIFESCALE</text></view>
   </view>
 
   <view class="auth-copy">

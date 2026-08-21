@@ -34,3 +34,14 @@ test("the Chinese manifesto headline has intentional two-line copy", async () =>
   assert.match(website, /pillarsTitle: \["不是倒数生命，", "而是把今天留下。"\]/);
   assert.match(miniProgram, /<text>不是倒数生命，<\/text><text>而是把今天留下。<\/text>/);
 });
+
+test("the mini program presents the Yusheng Youke product brand", async () => {
+  const [app, landing, auth] = await Promise.all([
+    source("miniprogram/app.json"),
+    source("miniprogram/pages/index/index.wxml"),
+    source("miniprogram/pages/auth/auth.wxml"),
+  ]);
+  assert.match(app, /余生有刻/);
+  assert.match(landing, /余生有刻/);
+  assert.match(auth, /余生有刻/);
+});

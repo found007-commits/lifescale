@@ -5,7 +5,7 @@
   <view wx:if="{{error}}" class="form-error">{{error}}</view>
   <block wx:if="{{!loading && profile}}">
     <view class="paper-card profile-card">
-      <text class="profile-name">{{profile.display_name || 'LifeScale 用户'}}</text>
+      <text class="profile-name">{{profile.display_name || '余生有刻用户'}}</text>
       <text class="muted">{{email}}</text>
       <view class="profile-grid">
         <view><text>出生日期</text><text>{{profile.birth_date}}</text></view>
