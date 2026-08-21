@@ -1,0 +1,58 @@
+name: Deploy LifeScale Overseas
+
+on:
+  push:
+    branches:
+      - codex/overseas-app
+  workflow_dispatch:
+
+concurrency:
+  group: lifescale-overseas-production
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type-check
+        run: pnpm typecheck
+
+      - name: Run focused tests
+        run: pnpm exec tsx --test tests/*.test.ts tests/*.test.mjs
+
+      - name: Pull Vercel production settings
+        run: pnpm dlx vercel@59.1.4 pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Build for Vercel
+        run: pnpm dlx vercel@59.1.4 build --prod --token="${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Deploy to production
+        run: pnpm dlx vercel@59.1.4 deploy --prebuilt --prod --token="${{ secrets.VERCEL_TOKEN }}"
