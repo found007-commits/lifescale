@@ -1,11 +1,12 @@
 "use client";
 
 import type { Session } from "@supabase/supabase-js";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ageOnDate, calculateLifeMetrics, daysBetween, targetDateFromAge, todayInTimeZone } from "../../lib/life-calculations";
 import { genderLabel } from "../../lib/gender-options";
 import { createProfile } from "../../lib/lifescale-data";
 import type { GenderOption, LifeProfile, Locale } from "../../lib/types";
+import { useTraditionalChinese } from "../../lib/use-traditional-chinese";
 import { Brand } from "./Brand";
 import { GenderSelector } from "./GenderSelector";
 import { formatLocalizedDate, LocalizedDateField } from "./LocalizedDateField";
@@ -13,7 +14,7 @@ import { TargetAgeField } from "./TargetAgeField";
 
 const PRIVACY_VERSION = "2026-08-22";
 
-export function Onboarding({ session, onComplete }: { session: Session; onComplete: (profile: LifeProfile) => void }) {
+export function Onboarding({ session, initialLocale, onComplete }: { session: Session; initialLocale: Locale; onComplete: (profile: LifeProfile) => void }) {
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
   const today = todayInTimeZone(timezone);
   const [step, setStep] = useState(0);
@@ -23,12 +24,14 @@ export function Onboarding({ session, onComplete }: { session: Session; onComple
   const [targetType, setTargetType] = useState<"age" | "date">("age");
   const [targetAge, setTargetAge] = useState("");
   const [targetDate, setTargetDate] = useState("");
-  const [locale, setLocale] = useState<Locale>("zh");
+  const [locale, setLocale] = useState<Locale>(initialLocale);
+  const surfaceRef = useRef<HTMLElement>(null);
   const [accepted, setAccepted] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const en = locale === "en";
+  useTraditionalChinese(surfaceRef, locale);
 
   useEffect(() => {
     try {
@@ -85,7 +88,7 @@ export function Onboarding({ session, onComplete }: { session: Session; onComple
   }
 
   return (
-    <main className="onboarding-shell">
+    <main className="onboarding-shell" key={locale} ref={surfaceRef} lang={locale === "zh-TW" ? "zh-TW" : locale === "zh" ? "zh-CN" : "en"}>
       <header className="onboarding-header"><Brand /><span>{session.user.email}</span></header>
       <div className="onboarding-progress"><span className={step >= 0 ? "active" : ""}>{en ? "Understand LifeScale" : "理解余生有刻"}</span><i /><span className={step >= 1 ? "active" : ""}>{en ? "Set your scale" : "设定余生刻度"}</span><i /><span className={step >= 2 ? "active" : ""}>{en ? "Confirm carefully" : "郑重确认"}</span></div>
 
@@ -106,7 +109,7 @@ export function Onboarding({ session, onComplete }: { session: Session; onComple
             <LocalizedDateField id="onboarding-birth-date" label={en ? "Birth date" : "出生日期"} locale={locale} max={today} value={birthDate} onChange={(value) => { setBirthDate(value); setTargetDate(""); }} hint={en ? "Choose day, month and year." : "请依次选择年、月、日。"} />
             <fieldset className="target-type"><legend>{en ? "How would you like to set your goal?" : "目标设定方式"}</legend><button type="button" className={targetType === "age" ? "selected" : ""} onClick={() => setTargetType("age")}>{en ? "Target age" : "按目标年龄"}</button><button type="button" className={targetType === "date" ? "selected" : ""} onClick={() => setTargetType("date")}>{en ? "Exact date" : "按具体日期"}</button></fieldset>
             {targetType === "age" ? <TargetAgeField locale={locale} minimumAge={minimumAge} value={targetAge} onChange={setTargetAge} /> : <LocalizedDateField id="onboarding-target-date" label={en ? "Life target date" : "人生目标日期"} locale={locale} min={birthDate ? targetDateFromAge(birthDate, 30) : today} max={birthDate ? targetDateFromAge(birthDate, 150) : `${new Date().getFullYear() + 150}-12-31`} value={targetDate} onChange={setTargetDate} hint={en ? "This is not an actual date of death and never triggers a death status." : "这不是实际死亡日期，也不会触发死亡标记。"} />}
-            <label>{en ? "Interface language" : "界面语言"}<select value={locale} onChange={(event) => setLocale(event.target.value as Locale)}><option value="zh">简体中文</option><option value="en">English</option></select></label>
+            <label>{en ? "Interface language" : "界面语言"}<select value={locale} onChange={(event) => { const next = event.target.value as Locale; setLocale(next); window.localStorage.setItem("lifescale:locale", next); }}><option value="zh">简体中文</option><option value="zh-TW">繁體中文</option><option value="en">English</option></select></label>
             <label className="confirmation-check"><input type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} /><span>{en ? "I have read and accept the " : "我已阅读并同意"}<a href="/terms" target="_blank">{en ? "Terms" : "《用户协议》"}</a>{en ? " and " : "与"}<a href="/privacy" target="_blank">{en ? "Privacy Notice" : "《隐私说明》"}</a>{en ? "." : "。"}</span></label>
             {!validTarget && birthDate ? <p className="form-status">{en ? "Your target must be after today and no earlier than your 30th birthday." : "目标必须晚于今天，且不早于你的 30 岁生日。"}</p> : null}
             <div className="onboarding-actions"><button className="change-email" onClick={() => setStep(0)}>{en ? "Back" : "返回"}</button><button className="primary-button" disabled={!accepted || !validTarget || !gender} onClick={() => setStep(2)}>{en ? "Review once more" : "核对最后一次"}</button></div>

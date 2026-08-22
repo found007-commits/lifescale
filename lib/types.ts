@@ -1,4 +1,4 @@
-export type Locale = "zh" | "en";
+export type Locale = "zh" | "zh-TW" | "en";
 export type DisplayMode = "gentle" | "clear";
 export type GenderOption = "male" | "female" | "l" | "g" | "b" | "t" | "q" | "private";
 export type Visibility = "private" | "public";

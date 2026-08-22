@@ -1,9 +1,19 @@
 import type { Locale } from "./types";
 
-const chineseRegions = new Set(["CN", "HK", "MO", "TW", "SG"]);
+const traditionalChineseRegions = new Set(["HK", "MO", "TW"]);
 
 export function detectLocale(country: string | null, acceptLanguage: string | null): Locale {
-  if (country && chineseRegions.has(country.toUpperCase())) return "zh";
-  if ((acceptLanguage || "").toLowerCase().startsWith("zh")) return "zh";
+  const countryCode = country?.trim().toUpperCase();
+  if (countryCode === "CN") return "zh";
+  if (countryCode && traditionalChineseRegions.has(countryCode)) return "zh-TW";
+  if (!countryCode) {
+    const browserLanguage = (acceptLanguage || "").toLowerCase();
+    if (/^zh-(tw|hk|mo|hant)/.test(browserLanguage)) return "zh-TW";
+    if (browserLanguage.startsWith("zh")) return "zh";
+  }
   return "en";
+}
+
+export function isLocale(value: unknown): value is Locale {
+  return value === "zh" || value === "zh-TW" || value === "en";
 }

@@ -2,14 +2,14 @@
 
 import { z } from "zod";
 import { getSupabaseBrowserClient } from "./supabase/client";
-import type { Checkin, EntryCategory, EntryMedia, GenderOption, LifeEntry, LifeProfile, Locale, Mood, Visibility } from "./types";
+import type { Checkin, EntryCategory, EntryMedia, LifeEntry, LifeProfile, Locale, Mood, Visibility } from "./types";
 
 export const profileInputSchema = z.object({
   id: z.string().uuid(),
   email: z.string().email(),
   display_name: z.string().trim().max(80).nullable(),
   gender_identity: z.enum(["male", "female", "l", "g", "b", "t", "q", "private"]),
-  locale: z.enum(["zh", "en"]),
+  locale: z.enum(["zh", "zh-TW", "en"]),
   timezone: z.string().min(1).max(100),
   birth_date: z.iso.date(),
   target_age: z.number().int().min(30).max(150).nullable(),
@@ -139,5 +139,5 @@ export async function saveSevenDayReport(input: { userId: string; start: string;
 }
 
 export function localeValue(value: unknown): Locale {
-  return value === "en" ? "en" : "zh";
+  return value === "en" || value === "zh-TW" ? value : "zh";
 }

@@ -48,12 +48,25 @@ test("registration explains the privacy boundary and records have no public opti
   assert.doesNotMatch(composer, /option value="public"/);
 });
 
-test("local storage is limited to preview, theme and draft state", async () => {
+test("local storage is limited to preview, theme and locale preference", async () => {
   const files = ["app/components/Experience.tsx", "app/components/Onboarding.tsx", "lib/use-theme.ts", "app/components/Dashboard.tsx", "lib/lifescale-data.ts"];
   const combined = (await Promise.all(files.map(source))).join("\n");
-  for (const match of combined.matchAll(/localStorage\.[^(]+\(([^)]*)\)/g)) assert.match(match[1], /lifescale:(preview-draft|theme)/);
-  assert.doesNotMatch(await source("app/components/Dashboard.tsx"), /localStorage/);
+  for (const match of combined.matchAll(/localStorage\.[^(]+\(([^)]*)\)/g)) assert.match(match[1], /lifescale:(preview-draft|theme|locale)/);
   assert.doesNotMatch(await source("lib/lifescale-data.ts"), /localStorage/);
+});
+
+test("locale is selected from IP and supports simplified, traditional and English", async () => {
+  const [i18n, types, experience, migration] = await Promise.all([
+    source("lib/i18n.ts"),
+    source("lib/types.ts"),
+    source("app/components/Experience.tsx"),
+    source("supabase/migrations/20260822143000_add_traditional_chinese_locale.sql"),
+  ]);
+  assert.match(i18n, /countryCode === "CN"/);
+  assert.match(i18n, /"HK", "MO", "TW"/);
+  assert.match(types, /"zh-TW"/);
+  assert.match(experience, /value="zh-TW"/);
+  assert.match(migration, /'zh-TW'/);
 });
 
 test("the web app presents the 余生有刻 product brand", async () => {

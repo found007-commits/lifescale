@@ -1,10 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLifeScaleSession } from "../../lib/auth-client";
+import { isLocale } from "../../lib/i18n";
 import { ageOnDate, calculateLifeMetrics, targetDateFromAge, todayInTimeZone } from "../../lib/life-calculations";
 import type { Locale } from "../../lib/types";
 import { useTheme } from "../../lib/use-theme";
+import { useTraditionalChinese } from "../../lib/use-traditional-chinese";
 import { AuthPanel } from "./AuthPanel";
 import { Brand } from "./Brand";
 import { Dashboard } from "./Dashboard";
@@ -37,12 +39,21 @@ const pageCopy = {
 export function Experience({ initialLocale }: { initialLocale: Locale; country: string }) {
   const { session, isPending } = useLifeScaleSession();
   const [locale, setLocale] = useState<Locale>(initialLocale);
+  const surfaceRef = useRef<HTMLElement>(null);
   const [authOpen, setAuthOpen] = useState(false);
   const [birthDate, setBirthDate] = useState("");
   const [targetAge, setTargetAge] = useState("");
   const [previewed, setPreviewed] = useState(false);
   const { theme, setTheme } = useTheme();
-  const t = pageCopy[locale];
+  const t = pageCopy[locale === "zh-TW" ? "zh" : locale];
+  useTraditionalChinese(surfaceRef, locale);
+
+  useEffect(() => {
+    const savedLocale = window.localStorage.getItem("lifescale:locale");
+    if (!isLocale(savedLocale)) return;
+    const frame = window.requestAnimationFrame(() => setLocale(savedLocale));
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
   const today = todayInTimeZone(timezone);
   const currentAge = birthDate ? ageOnDate(birthDate, today) : 0;
@@ -55,7 +66,12 @@ export function Experience({ initialLocale }: { initialLocale: Locale; country: 
   }, [birthDate, minimumAge, numericTargetAge, timezone]);
 
   if (isPending) return <main className="app-loading full">LifeScale</main>;
-  if (session?.user) return <Dashboard session={session} />;
+  if (session?.user) return <Dashboard session={session} initialLocale={locale} />;
+
+  function changeLocale(next: Locale) {
+    setLocale(next);
+    window.localStorage.setItem("lifescale:locale", next);
+  }
 
   function openAuthWithDraft() {
     if (metrics) {
@@ -65,15 +81,15 @@ export function Experience({ initialLocale }: { initialLocale: Locale; country: 
   }
 
   return (
-    <main className="marketing-shell">
+    <main className="marketing-shell" key={locale} ref={surfaceRef} lang={locale === "zh-TW" ? "zh-TW" : locale === "zh" ? "zh-CN" : "en"}>
       <header className="site-header">
         <Brand />
-        <nav aria-label={locale === "zh" ? "主要导航" : "Primary navigation"}>
+        <nav aria-label={locale === "en" ? "Primary navigation" : "主要导航"}>
           <a href="#scale">{t.nav[0]}</a><a href="#today">{t.nav[1]}</a><a href="#report">{t.nav[2]}</a><a href="/privacy">{t.nav[3]}</a>
         </nav>
         <div className="header-actions">
           <button className="theme-button" onClick={() => setTheme(theme === "light" ? "dark" : "light")} aria-label={t.theme}>{theme === "light" ? "◐" : "☼"}</button>
-          <label className="language-select"><span className="sr-only">Language</span><select value={locale} onChange={(event) => setLocale(event.target.value as Locale)}><option value="zh">中文</option><option value="en">EN</option></select></label>
+          <label className="language-select"><span className="sr-only">Language</span><select value={locale} onChange={(event) => changeLocale(event.target.value as Locale)}><option value="zh">简体中文</option><option value="zh-TW">繁體中文</option><option value="en">English</option></select></label>
           <button className="outline-button" onClick={() => setAuthOpen(true)}>{t.signIn}</button>
         </div>
       </header>
@@ -106,7 +122,7 @@ export function Experience({ initialLocale }: { initialLocale: Locale; country: 
         </div>
       </section>
 
-      <section className="time-ribbon" id="today"><span>365</span><p>{locale === "zh" ? "每一年，不只是经过。" : "A year should be more than time passing."}</p><b>+1 TODAY</b></section>
+      <section className="time-ribbon" id="today"><span>365</span><p>{locale === "en" ? "A year should be more than time passing." : "每一年，不只是经过。"}</p><b>+1 TODAY</b></section>
 
       <section className="product-principles" id="report">
         <div><p className="kicker">LIFESCALE</p><h2>{t.pillarsTitle.map((line) => <span key={line}>{line}</span>)}</h2></div>

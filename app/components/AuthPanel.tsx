@@ -35,7 +35,7 @@ export function AuthPanel({ open, onClose, locale }: { open: boolean; onClose: (
   const [busy, setBusy] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [acknowledged, setAcknowledged] = useState(false);
-  const t = messages[locale];
+  const t = messages[locale === "zh-TW" ? "zh" : locale];
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -68,7 +68,7 @@ export function AuthPanel({ open, onClose, locale }: { open: boolean; onClose: (
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <section className="auth-panel" role="dialog" aria-modal="true" aria-labelledby="auth-title">
-        <button className="modal-close" onClick={onClose} aria-label={locale === "zh" ? "关闭" : "Close"}>×</button>
+        <button className="modal-close" onClick={onClose} aria-label={locale === "en" ? "Close" : "关闭"}>×</button>
         <p className="kicker">{t.eyebrow}</p>
         <h2 id="auth-title">{t.title}</h2>
         <p className="auth-intro">{t.intro}</p>
