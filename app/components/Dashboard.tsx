@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { signOut } from "../../lib/auth-client";
 import { calculateLifeMetrics } from "../../lib/life-calculations";
 import { deleteEntry, loadLifeScaleData, updateProfile } from "../../lib/lifescale-data";
+import { getJourneyPrompt } from "../../lib/journey-prompts";
 import { calculateStreak } from "../../lib/report-calculations";
 import type { Checkin, LifeEntry, LifeProfile, Locale } from "../../lib/types";
 import { useTheme } from "../../lib/use-theme";
@@ -64,6 +65,7 @@ export function Dashboard({ session }: { session: Session }) {
   const activeMetrics = metrics;
   const locale: Locale = activeProfile.locale === "en" ? "en" : "zh";
   const en = locale === "en";
+  const journeyPrompt = getJourneyPrompt(checkins.length, checkedToday, locale);
   const displayName = activeProfile.display_name || session.user.email?.split("@")[0] || "LifeScale";
   const ringStyle = { "--progress": `${Math.max(3, activeMetrics.progressPercent * 3.6)}deg` } as CSSProperties;
 
@@ -119,6 +121,8 @@ export function Dashboard({ session }: { session: Session }) {
             <button className="primary-button" onClick={() => { setEditingEntry(null); setComposerOpen(true); }}>{en ? "Record today +1" : "记录今天 +1"}</button>
           </div>
         </header>
+
+        {tab === "home" ? <section className={`journey-reminder-shell ${journeyPrompt.day === 100 ? "milestone" : ""}`} aria-live="polite"><div className="journey-reminder"><span>{journeyPrompt.label}</span><div><h2>{journeyPrompt.title}</h2><p>{journeyPrompt.body}</p></div>{!checkedToday ? <button type="button" onClick={() => { setEditingEntry(null); setComposerOpen(true); }}>{en ? "Keep today" : "留下今天"} →</button> : null}</div></section> : null}
 
         {tab === "home" ? <section className={`dashboard-page ${profile.display_mode}-mode`}><header className="dashboard-intro"><p className="kicker">TODAY · {metrics.today}</p><h1>{metrics.isBonusChapter ? (en ? "Bonus time. Another day gained." : "生命加时，今天又赚到一天。") : (en ? "Today is worth remembering." : "今天，也值得被记住。")}</h1><p>{en ? "This is a life-time goal you set for yourself, never a death prediction." : "这不是死亡预测，而是你为自己设定的人生时间目标。"}</p></header><div className="life-focus"><div className="life-dial" style={ringStyle}><div className="life-dial-inner"><small>{metrics.isBonusChapter ? (en ? "BONUS TIME" : "生命加时") : profile.display_mode === "gentle" ? (en ? "YOURS TO WRITE" : "仍可书写") : (en ? "DAYS LEFT" : "剩余天数")}</small><strong>{(metrics.isBonusChapter ? metrics.bonusDays : metrics.remainingDays).toLocaleString()}</strong><span>{metrics.isBonusChapter ? "BONUS DAYS" : "DAYS"}</span></div></div><div className="life-summary"><p>{metrics.isBonusChapter ? (en ? "Your target date has passed. LifeScale is now adding every day you live." : "目标日期已经走过，LifeScale 正在为你正向累计每一天。") : (en ? `${metrics.remainingYears} years, ${metrics.remainingMonths} months and ${metrics.remainingRemainderDays} days to your goal.` : `距目标还有 ${metrics.remainingYears} 年 ${metrics.remainingMonths} 个月 ${metrics.remainingRemainderDays} 天。`)}</p><dl><div><dt>{en ? "Days lived" : "已走过"}</dt><dd>{metrics.livedDays.toLocaleString()} {en ? "days" : "天"}</dd></div><div><dt>{en ? "Life progress" : "生命进度"}</dt><dd>{metrics.progressPercent.toFixed(2)}%</dd></div><div><dt>{en ? "Weeks left" : "剩余周数"}</dt><dd>{metrics.remainingWeeks.toLocaleString()} {en ? "weeks" : "周"}</dd></div><div><dt>{en ? "Next birthday" : "下次生日"}</dt><dd>{en ? `in ${metrics.nextBirthdayDays} days` : `${metrics.nextBirthdayDays} 天后`}</dd></div></dl><button className={`today-checkin ${checkedToday ? "done" : ""}`} onClick={() => { setEditingEntry(null); setComposerOpen(true); }}><span>{checkedToday ? "✓" : "+1"}</span><strong>{checkedToday ? (en ? "Today is already recorded" : "今天已经留下记录") : (en ? "Record today +1" : "记录今天 +1")}</strong><small>{checkedToday ? (en ? `${streak}-day streak · ${checkins.length} total days` : `连续 ${streak} 天 · 累计 ${checkins.length} 天`) : (en ? "One sentence or one photo is enough" : "一句话、一张图，也足够")}</small></button></div></div><section className="recent-section"><div className="section-bar"><div><p className="kicker">RECENT DAYS</p><h2>{en ? "Days you have kept" : "最近留下的日子"}</h2></div><button className="change-email" onClick={() => setTab("history")}>{en ? "View all" : "查看全部"} →</button></div>{entries.length ? <div className="recent-row">{entries.slice(0, 3).map((entry) => <EntryCard entry={entry} locale={locale} key={entry.id} />)}</div> : <div className="recent-empty"><strong>{en ? "Your first entry starts today." : "你的第一条记录，会从今天开始。"}</strong><button className="primary-button" onClick={() => setComposerOpen(true)}>{en ? "Record today +1" : "记录今天 +1"}</button></div>}</section></section> : null}
 

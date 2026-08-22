@@ -2,8 +2,6 @@
 
 import type { Locale } from "../../lib/types";
 
-const PRESET_AGES = [70, 80, 90, 100];
-
 export function normalizeTargetAge(raw: string) {
   const digits = raw.replace(/\D/g, "").replace(/^0+/, "");
   return digits.slice(0, 3);
@@ -21,27 +19,12 @@ export function TargetAgeField({
   onChange: (value: string) => void;
 }) {
   const en = locale === "en";
-  const presets = PRESET_AGES.filter((age) => age >= minimumAge);
 
   return (
     <fieldset className="target-age-field">
-      <legend>{en ? "Age you hope to reach" : "希望活到的年龄"}</legend>
-      {presets.length ? (
-        <div className="age-presets" role="group" aria-label={en ? "Common target ages" : "常用目标年龄"}>
-          {presets.map((age) => (
-            <button
-              type="button"
-              className={value === String(age) ? "selected" : ""}
-              onClick={() => onChange(String(age))}
-              key={age}
-            >
-              {age}<span>{en ? " yrs" : " 岁"}</span>
-            </button>
-          ))}
-        </div>
-      ) : null}
+      <legend>{en ? "The age you choose for your life target" : "你为自己设定的目标年龄"}</legend>
       <label className="custom-age-label">
-        <span>{en ? "Or enter your own age" : "或自行填写"}</span>
+        <span>{en ? "Enter your own number" : "请自行填写，不提供推荐数字"}</span>
         <div className="age-field">
           <input
             type="text"
@@ -50,7 +33,7 @@ export function TargetAgeField({
             autoComplete="off"
             maxLength={3}
             value={value}
-            placeholder={en ? `${minimumAge}–150` : `${minimumAge}–150 岁`}
+            placeholder={en ? `${minimumAge}-150` : `${minimumAge}-150 岁`}
             aria-describedby="target-age-guidance"
             onFocus={(event) => event.currentTarget.select()}
             onChange={(event) => onChange(normalizeTargetAge(event.target.value))}
@@ -60,8 +43,8 @@ export function TargetAgeField({
       </label>
       <small id="target-age-guidance" className="target-age-guidance">
         {en
-          ? `Choose a preset or enter ${minimumAge}–150. Your final choice can only be confirmed once.`
-          : `可直接选择，也可填写 ${minimumAge}–150 岁。正式保存后只能确认一次，请慎重选择。`}
+          ? `Enter an integer from ${minimumAge} to 150. LifeScale does not suggest a number or define your life for you. Your final choice can only be confirmed once.`
+          : `请输入 ${minimumAge}-150 岁之间的整数。系统不推荐任何数字，也不替你定义人生。正式保存后只能确认一次，请慎重选择。`}
       </small>
     </fieldset>
   );

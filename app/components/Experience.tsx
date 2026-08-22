@@ -8,6 +8,7 @@ import { useTheme } from "../../lib/use-theme";
 import { AuthPanel } from "./AuthPanel";
 import { Brand } from "./Brand";
 import { Dashboard } from "./Dashboard";
+import { LocalizedDateField } from "./LocalizedDateField";
 import { TargetAgeField } from "./TargetAgeField";
 
 const pageCopy = {
@@ -38,7 +39,7 @@ export function Experience({ initialLocale }: { initialLocale: Locale; country: 
   const [locale, setLocale] = useState<Locale>(initialLocale);
   const [authOpen, setAuthOpen] = useState(false);
   const [birthDate, setBirthDate] = useState("");
-  const [targetAge, setTargetAge] = useState("90");
+  const [targetAge, setTargetAge] = useState("");
   const [previewed, setPreviewed] = useState(false);
   const { theme, setTheme } = useTheme();
   const t = pageCopy[locale];
@@ -89,7 +90,7 @@ export function Experience({ initialLocale }: { initialLocale: Locale; country: 
         <div className="free-preview-card">
           <div className="preview-card-heading"><span>FREE PREVIEW</span><strong>{t.preview}</strong></div>
           <div className="preview-inputs">
-            <label>{t.birth}<input type="date" max={today} value={birthDate} onChange={(event) => { setBirthDate(event.target.value); setPreviewed(false); }} /></label>
+            <LocalizedDateField id="preview-birth-date" label={t.birth} locale={locale} max={today} value={birthDate} onChange={(value) => { setBirthDate(value); setPreviewed(false); }} hint={locale === "en" ? "Day / month / year" : "年 / 月 / 日"} />
             <TargetAgeField locale={locale} minimumAge={minimumAge} value={targetAge} onChange={(value) => { setTargetAge(value); setPreviewed(false); }} />
           </div>
           {!previewed || !metrics ? (
