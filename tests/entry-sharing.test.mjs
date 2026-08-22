@@ -20,5 +20,9 @@ test("each daily entry offers an explicit private-safe share action", async () =
   assert.match(dialog, /Instagram/);
   assert.match(dialog, /原记录继续保持私密/);
   assert.match(dialog, /canvas\.toBlob/);
+  assert.match(dialog, /MicroMessenger/);
+  assert.match(dialog, /微信内直接操作/);
+  assert.match(dialog, /if \(inWeChat\)/);
+  assert.match(dialog, /entry\.entry_date\.slice\(0, 10\)/);
   assert.doesNotMatch(dialog, /updateProfile|insertEntry|visibility:\s*["']public/);
 });
