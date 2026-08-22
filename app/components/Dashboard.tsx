@@ -96,8 +96,7 @@ export function Dashboard({ session }: { session: Session }) {
 
   async function deleteAccount() {
     if (!window.confirm(en ? "This permanently deletes your account, cloud data and images. Continue?" : "这会永久注销账号并删除云端资料与图片。确定继续吗？")) return;
-    const confirmation = window.prompt(en ? "Type DELETE to confirm permanent deletion:" : "请输入 DELETE 确认永久注销：");
-    if (confirmation !== "DELETE") return;
+    if (!window.confirm(en ? "Please confirm once more. This action cannot be undone and all account data will be permanently deleted." : "请再次确认：此操作无法撤销，账号及全部数据将被永久删除。")) return;
     const response = await fetch("/api/account/delete", { method: "DELETE", headers: { Authorization: `Bearer ${session.access_token}` } });
     const result = await response.json().catch(() => ({})) as { error?: string };
     if (!response.ok) { setToast(result.error || (en ? "Account deletion failed. Please try again." : "注销失败，请稍后再试。")); return; }
