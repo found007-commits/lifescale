@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createEntry, updateEntry, uploadEntryImage } from "../../lib/lifescale-data";
 import { todayInTimeZone } from "../../lib/life-calculations";
-import type { EntryCategory, LifeEntry, Locale, Mood, Visibility } from "../../lib/types";
+import type { EntryCategory, LifeEntry, Locale, Mood } from "../../lib/types";
 
 const prompts = ["今天值得记住的一件事是什么？", "今天你把时间给了谁？", "如果今天不能重来，你满意吗？", "明天最值得完成的一件事是什么？", "今天有什么事情让你感到感恩？"];
 const moods: Array<[Mood, string]> = [["calm", "平静"], ["happy", "开心"], ["grateful", "感恩"], ["tired", "疲惫"], ["sad", "难过"], ["anxious", "焦虑"], ["hopeful", "充满希望"]];
@@ -13,7 +13,6 @@ export function EntryComposer({ userId, timezone, locale, entry, onClose, onSave
   const [content, setContent] = useState(entry?.content || "");
   const [mood, setMood] = useState<Mood>(entry?.mood || "calm");
   const [category, setCategory] = useState<EntryCategory>(entry?.category || "daily");
-  const [visibility, setVisibility] = useState<Visibility>(entry?.visibility || "private");
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -25,9 +24,9 @@ export function EntryComposer({ userId, timezone, locale, entry, onClose, onSave
     try {
       let entryId = entry?.id;
       if (entry) {
-        await updateEntry(entry.id, userId, { content: content.trim(), mood, category, visibility });
+        await updateEntry(entry.id, userId, { content: content.trim(), mood, category, visibility: "private" });
       } else {
-        const created = await createEntry({ userId, entryDate: new Date().toISOString(), content: content.trim(), mood, category, visibility, checkinDate: todayInTimeZone(timezone) });
+        const created = await createEntry({ userId, entryDate: new Date().toISOString(), content: content.trim(), mood, category, visibility: "private", checkinDate: todayInTimeZone(timezone) });
         entryId = created.id;
       }
       if (file && entryId) await uploadEntryImage(userId, entryId, file);
@@ -46,8 +45,8 @@ export function EntryComposer({ userId, timezone, locale, entry, onClose, onSave
         <p className="daily-prompt">{prompt}</p>
         <label>{en ? "Write one sentence, or a little more" : "写下一句话，或多写一点"}<textarea rows={6} maxLength={12000} value={content} onChange={(event) => setContent(event.target.value)} placeholder={en ? "What happened? What do you want to remember?" : "此刻发生了什么？你想记住什么？"} /></label>
         <div className="composer-row"><label>{en ? "Mood" : "此刻的心情"}<select value={mood} onChange={(event) => setMood(event.target.value as Mood)}>{moods.map(([value, label]) => <option value={value} key={value}>{en ? ({ calm: "Calm", happy: "Happy", grateful: "Grateful", tired: "Tired", sad: "Sad", anxious: "Anxious", hopeful: "Hopeful" } as Record<Mood, string>)[value] : label}</option>)}</select></label><label>{en ? "Category" : "分类"}<select value={category} onChange={(event) => setCategory(event.target.value as EntryCategory)}>{categories.map(([value, label]) => <option value={value} key={value}>{en ? ({ daily: "Daily", family: "Family", work: "Work", growth: "Growth", health: "Health", travel: "Travel", reflection: "Reflection", other: "Other" } as Record<EntryCategory, string>)[value] : label}</option>)}</select></label></div>
-        <div className="composer-row"><label>{en ? "Image (up to 10 MB)" : "图片（最多 10 MB）"}<input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" onChange={(event) => setFile(event.target.files?.[0] || null)} /></label><label>{en ? "Visibility" : "谁可以看"}<select value={visibility} onChange={(event) => setVisibility(event.target.value as Visibility)}><option value="private">{en ? "Only me" : "仅自己可见"}</option><option value="public">{en ? "Public" : "公开"}</option></select></label></div>
-        <p className="privacy-hint">{en ? "Entries are private by default. Public visibility is always your explicit choice." : "记录默认仅自己可见。选择“公开”必须由你主动决定。"}</p>
+        <label>{en ? "Image (up to 10 MB)" : "图片（最多 10 MB）"}<input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" onChange={(event) => setFile(event.target.files?.[0] || null)} /></label>
+        <p className="privacy-hint private-only">{en ? "Only you can view this record and its image. There is no public option." : "这条记录和图片仅你本人可见，不提供公开选项。"}</p>
         {error ? <p className="form-status" role="status">{error}</p> : null}
         <button className="primary-button composer-submit" disabled={busy} onClick={save}>{busy ? (en ? "Saving…" : "正在保存…") : entry ? (en ? "Save changes" : "保存修改") : (en ? "Record Today +1" : "记录今天 +1")}</button>
       </section>

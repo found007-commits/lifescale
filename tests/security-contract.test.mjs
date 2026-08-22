@@ -15,9 +15,10 @@ test("email OTP is the only enabled login method", async () => {
 });
 
 test("database migrations enforce ownership and a permanent core-target lock", async () => {
-  const [sql, permanentLock] = await Promise.all([
+  const [sql, permanentLock, privateOnly] = await Promise.all([
     source("supabase/migrations/20260821000000_lifescale_core.sql"),
     source("supabase/migrations/20260821193000_permanent_core_target_lock.sql"),
+    source("supabase/migrations/20260822090000_private_records_only.sql"),
   ]);
   assert.match(sql, /enable row level security/);
   assert.match(sql, /auth\.uid\(\)/);
@@ -27,6 +28,24 @@ test("database migrations enforce ownership and a permanent core-target lock", a
   assert.match(sql, /actual_death_date/);
   assert.match(sql, /storage\.objects/);
   assert.match(sql, /bucket_id = 'entry-media'/);
+  assert.match(privateOnly, /entries_select_own/);
+  assert.match(privateOnly, /visibility = 'private'/);
+  assert.match(privateOnly, /life_entries_private_only/);
+  assert.match(privateOnly, /drop policy if exists "entries_select_own_or_public"/);
+  assert.doesNotMatch(privateOnly, /create policy "entries_select_own_or_public"/);
+});
+
+test("registration explains the privacy boundary and records have no public option", async () => {
+  const [auth, onboarding, composer] = await Promise.all([
+    source("app/components/AuthPanel.tsx"),
+    source("app/components/Onboarding.tsx"),
+    source("app/components/EntryComposer.tsx"),
+  ]);
+  assert.match(auth, /记录默认仅你可见/);
+  assert.match(auth, /没有供创作者或运营人员浏览、修改/);
+  assert.match(onboarding, /核心资料只确认一次/);
+  assert.match(composer, /不提供公开选项/);
+  assert.doesNotMatch(composer, /option value="public"/);
 });
 
 test("local storage is limited to preview, theme and draft state", async () => {

@@ -10,14 +10,20 @@ const messages = {
     email: "你的邮箱地址", send: "发送验证码", sending: "正在发送…", sent: "六位验证码已发送，请查看邮箱。", code: "六位验证码",
     verify: "验证并继续", verifying: "正在验证…", change: "更换邮箱", resend: "重新发送", configured: "邮件服务正在配置，请稍后再试。",
     sendError: "验证码发送失败，请稍后再试。", verifyError: "验证码不正确或已过期，请重新获取。", legalA: "继续即表示你同意",
-    terms: "服务条款", legalB: "并知悉", privacy: "隐私说明",
+    terms: "服务条款", legalB: "并知悉", privacy: "隐私说明", privacyTitle: "记录默认仅你可见",
+    privacyBody: "产品内没有供创作者或运营人员浏览、修改用户私密记录的内容后台。云服务仅按隐私说明处理登录、同步、存储、安全与注销所需的数据。",
+    coreTitle: "核心资料只确认一次", coreBody: "出生日期和人生目标保存后不能单独修改或删除。如需清除，只能注销整个账号。",
+    acknowledge: "我已了解隐私边界和核心资料锁定规则",
   },
   en: {
     eyebrow: "EMAIL SIGN UP / SIGN IN", title: "Begin from here.", intro: "Enter your email for a six-digit code. On your first sign-in, you will carefully set your personal life horizon.",
     email: "Your email address", send: "Send code", sending: "Sending…", sent: "Your six-digit code has been sent.", code: "Six-digit code",
     verify: "Verify and continue", verifying: "Verifying…", change: "Change email", resend: "Send again", configured: "Email sign-in is being configured. Please try again shortly.",
     sendError: "We could not send the code. Please try again.", verifyError: "That code is incorrect or expired. Request a new one.", legalA: "By continuing, you agree to the ",
-    terms: "Terms", legalB: " and acknowledge the ", privacy: "Privacy Notice",
+    terms: "Terms", legalB: " and acknowledge the ", privacy: "Privacy Notice", privacyTitle: "Your records are private by default",
+    privacyBody: "There is no product or operations console for the creator or staff to browse or edit private records. Cloud services process only the data needed for sign-in, sync, storage, security and account deletion, as described in the Privacy Notice.",
+    coreTitle: "Core details are confirmed once", coreBody: "Your birth date and life target cannot be edited or deleted separately after saving. Clearing them requires deleting the entire account.",
+    acknowledge: "I understand the privacy boundary and permanent core-data lock",
   },
 } as const;
 
@@ -28,6 +34,7 @@ export function AuthPanel({ open, onClose, locale }: { open: boolean; onClose: (
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const [acknowledged, setAcknowledged] = useState(false);
   const t = messages[locale];
 
   useEffect(() => {
@@ -65,11 +72,18 @@ export function AuthPanel({ open, onClose, locale }: { open: boolean; onClose: (
         <p className="kicker">{t.eyebrow}</p>
         <h2 id="auth-title">{t.title}</h2>
         <p className="auth-intro">{t.intro}</p>
+        <div className="privacy-registration-notice">
+          <div><strong>{t.privacyTitle}</strong><p>{t.privacyBody}</p></div>
+          <div><strong>{t.coreTitle}</strong><p>{t.coreBody}</p></div>
+        </div>
         {step === "email" ? (
-          <div className="email-row">
-            <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder={t.email} aria-label={t.email} autoComplete="email" />
-            <button className="primary-button" disabled={busy || !email.includes("@")} onClick={sendCode}>{busy ? t.sending : t.send}</button>
-          </div>
+          <>
+            <label className="privacy-acknowledgement"><input type="checkbox" checked={acknowledged} onChange={(event) => setAcknowledged(event.target.checked)} /><span>{t.acknowledge}</span></label>
+            <div className="email-row">
+              <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder={t.email} aria-label={t.email} autoComplete="email" />
+              <button className="primary-button" disabled={busy || !email.includes("@") || !acknowledged} onClick={sendCode}>{busy ? t.sending : t.send}</button>
+            </div>
+          </>
         ) : (
           <>
             <p className="otp-destination">{t.sent} <strong>{email}</strong></p>

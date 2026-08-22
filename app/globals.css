@@ -160,12 +160,20 @@ button { color: inherit; }
 
 /* Authentication and forms */
 .modal-backdrop { position: fixed; inset: 0; z-index: 100; padding: 20px; overflow-y: auto; background: rgba(8,32,23,.7); backdrop-filter: blur(11px); display: grid; place-items: center; }
-.auth-panel, .composer { width: min(540px, 100%); padding: 50px; border-radius: 28px; background: var(--paper); position: relative; box-shadow: 0 40px 100px rgba(0,0,0,.28); }
+.auth-panel, .composer { width: min(620px, 100%); padding: 46px; border-radius: 28px; background: var(--paper); position: relative; box-shadow: 0 40px 100px rgba(0,0,0,.28); }
 .composer { width: min(620px, 100%); }
 .modal-close { position: absolute; right: 21px; top: 17px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: transparent; color: var(--muted); font-size: 28px; cursor: pointer; }
 .auth-panel h2 { margin: 0; font: 500 clamp(19px, 6vw, 34px)/1.15 var(--serif); letter-spacing: -.04em; white-space: nowrap; }
 .composer h2 { margin: 0; font: 500 42px/1.06 var(--serif); letter-spacing: -.025em; text-wrap: balance; }
 .auth-intro { color: var(--muted); line-height: 1.7; }
+.privacy-registration-notice { margin-top: 20px; padding: 3px 18px; border: 1px solid rgba(20,61,47,.14); border-radius: 18px; background: rgba(20,61,47,.045); }
+.privacy-registration-notice > div { padding: 14px 0; display: grid; grid-template-columns: 148px 1fr; gap: 14px; align-items: start; }
+.privacy-registration-notice > div + div { border-top: 1px solid var(--line); }
+.privacy-registration-notice strong { color: var(--green); font: 600 15px/1.45 var(--serif); }
+.privacy-registration-notice p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.65; }
+.privacy-acknowledgement { margin-top: 18px; display: grid; grid-template-columns: 19px 1fr; gap: 9px; align-items: start; color: var(--green-2); font-size: 11px; line-height: 1.55; cursor: pointer; }
+.privacy-acknowledgement input { width: 18px; height: 18px; margin: 0; accent-color: var(--green); }
+.privacy-acknowledgement input:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 .email-row { margin-top: 24px; display: grid; grid-template-columns: 1fr auto; gap: 8px; }
 .otp-destination { margin: 24px 0 -12px; color: var(--muted); font-size: 13px; }
 .change-email { margin-top: 12px; padding: 0; border: 0; background: transparent; color: var(--green-2); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; font-size: 12px; }
@@ -191,6 +199,9 @@ input:focus, select:focus, textarea:focus { border-color: var(--gold); box-shado
 .onboarding-welcome-copy h1, .onboarding-form-intro h1, .confirm-heading h1 { margin: 0; max-width: 650px; font: 500 clamp(57px, 5.5vw, 84px)/1.02 var(--serif); letter-spacing: -.045em; text-wrap: balance; }
 .onboarding-welcome-copy h1 em, .confirm-heading h1 em { display: block; color: var(--gold); font-style: normal; }
 .onboarding-welcome-copy > p:not(.kicker), .onboarding-form-intro > p:not(.kicker), .confirm-heading > p:not(.kicker) { max-width: 580px; margin: 30px 0; color: var(--muted); font-size: 16px; line-height: 1.85; }
+.welcome-privacy-promise { max-width: 580px; margin: -6px 0 30px; padding: 17px 18px; border-left: 3px solid var(--gold); background: rgba(215,155,47,.09); }
+.welcome-privacy-promise strong { color: var(--green); font: 600 17px/1.4 var(--serif); }
+.welcome-privacy-promise p { margin: 7px 0 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
 .onboarding-values { display: grid; }
 .onboarding-values article { min-height: 145px; padding: 25px 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: 55px 180px 1fr; align-items: start; gap: 18px; }
 .onboarding-values article:last-child { border-bottom: 1px solid var(--line); }
@@ -404,6 +415,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--gold); box-shado
   .site-footer { width: calc(100% - 34px); padding: 35px 0; display: flex; flex-direction: column; align-items: flex-start; }
   .site-footer nav { flex-wrap: wrap; gap: 16px 24px; }
   .auth-panel, .composer { padding: 40px 22px 26px; }
+  .privacy-registration-notice > div { grid-template-columns: 1fr; gap: 5px; }
   .composer h2 { font-size: 34px; }
   .email-row { grid-template-columns: 1fr; }
   .onboarding-header { width: calc(100% - 30px); min-height: 76px; }
@@ -581,6 +593,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--gold); box-shado
 .record-actions button { border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 11px; }
 .daily-prompt { padding: 14px 16px; border-left: 3px solid var(--gold); background: rgba(215,155,47,.08); color: var(--green-2); }
 .privacy-hint { color: var(--muted); font-size: 10px; }
+.privacy-hint.private-only { margin: 2px 0 22px; padding: 12px 14px; border-left: 3px solid var(--green-2); border-radius: 0 10px 10px 0; background: rgba(20,61,47,.06); color: var(--green-2); font-weight: 700; line-height: 1.6; }
 .composer-submit { width: 100%; min-height: 53px; }
 
 .report-hero { margin: 45px 0 24px; padding: 42px; border-radius: 32px; background: var(--green); color: var(--paper); display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 30px; }
