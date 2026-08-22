@@ -31,6 +31,9 @@ export function Dashboard({ session }: { session: Session }) {
   const [composerOpen, setComposerOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<LifeEntry | null>(null);
   const [toast, setToast] = useState("");
+  const [deleteStep, setDeleteStep] = useState<0 | 1 | 2>(0);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
   const { theme, setTheme } = useTheme();
 
   const refresh = useCallback(async () => {
@@ -51,6 +54,12 @@ export function Dashboard({ session }: { session: Session }) {
     return () => { active = false; };
   }, [session.user.id]);
   useEffect(() => { if (!toast) return; const timer = window.setTimeout(() => setToast(""), 3200); return () => window.clearTimeout(timer); }, [toast]);
+  useEffect(() => {
+    if (!deleteStep) return;
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape" && !deletingAccount) setDeleteStep(0); };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [deleteStep, deletingAccount]);
 
   const metrics = useMemo(() => profile ? calculateLifeMetrics({ birthDate: profile.birth_date, targetAge: profile.target_age, targetDate: profile.target_date, timeZone: profile.timezone }) : null, [profile]);
   const streak = metrics ? calculateStreak(checkins, metrics.today) : 0;
@@ -94,13 +103,29 @@ export function Dashboard({ session }: { session: Session }) {
     const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `lifescale-export-${activeMetrics.today}.json`; link.click(); URL.revokeObjectURL(link.href);
   }
 
-  async function deleteAccount() {
-    if (!window.confirm(en ? "This permanently deletes your account, cloud data and images. Continue?" : "这会永久注销账号并删除云端资料与图片。确定继续吗？")) return;
-    if (!window.confirm(en ? "Please confirm once more. This action cannot be undone and all account data will be permanently deleted." : "请再次确认：此操作无法撤销，账号及全部数据将被永久删除。")) return;
-    const response = await fetch("/api/account/delete", { method: "DELETE", headers: { Authorization: `Bearer ${session.access_token}` } });
-    const result = await response.json().catch(() => ({})) as { error?: string };
-    if (!response.ok) { setToast(result.error || (en ? "Account deletion failed. Please try again." : "注销失败，请稍后再试。")); return; }
-    await signOut(); window.location.reload();
+  function requestAccountDeletion() {
+    setDeleteError("");
+    setDeleteStep(1);
+  }
+
+  async function confirmAccountDeletion() {
+    if (deleteStep === 1) { setDeleteStep(2); return; }
+    if (deleteStep !== 2 || deletingAccount) return;
+    setDeletingAccount(true);
+    setDeleteError("");
+    try {
+      const response = await fetch("/api/account/delete", { method: "DELETE", headers: { Authorization: `Bearer ${session.access_token}` } });
+      if (!response.ok) {
+        setDeleteError(en ? "Account deletion failed. Please try again shortly." : "注销失败，请稍后重试。");
+        return;
+      }
+      await signOut();
+      window.location.reload();
+    } catch {
+      setDeleteError(en ? "The network is unavailable. Please try again." : "网络暂时不可用，请重试。");
+    } finally {
+      setDeletingAccount(false);
+    }
   }
 
   return (
@@ -129,8 +154,9 @@ export function Dashboard({ session }: { session: Session }) {
 
         {tab === "report" ? <ReportView profile={profile} entries={entries} checkins={checkins} locale={locale} /> : null}
 
-        {tab === "profile" ? <section className="workspace-page"><header className="section-heading"><div><p className="kicker">PROFILE & DATA</p><h1>{en ? "Your profile. Your data." : "你的资料，你的数据。"}</h1></div></header><div className="settings-grid"><CoreTargetEditor profile={profile} onUpdated={setProfile} /><section className="settings-card"><h2>{en ? "Preferences" : "个人偏好"}</h2><form onSubmit={savePreferences}><label>{en ? "Display name" : "显示名称"}<input name="display_name" defaultValue={profile.display_name || ""} maxLength={80} /></label><label>{en ? "Language" : "语言"}<select name="locale" defaultValue={profile.locale}><option value="zh">简体中文</option><option value="en">English</option></select></label><label>{en ? "Time zone" : "时区"}<input name="timezone" defaultValue={profile.timezone} /></label><label>{en ? "Display mode" : "显示模式"}<select name="display_mode" defaultValue={profile.display_mode}><option value="gentle">{en ? "Gentle" : "温和模式"}</option><option value="clear">{en ? "Clear" : "清醒模式"}</option></select></label><button className="primary-button settings-wide-button">{en ? "Save preferences" : "保存个人资料"}</button></form></section><section className="settings-card account-card"><h2>{en ? "Privacy & data" : "隐私与数据"}</h2><p>{en ? "Records and images are visible only to you. The product has no creator or operations console for browsing or editing private content; identity and row-level permissions protect every request." : "记录与图片仅你本人可见。产品内没有供创作者或运营人员浏览、修改私密内容的后台入口；每次访问都经过身份与行级权限校验。"}</p><button className="settings-action" onClick={exportData}><span>{en ? "Export all data" : "导出全部数据"}</span><b>JSON ↓</b></button><a className="settings-action" href="/privacy"><span>{en ? "Privacy notice" : "隐私说明"}</span><b>→</b></a><a className="settings-action" href="/terms"><span>{en ? "Terms" : "用户协议"}</span><b>→</b></a><a className="settings-action" href="/third-parties"><span>{en ? "Third-party services" : "第三方服务清单"}</span><b>→</b></a><button className="settings-action" onClick={() => void signOut()}><span>{en ? "Sign out" : "退出登录"}</span><b>→</b></button><button className="settings-action danger" onClick={() => void deleteAccount()}><span>{en ? "Permanently delete account and data" : "永久注销账号并删除数据"}</span><b>×</b></button></section></div></section> : null}
+        {tab === "profile" ? <section className="workspace-page"><header className="section-heading"><div><p className="kicker">PROFILE & DATA</p><h1>{en ? "Your profile. Your data." : "你的资料，你的数据。"}</h1></div></header><div className="settings-grid"><CoreTargetEditor profile={profile} onUpdated={setProfile} /><section className="settings-card"><h2>{en ? "Preferences" : "个人偏好"}</h2><form onSubmit={savePreferences}><label>{en ? "Display name" : "显示名称"}<input name="display_name" defaultValue={profile.display_name || ""} maxLength={80} /></label><label>{en ? "Language" : "语言"}<select name="locale" defaultValue={profile.locale}><option value="zh">简体中文</option><option value="en">English</option></select></label><label>{en ? "Time zone" : "时区"}<input name="timezone" defaultValue={profile.timezone} /></label><label>{en ? "Display mode" : "显示模式"}<select name="display_mode" defaultValue={profile.display_mode}><option value="gentle">{en ? "Gentle" : "温和模式"}</option><option value="clear">{en ? "Clear" : "清醒模式"}</option></select></label><button className="primary-button settings-wide-button">{en ? "Save preferences" : "保存个人资料"}</button></form></section><section className="settings-card account-card"><h2>{en ? "Privacy & data" : "隐私与数据"}</h2><p>{en ? "Records and images are visible only to you. The product has no creator or operations console for browsing or editing private content; identity and row-level permissions protect every request." : "记录与图片仅你本人可见。产品内没有供创作者或运营人员浏览、修改私密内容的后台入口；每次访问都经过身份与行级权限校验。"}</p><button className="settings-action" onClick={exportData}><span>{en ? "Export all data" : "导出全部数据"}</span><b>JSON ↓</b></button><a className="settings-action" href="/privacy"><span>{en ? "Privacy notice" : "隐私说明"}</span><b>→</b></a><a className="settings-action" href="/terms"><span>{en ? "Terms" : "用户协议"}</span><b>→</b></a><a className="settings-action" href="/third-parties"><span>{en ? "Third-party services" : "第三方服务清单"}</span><b>→</b></a><button className="settings-action" onClick={() => void signOut()}><span>{en ? "Sign out" : "退出登录"}</span><b>→</b></button><button className="settings-action danger" onClick={requestAccountDeletion}><span>{en ? "Permanently delete account and data" : "永久注销账号并删除数据"}</span><b>×</b></button></section></div></section> : null}
       </div>
+      {deleteStep ? <div className="modal-backdrop danger-confirm-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget && !deletingAccount) setDeleteStep(0); }}><section className="danger-confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-description"><span className="danger-confirm-kicker">{en ? "ACCOUNT & DATA" : "账号与数据"}</span><h2 id="delete-dialog-title">{deleteStep === 1 ? (en ? "Delete your account?" : "确定注销账号？") : (en ? "One final confirmation" : "请做最后一次确认")}</h2><p id="delete-dialog-description">{deleteStep === 1 ? (en ? "Your account, cloud records and images will be permanently deleted." : "账号、云端记录和图片都将被永久删除。") : (en ? "This action cannot be undone. After deletion, none of this data can be recovered." : "此操作无法撤销，注销后所有数据均无法恢复。")}</p>{deleteError ? <p className="danger-confirm-error" role="alert">{deleteError}</p> : null}<div className="danger-confirm-actions"><button type="button" className="outline-button" autoFocus onClick={() => setDeleteStep(0)} disabled={deletingAccount}>{en ? "Cancel" : "取消"}</button><button type="button" className="danger-confirm-button" onClick={() => void confirmAccountDeletion()} disabled={deletingAccount}>{deleteStep === 1 ? (en ? "Continue" : "继续") : deletingAccount ? (en ? "Deleting..." : "正在注销...") : (en ? "Delete permanently" : "确认永久注销")}</button></div></section></div> : null}
       {composerOpen ? <EntryComposer userId={profile.id} timezone={profile.timezone} locale={locale} entry={editingEntry} onClose={() => { setComposerOpen(false); setEditingEntry(null); }} onSaved={async () => { await refresh(); setToast(en ? "Today did not simply pass. You kept it." : "今天没有只是过去，而是被你留下了。"); }} /> : null}
       {toast ? <div className="toast" role="status">{toast}</div> : null}
     </main>

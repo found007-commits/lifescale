@@ -70,7 +70,9 @@ test("the web app presents the 余生有刻 product brand", async () => {
 
 test("account deletion uses two click confirmations without typed DELETE", async () => {
   const dashboard = await source("app/components/Dashboard.tsx");
-  assert.equal((dashboard.match(/window\.confirm\(/g) || []).length >= 2, true);
+  assert.equal((dashboard.match(/window\.confirm\(/g) || []).length, 1);
   assert.doesNotMatch(dashboard, /window\.prompt\(|请输入 DELETE|Type DELETE/);
-  assert.match(dashboard, /请再次确认/);
+  assert.match(dashboard, /role="alertdialog"/);
+  assert.match(dashboard, /deleteStep === 1/);
+  assert.match(dashboard, /请做最后一次确认/);
 });

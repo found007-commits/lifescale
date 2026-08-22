@@ -629,6 +629,17 @@ input:focus, select:focus, textarea:focus { border-color: var(--gold); box-shado
 .settings-button-row { margin-top: 22px; display: flex; justify-content: space-between; align-items: center; }
 .account-card { grid-column: 1/-1; }
 .settings-action.danger { color: #b34b45; }
+.danger-confirm-backdrop { z-index: 200; align-items: center; justify-items: center; }
+.danger-confirm-dialog { width: min(480px, 100%); padding: 38px; border: 1px solid rgba(179,75,69,.2); border-radius: 26px; background: var(--paper); color: var(--green); box-shadow: 0 30px 90px rgba(4,24,17,.32); }
+.danger-confirm-kicker { color: #a14234; font-size: 9px; font-weight: 800; letter-spacing: .2em; }
+.danger-confirm-dialog h2 { margin: 14px 0 10px; font: 600 34px/1.15 var(--serif); letter-spacing: -.025em; }
+.danger-confirm-dialog > p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+.danger-confirm-dialog .danger-confirm-error { margin-top: 18px; padding: 12px 14px; border-radius: 12px; background: rgba(179,75,69,.1); color: #a14234; font-weight: 700; }
+.danger-confirm-actions { margin-top: 28px; display: flex; justify-content: flex-end; gap: 10px; }
+.danger-confirm-actions button { min-width: 110px; min-height: 46px; }
+.danger-confirm-button { border: 1px solid #a14234; border-radius: 999px; padding: 0 20px; background: #a14234; color: white; cursor: pointer; font-weight: 700; }
+.danger-confirm-button:hover { background: #88382f; border-color: #88382f; }
+.danger-confirm-actions button:disabled { cursor: wait; opacity: .58; }
 
 @media (max-width: 1000px) {
   .preview-hero { grid-template-columns: 1fr; gap: 45px; }
@@ -673,6 +684,11 @@ input:focus, select:focus, textarea:focus { border-color: var(--gold); box-shado
   .report-hero strong { font-size: 56px; }
   .report-actions { align-items: stretch; flex-direction: column; }
   .report-actions button { width: 100%; }
+  .danger-confirm-backdrop { padding: 18px; }
+  .danger-confirm-dialog { padding: 30px 22px 22px; border-radius: 22px; }
+  .danger-confirm-dialog h2 { font-size: 29px; }
+  .danger-confirm-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .danger-confirm-actions button { width: 100%; min-width: 0; }
 }
 
 @media (max-width: 420px) {
