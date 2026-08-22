@@ -1,5 +1,6 @@
 export type Locale = "zh" | "en";
 export type DisplayMode = "gentle" | "clear";
+export type GenderOption = "male" | "female" | "l" | "g" | "b" | "t" | "q" | "private";
 export type Visibility = "private" | "public";
 export type Mood = "calm" | "happy" | "grateful" | "tired" | "sad" | "anxious" | "hopeful";
 export type EntryCategory = "daily" | "family" | "work" | "growth" | "health" | "travel" | "reflection" | "other";
@@ -8,6 +9,7 @@ export type LifeProfile = {
   id: string;
   email: string;
   display_name: string | null;
+  gender_identity: GenderOption;
   locale: Locale;
   timezone: string;
   birth_date: string;

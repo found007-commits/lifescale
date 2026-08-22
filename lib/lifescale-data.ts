@@ -2,12 +2,13 @@
 
 import { z } from "zod";
 import { getSupabaseBrowserClient } from "./supabase/client";
-import type { Checkin, EntryCategory, EntryMedia, LifeEntry, LifeProfile, Locale, Mood, Visibility } from "./types";
+import type { Checkin, EntryCategory, EntryMedia, GenderOption, LifeEntry, LifeProfile, Locale, Mood, Visibility } from "./types";
 
 export const profileInputSchema = z.object({
   id: z.string().uuid(),
   email: z.string().email(),
   display_name: z.string().trim().max(80).nullable(),
+  gender_identity: z.enum(["male", "female", "l", "g", "b", "t", "q", "private"]),
   locale: z.enum(["zh", "en"]),
   timezone: z.string().min(1).max(100),
   birth_date: z.iso.date(),
@@ -72,7 +73,7 @@ export async function createProfile(input: z.input<typeof profileInputSchema>) {
   return data as LifeProfile;
 }
 
-export async function updateProfile(userId: string, values: Partial<Pick<LifeProfile, "display_name" | "locale" | "timezone" | "display_mode" | "birth_date" | "target_age" | "target_date">>) {
+export async function updateProfile(userId: string, values: Partial<Pick<LifeProfile, "display_name" | "gender_identity" | "locale" | "timezone" | "display_mode" | "birth_date" | "target_age" | "target_date">>) {
   const { data, error } = await getSupabaseBrowserClient().from("profiles").update(values).eq("id", userId).select("*").single();
   if (error) throw new Error(errorMessage(error, "Could not update your profile."));
   return data as LifeProfile;

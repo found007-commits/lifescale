@@ -76,3 +76,24 @@ test("account deletion uses two click confirmations without typed DELETE", async
   assert.match(dashboard, /deleteStep === 1/);
   assert.match(dashboard, /请做最后一次确认/);
 });
+
+test("gender is a controlled localized choice throughout profile setup", async () => {
+  const [types, selector, onboarding, dashboard, data, migration] = await Promise.all([
+    source("lib/types.ts"),
+    source("app/components/GenderSelector.tsx"),
+    source("app/components/Onboarding.tsx"),
+    source("app/components/Dashboard.tsx"),
+    source("lib/lifescale-data.ts"),
+    source("supabase/migrations/20260822111500_add_profile_gender.sql"),
+  ]);
+  assert.match(types, /GenderOption = "male" \| "female" \| "l" \| "g" \| "b" \| "t" \| "q" \| "private"/);
+  assert.match(selector, /genderOptions\.map/);
+  assert.doesNotMatch(selector, /<input|<textarea/);
+  assert.match(onboarding, /gender_identity: gender/);
+  assert.match(onboarding, /genderLabel\(gender, locale\)/);
+  assert.match(dashboard, /<GenderSelector locale=\{locale\}/);
+  assert.match(dashboard, /gender_identity: genderChoice \|\| activeProfile\.gender_identity/);
+  assert.match(data, /z\.enum\(\["male", "female", "l", "g", "b", "t", "q", "private"\]\)/);
+  assert.match(migration, /check \(gender_identity in \('male', 'female', 'l', 'g', 'b', 't', 'q', 'private'\)\)/);
+  assert.match(migration, /default 'private'/);
+});

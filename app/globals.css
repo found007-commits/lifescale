@@ -550,6 +550,15 @@ input:focus, select:focus, textarea:focus { border-color: var(--gold); box-shado
 .target-type legend { grid-column: 1/-1; margin-bottom: 8px; color: var(--green-2); font-size: 12px; font-weight: 700; }
 .target-type button { min-height: 45px; border: 1px solid var(--line); border-radius: 12px; background: transparent; cursor: pointer; }
 .target-type button.selected { border-color: var(--gold); background: rgba(215,155,47,.1); color: var(--gold); }
+.gender-selector { margin: 26px 0; padding: 0; border: 0; }
+.gender-selector legend { margin-bottom: 12px; color: var(--green-2); font-size: 12px; font-weight: 700; }
+.gender-option-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.gender-option-grid button { min-height: 44px; border: 1px solid var(--line); border-radius: 12px; background: transparent; color: var(--green-2); cursor: pointer; font-weight: 700; white-space: nowrap; transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s ease; }
+.gender-option-grid button:hover { border-color: var(--green-2); }
+.gender-option-grid button:active { transform: scale(.98); }
+.gender-option-grid button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.gender-option-grid button.selected { border-color: var(--button-bg); background: var(--button-bg); color: var(--button-text); }
+.gender-selector > p { margin: 9px 0 0; color: var(--muted); font-size: 10px; }
 .confirmation-check a { color: inherit; font-weight: 700; }
 
 .app-workspace { min-width: 0; }
@@ -689,6 +698,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--gold); box-shado
   .danger-confirm-dialog h2 { font-size: 29px; }
   .danger-confirm-actions { display: grid; grid-template-columns: 1fr 1fr; }
   .danger-confirm-actions button { width: 100%; min-width: 0; }
+  .gender-option-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 420px) {
