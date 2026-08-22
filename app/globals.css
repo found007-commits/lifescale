@@ -656,10 +656,9 @@ input:focus, select:focus, textarea:focus { border-color: var(--gold); box-shado
 .share-dialog { width: min(680px, 100%); max-height: calc(100vh - 40px); padding: 38px; overflow-y: auto; border-radius: 28px; background: var(--paper); color: var(--green); position: relative; box-shadow: 0 36px 100px rgba(4,24,17,.34); }
 .share-dialog h2 { margin: 11px 0 8px; font: 600 38px/1.1 var(--serif); }
 .share-privacy { margin: 0; max-width: 570px; color: var(--muted); font-size: 12px; line-height: 1.7; }
-.share-card-preview { min-height: 215px; margin-top: 24px; padding: 27px; border-radius: 22px; background: var(--green); color: white; display: grid; align-content: space-between; gap: 20px; }
-.share-card-preview > span { color: var(--gold); font-size: 9px; font-weight: 800; letter-spacing: .16em; }
-.share-card-preview > strong { max-width: 560px; font: 500 29px/1.4 var(--serif); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.share-card-preview > small { color: #bdccc5; }
+.share-card-preview-image { width: 224px; aspect-ratio: 4/5; margin: 24px auto 0; border-radius: 20px; background: var(--green); color: white; box-shadow: 0 18px 44px rgba(20,61,47,.18); display: grid; place-items: center; overflow: hidden; }
+.share-card-preview-image img { width: 100%; height: 100%; object-fit: cover; }
+.share-card-preview-image > span { padding: 20px; color: #bdccc5; text-align: center; font-size: 11px; }
 .share-platform-grid { margin-top: 22px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
 .share-platform-grid button { min-width: 0; padding: 13px 5px 10px; border: 1px solid var(--line); border-radius: 16px; background: transparent; color: var(--green); cursor: pointer; display: grid; justify-items: center; gap: 7px; }
 .share-platform-grid button:hover { border-color: var(--gold); background: rgba(215,155,47,.07); }
@@ -721,8 +720,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--gold); box-shado
   .share-dialog { padding: 30px 20px 22px; border-radius: 23px; }
   .share-dialog h2 { font-size: 31px; }
   .share-platform-grid { grid-template-columns: repeat(3, 1fr); }
-  .share-card-preview { min-height: 190px; padding: 22px; }
-  .share-card-preview > strong { font-size: 25px; }
+  .share-card-preview-image { width: 184px; }
   .gender-option-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 

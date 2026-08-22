@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import type { LifeEntry, Locale } from "../../lib/types";
 
@@ -100,14 +101,21 @@ export function EntryShareDialog({ entry, locale, onClose }: { entry: LifeEntry;
   const [card, setCard] = useState<Blob | null>(null);
   const [preparing, setPreparing] = useState(true);
   const [status, setStatus] = useState("");
+  const [cardUrl, setCardUrl] = useState("");
   const copy = useMemo(() => ({
     wechat: en ? "WeChat" : "微信好友", moments: en ? "WeChat Moments" : "朋友圈", facebook: "Facebook", instagram: "Instagram", more: en ? "More" : "更多",
   }), [en]);
 
   useEffect(() => {
     let active = true;
-    void createShareCard(entry, locale).then((blob) => { if (active) { setCard(blob); setPreparing(false); } });
-    return () => { active = false; };
+    let url = "";
+    void createShareCard(entry, locale).then((blob) => {
+      if (!active) return;
+      if (blob) { url = URL.createObjectURL(blob); setCardUrl(url); }
+      setCard(blob);
+      setPreparing(false);
+    });
+    return () => { active = false; if (url) URL.revokeObjectURL(url); };
   }, [entry, locale]);
 
   useEffect(() => {
@@ -146,7 +154,7 @@ export function EntryShareDialog({ entry, locale, onClose }: { entry: LifeEntry;
       <p className="kicker">SHARE A DAY</p>
       <h2 id="share-dialog-title">{en ? "Share this day" : "分享这一天"}</h2>
       <p className="share-privacy">{en ? "Only the copy you confirm is shared. Your original entry stays private. The card contains no email, birth date or life target." : "只分享你确认的副本。原记录继续保持私密，分享卡不含邮箱、出生日期或人生目标。"}</p>
-      <div className="share-card-preview" aria-hidden="true"><span>余生有刻 · LIFESCALE</span><strong className="ignore-opencc">{entry.content || (en ? "Today was worth remembering." : "今天，也值得被记住。")}</strong><small>{entry.entry_date}</small></div>
+      <div className="share-card-preview-image">{cardUrl ? <Image src={cardUrl} alt={en ? "Preview of the share card" : "分享卡预览"} width={1080} height={1350} unoptimized /> : <span>{en ? "Preparing your share card…" : "正在生成分享卡…"}</span>}</div>
       <div className="share-platform-grid" aria-label={en ? "Share choices" : "分享方式"}>
         {(["wechat", "moments", "facebook", "instagram", "more"] as ShareTarget[]).map((target) => <button type="button" key={target} disabled={preparing} onClick={() => void share(target)}><b>{target === "wechat" ? "微" : target === "moments" ? "圈" : target === "facebook" ? "f" : target === "instagram" ? "◎" : "···"}</b><span>{copy[target]}</span></button>)}
       </div>
