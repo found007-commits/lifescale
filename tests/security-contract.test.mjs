@@ -110,3 +110,13 @@ test("gender is a controlled localized choice throughout profile setup", async (
   assert.match(migration, /check \(gender_identity in \('male', 'female', 'l', 'g', 'b', 't', 'q', 'private'\)\)/);
   assert.match(migration, /default 'private'/);
 });
+
+test("journal heading uses the full first line before wrapping", async () => {
+  const [dashboard, styles] = await Promise.all([
+    source("app/components/Dashboard.tsx"),
+    source("app/globals.css"),
+  ]);
+  assert.match(dashboard, /workspace-page history-page/);
+  assert.match(styles, /\.history-page \.section-heading h1[^}]*text-wrap:\s*wrap/);
+  assert.match(styles, /\.history-page \.section-heading[^}]*grid-template-columns:\s*minmax\(0, 1fr\) auto/);
+});
