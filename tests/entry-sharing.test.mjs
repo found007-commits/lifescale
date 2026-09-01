@@ -20,6 +20,10 @@ test("each daily entry offers an explicit private-safe share action", async () =
   assert.match(dialog, /Instagram/);
   assert.match(dialog, /原记录继续保持私密/);
   assert.match(dialog, /canvas\.toBlob/);
+  assert.match(dialog, /canvas\.height = cardHeight/);
+  assert.match(dialog, /entry\.content\.trim\(\)\.split|text\.trim\(\)\.split/);
+  assert.doesNotMatch(dialog, /wrapText\([^)]*,\s*9\)/);
+  assert.doesNotMatch(dialog, /lines\[lines\.length - 1\].*…/);
   assert.match(dialog, /MicroMessenger/);
   assert.match(dialog, /微信内直接操作/);
   assert.match(dialog, /if \(inWeChat\)/);

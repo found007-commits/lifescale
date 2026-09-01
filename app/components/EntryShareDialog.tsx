@@ -16,31 +16,46 @@ const categoryLabels: Record<string, { zh: string; en: string }> = {
   reflection: { zh: "感悟", en: "Reflection" }, other: { zh: "其他", en: "Other" },
 };
 
-function wrapText(context: CanvasRenderingContext2D, text: string, maxWidth: number, maxLines: number) {
-  const characters = Array.from(text.trim());
+function wrapText(context: CanvasRenderingContext2D, text: string, maxWidth: number) {
   const lines: string[] = [];
-  let current = "";
-  for (const character of characters) {
-    const next = current + character;
-    if (context.measureText(next).width > maxWidth && current) {
-      lines.push(current.trim());
-      current = character;
-      if (lines.length === maxLines) break;
-    } else current = next;
+  const paragraphs = text.trim().split(/\r?\n/);
+  for (const paragraph of paragraphs) {
+    if (!paragraph.trim()) { lines.push(""); continue; }
+    let current = "";
+    for (const character of Array.from(paragraph)) {
+      const next = current + character;
+      if (context.measureText(next).width > maxWidth && current) {
+        lines.push(current.trimEnd());
+        current = character;
+      } else current = next;
+    }
+    if (current) lines.push(current.trimEnd());
   }
-  if (lines.length < maxLines && current.trim()) lines.push(current.trim());
-  const usedLength = lines.join("").length;
-  if (usedLength < characters.length && lines.length) lines[lines.length - 1] = `${lines[lines.length - 1].replace(/[，。,.!?！？\s]+$/, "")}…`;
-  return lines;
+  return lines.length ? lines : [""];
 }
 
-function createShareCard(entry: LifeEntry, locale: Locale): Promise<{ blob: Blob | null; dataUrl: string }> {
+function createShareCard(entry: LifeEntry, locale: Locale): Promise<{ blob: Blob | null; dataUrl: string; height: number }> {
   const en = locale === "en";
+  const content = entry.content.trim() || (en ? "Today was worth remembering." : "今天，也值得被记住。");
+  const fontSize = content.length > 5000 ? 30 : content.length > 2500 ? 36 : content.length > 1200 ? 44 : content.length > 600 ? 50 : en ? 55 : 58;
+  const lineHeight = Math.ceil(fontSize * 1.42);
+  const contentFont = en ? `500 ${fontSize}px Georgia, serif` : `500 ${fontSize}px 'Songti SC', 'Noto Serif CJK SC', serif`;
+  const measureCanvas = document.createElement("canvas");
+  measureCanvas.width = 1080;
+  const measureContext = measureCanvas.getContext("2d");
+  if (!measureContext) return Promise.resolve({ blob: null, dataUrl: "", height: 1350 });
+  measureContext.font = contentFont;
+  const lines = wrapText(measureContext, content, 920);
+  const contentTop = 420;
+  const contentBottom = contentTop + Math.max(0, lines.length - 1) * lineHeight + fontSize;
+  const tagTop = Math.max(1085, contentBottom + 64);
+  const cardHeight = Math.ceil(tagTop + 265);
+
   const canvas = document.createElement("canvas");
   canvas.width = 1080;
-  canvas.height = 1350;
+  canvas.height = cardHeight;
   const context = canvas.getContext("2d");
-  if (!context) return Promise.resolve({ blob: null, dataUrl: "" });
+  if (!context) return Promise.resolve({ blob: null, dataUrl: "", height: cardHeight });
 
   context.fillStyle = "#f4f0e6";
   context.fillRect(0, 0, canvas.width, canvas.height);
@@ -64,29 +79,27 @@ function createShareCard(entry: LifeEntry, locale: Locale): Promise<{ blob: Blob
   context.font = "700 25px system-ui, sans-serif";
   context.fillText(date, 76, 315);
 
-  const content = entry.content.trim() || (en ? "Today was worth remembering." : "今天，也值得被记住。");
   context.fillStyle = "#143d2f";
-  context.font = en ? "500 55px Georgia, serif" : "500 58px 'Songti SC', 'Noto Serif CJK SC', serif";
-  const lines = wrapText(context, content, 920, 9);
-  lines.forEach((line, index) => context.fillText(line, 76, 420 + index * 82));
+  context.font = contentFont;
+  lines.forEach((line, index) => context.fillText(line, 76, contentTop + index * lineHeight));
 
   const mood = moodLabels[entry.mood]?.[en ? "en" : "zh"] || entry.mood;
   const category = categoryLabels[entry.category]?.[en ? "en" : "zh"] || entry.category;
   context.fillStyle = "rgba(20,61,47,.09)";
-  context.beginPath(); context.roundRect(76, 1085, 928, 100, 26); context.fill();
+  context.beginPath(); context.roundRect(76, tagTop, 928, 100, 26); context.fill();
   context.fillStyle = "#143d2f";
   context.font = "600 25px system-ui, sans-serif";
-  context.fillText(`${mood}  ·  ${category}`, 112, 1148);
+  context.fillText(`${mood}  ·  ${category}`, 112, tagTop + 63);
 
   context.fillStyle = "#64766e";
   context.font = "500 21px system-ui, sans-serif";
-  context.fillText(en ? "See the life ahead. Make today count." : "看见余生，认真今天。", 76, 1263);
+  context.fillText(en ? "See the life ahead. Make today count." : "看见余生，认真今天。", 76, tagTop + 178);
   context.textAlign = "right";
   context.fillStyle = "#8a6414";
-  context.fillText("app.lifescale.space", 1004, 1263);
+  context.fillText("app.lifescale.space", 1004, tagTop + 178);
 
   const dataUrl = canvas.toDataURL("image/png", 0.94);
-  return new Promise((resolve) => canvas.toBlob((blob) => resolve({ blob, dataUrl }), "image/png", 0.94));
+  return new Promise((resolve) => canvas.toBlob((blob) => resolve({ blob, dataUrl, height: cardHeight }), "image/png", 0.94));
 }
 
 function downloadBlob(blob: Blob, entryDate: string) {
@@ -104,6 +117,7 @@ export function EntryShareDialog({ entry, locale, onClose }: { entry: LifeEntry;
   const [preparing, setPreparing] = useState(true);
   const [status, setStatus] = useState("");
   const [cardUrl, setCardUrl] = useState("");
+  const [cardHeight, setCardHeight] = useState(1350);
   const inWeChat = useMemo(() => typeof navigator !== "undefined" && /MicroMessenger/i.test(navigator.userAgent), []);
   const copy = useMemo(() => ({
     wechat: en ? "WeChat" : "微信好友", moments: en ? "WeChat Moments" : "朋友圈", facebook: "Facebook", instagram: "Instagram", more: en ? "More" : "更多",
@@ -111,9 +125,10 @@ export function EntryShareDialog({ entry, locale, onClose }: { entry: LifeEntry;
 
   useEffect(() => {
     let active = true;
-    void createShareCard(entry, locale).then(({ blob, dataUrl }) => {
+    void createShareCard(entry, locale).then(({ blob, dataUrl, height }) => {
       if (!active) return;
       setCardUrl(dataUrl);
+      setCardHeight(height);
       setCard(blob);
       setPreparing(false);
     });
@@ -168,7 +183,7 @@ export function EntryShareDialog({ entry, locale, onClose }: { entry: LifeEntry;
       <h2 id="share-dialog-title">{en ? "Share this day" : "分享这一天"}</h2>
       <p className="share-privacy">{en ? "Only the copy you confirm is shared. Your original entry stays private. The card contains no email, birth date or life target." : "只分享你确认的副本。原记录继续保持私密，分享卡不含邮箱、出生日期或人生目标。"}</p>
       {inWeChat ? <p className="wechat-direct-hint">{en ? "In WeChat: press and hold the card to send or save it. You do not need another browser." : "微信内直接操作：长按分享卡即可发送给朋友或保存图片，不需要转到浏览器。"}</p> : null}
-      <div className="share-card-preview-image">{cardUrl ? <Image src={cardUrl} alt={en ? "Preview of the share card" : "分享卡预览"} width={1080} height={1350} unoptimized /> : <span>{en ? "Preparing your share card…" : "正在生成分享卡…"}</span>}</div>
+      <div className="share-card-preview-image">{cardUrl ? <Image src={cardUrl} alt={en ? "Preview of the complete share card" : "完整分享卡预览"} width={1080} height={cardHeight} unoptimized /> : <span>{en ? "Preparing your share card…" : "正在生成分享卡…"}</span>}</div>
       <div className="share-platform-grid" aria-label={en ? "Share choices" : "分享方式"}>
         {(["wechat", "moments", "facebook", "instagram", "more"] as ShareTarget[]).map((target) => <button type="button" key={target} disabled={preparing} onClick={() => void share(target)}><b>{target === "wechat" ? "微" : target === "moments" ? "圈" : target === "facebook" ? "f" : target === "instagram" ? "◎" : "···"}</b><span>{copy[target]}</span></button>)}
       </div>
