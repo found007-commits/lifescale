@@ -132,38 +132,52 @@ async function createShareCard(entry: LifeEntry, locale: Locale, layout: ShareLa
   if (overlay && photo) {
     drawImageCover(context, photo, 0, 0, canvas.width, canvas.height);
     const lightPhoto = imageLuminance(photo) > 0.56;
-    const ink = lightPhoto ? "#102f24" : "#fbfaf6";
-    const quietInk = lightPhoto ? "rgba(16,47,36,.78)" : "rgba(251,250,246,.78)";
-    context.fillStyle = lightPhoto ? "rgba(244,240,230,.40)" : "rgba(5,24,17,.52)";
+    const headerInk = lightPhoto ? "#102f24" : "#fbfaf6";
+    const headerQuietInk = lightPhoto ? "rgba(16,47,36,.82)" : "rgba(251,250,246,.82)";
+    const readingInk = "#fffdf8";
+    const readingQuietInk = "rgba(255,253,248,.82)";
+    context.fillStyle = lightPhoto ? "rgba(244,240,230,.32)" : "rgba(5,24,17,.42)";
     context.fillRect(0, 0, canvas.width, canvas.height);
     const panelTop = 245;
-    const panelBottom = tagTop + 112;
-    context.fillStyle = lightPhoto ? "rgba(251,250,246,.62)" : "rgba(8,32,23,.58)";
+    const panelBottom = tagTop + 220;
+
+    // Treat the entry as a reading surface, not as bare text over a photo.
+    // Redrawing and softening only this area preserves the photo while the
+    // fixed dark veil guarantees contrast on bright and mixed-tone images.
+    context.save();
+    context.beginPath(); context.roundRect(54, panelTop, 972, panelBottom - panelTop, 34); context.clip();
+    context.filter = "blur(14px) saturate(70%) brightness(72%)";
+    drawImageCover(context, photo, 0, 0, canvas.width, canvas.height);
+    context.restore();
+    context.fillStyle = "rgba(6,30,22,.82)";
     context.beginPath(); context.roundRect(54, panelTop, 972, panelBottom - panelTop, 34); context.fill();
-    context.strokeStyle = lightPhoto ? "rgba(16,47,36,.18)" : "rgba(251,250,246,.24)";
+    context.strokeStyle = "rgba(255,253,248,.28)";
     context.lineWidth = 2;
     context.stroke();
 
-    context.fillStyle = ink;
+    context.fillStyle = headerInk;
     context.font = "600 47px Georgia, serif";
     context.fillText(en ? "A day I chose to keep" : "我选择留下的这一天", 76, 104);
-    context.fillStyle = quietInk;
+    context.fillStyle = headerQuietInk;
     context.font = "600 20px system-ui, sans-serif";
     context.fillText("余生有刻 · LIFESCALE", 76, 150);
-    context.fillStyle = ink;
+    context.fillStyle = "#f1c66d";
     context.font = "700 25px system-ui, sans-serif";
     context.fillText(date, 76, 294);
+    context.fillStyle = readingInk;
     context.font = contentFont;
-    context.shadowColor = lightPhoto ? "rgba(251,250,246,.45)" : "rgba(0,0,0,.42)";
-    context.shadowBlur = 9;
+    context.shadowColor = "rgba(0,0,0,.62)";
+    context.shadowBlur = 10;
+    context.shadowOffsetY = 2;
     lines.forEach((line, index) => context.fillText(line, 130, contentTop + index * lineHeight));
     context.shadowBlur = 0;
-    context.fillStyle = lightPhoto ? "rgba(16,47,36,.12)" : "rgba(251,250,246,.16)";
+    context.shadowOffsetY = 0;
+    context.fillStyle = "rgba(255,253,248,.13)";
     context.beginPath(); context.roundRect(76, tagTop, 928, 100, 26); context.fill();
-    context.fillStyle = ink;
+    context.fillStyle = readingInk;
     context.font = "600 25px system-ui, sans-serif";
     context.fillText(`${mood}  ·  ${category}`, 112, tagTop + 63);
-    context.fillStyle = quietInk;
+    context.fillStyle = readingQuietInk;
     context.font = "500 21px system-ui, sans-serif";
     context.fillText(en ? "See the life ahead. Make today count." : "看见余生，认真今天。", 76, tagTop + 178);
     context.textAlign = "right";
@@ -307,7 +321,7 @@ export function EntryShareDialog({ entry, locale, onClose }: { entry: LifeEntry;
           <button type="button" className={layout === "separate" ? "active" : ""} aria-pressed={layout === "separate"} onClick={() => { setStatus(""); setLayout("separate"); }}>{en ? "Photo + text" : "图文分开"}</button>
           <button type="button" className={layout === "overlay" ? "active" : ""} aria-pressed={layout === "overlay"} disabled={!hasPhoto} onClick={() => { setStatus(""); setLayout("overlay"); }}>{en ? "Text on photo" : "文字镶嵌"}</button>
         </div>
-        <small>{!hasPhoto ? (en ? "Add a photo to this entry to place text on it." : "这条记录没有图片，添加图片后可使用文字镶嵌。") : layout === "overlay" ? (en ? "LifeScale automatically reverses text contrast and adds a soft veil for clarity." : "系统会自动反转文字明暗并加入柔和遮罩，保证文字清楚。") : (en ? "The complete photo stays separate, with the full entry below it." : "完整图片单独保留，全部记录文字排在图片下方。")}</small>
+        <small>{!hasPhoto ? (en ? "Add a photo to this entry to place text on it." : "这条记录没有图片，添加图片后可使用文字镶嵌。") : layout === "overlay" ? (en ? "LifeScale adds a high-contrast reading panel and softens the photo behind the text." : "系统会加深文字底板并柔化文字区域，保证不同照片上都清楚易读。") : (en ? "The complete photo stays separate, with the full entry below it." : "完整图片单独保留，全部记录文字排在图片下方。")}</small>
       </div>
       <div className="share-card-preview-image">{cardUrl ? <Image src={cardUrl} alt={en ? "Preview of the complete share card" : "完整分享卡预览"} width={1080} height={cardHeight} unoptimized /> : <span>{en ? "Preparing your share card…" : "正在生成分享卡…"}</span>}</div>
       <div className="share-platform-grid" aria-label={en ? "Share choices" : "分享方式"}>

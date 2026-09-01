@@ -34,7 +34,9 @@ test("each daily entry offers an explicit private-safe share action", async () =
   assert.match(dialog, /drawImageContain/);
   assert.match(dialog, /drawImageCover/);
   assert.match(dialog, /imageLuminance/);
-  assert.match(dialog, /自动反转文字明暗/);
+  assert.match(dialog, /blur\(14px\) saturate\(70%\) brightness\(72%\)/);
+  assert.match(dialog, /rgba\(6,30,22,\.82\)/);
+  assert.match(dialog, /加深文字底板并柔化文字区域/);
   assert.match(dialog, /disabled=!\{hasPhoto\}|disabled=\{!hasPhoto\}/);
   assert.doesNotMatch(dialog, /updateProfile|insertEntry|visibility:\s*["']public/);
 });
