@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import type { LifeEntry, Locale } from "../../lib/types";
 
 type ShareTarget = "wechat" | "moments" | "facebook" | "instagram" | "more";
+type ShareLayout = "separate" | "overlay";
+type ShareCard = { blob: Blob | null; dataUrl: string; height: number; photoLoaded: boolean };
 
 const moodLabels: Record<string, { zh: string; en: string }> = {
   calm: { zh: "平静", en: "Calm" }, happy: { zh: "开心", en: "Happy" }, grateful: { zh: "感恩", en: "Grateful" },
@@ -34,72 +36,183 @@ function wrapText(context: CanvasRenderingContext2D, text: string, maxWidth: num
   return lines.length ? lines : [""];
 }
 
-function createShareCard(entry: LifeEntry, locale: Locale): Promise<{ blob: Blob | null; dataUrl: string; height: number }> {
+async function loadSharePhoto(url?: string) {
+  if (!url) return null;
+  const response = await fetch(url, { mode: "cors" });
+  if (!response.ok) throw new Error("Could not load the journal image.");
+  const objectUrl = URL.createObjectURL(await response.blob());
+  try {
+    const image = new window.Image();
+    image.decoding = "async";
+    image.src = objectUrl;
+    await new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve();
+      image.onerror = () => reject(new Error("Could not decode the journal image."));
+    });
+    return image;
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
+function drawImageCover(context: CanvasRenderingContext2D, image: HTMLImageElement, x: number, y: number, width: number, height: number) {
+  const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
+  const sourceWidth = width / scale;
+  const sourceHeight = height / scale;
+  const sourceX = (image.naturalWidth - sourceWidth) / 2;
+  const sourceY = (image.naturalHeight - sourceHeight) / 2;
+  context.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height);
+}
+
+function drawImageContain(context: CanvasRenderingContext2D, image: HTMLImageElement, x: number, y: number, width: number, height: number) {
+  const scale = Math.min(width / image.naturalWidth, height / image.naturalHeight);
+  const renderWidth = image.naturalWidth * scale;
+  const renderHeight = image.naturalHeight * scale;
+  context.drawImage(image, x + (width - renderWidth) / 2, y + (height - renderHeight) / 2, renderWidth, renderHeight);
+}
+
+function imageLuminance(image: HTMLImageElement) {
+  const sampleCanvas = document.createElement("canvas");
+  sampleCanvas.width = 24;
+  sampleCanvas.height = 24;
+  const context = sampleCanvas.getContext("2d", { willReadFrequently: true });
+  if (!context) return 0.35;
+  drawImageCover(context, image, 0, 0, 24, 24);
+  const pixels = context.getImageData(0, 0, 24, 24).data;
+  let total = 0;
+  for (let index = 0; index < pixels.length; index += 4) {
+    total += (pixels[index] * 0.2126 + pixels[index + 1] * 0.7152 + pixels[index + 2] * 0.0722) / 255;
+  }
+  return total / (pixels.length / 4);
+}
+
+function canvasBlob(canvas: HTMLCanvasElement) {
+  return new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png", 0.94));
+}
+
+async function createShareCard(entry: LifeEntry, locale: Locale, layout: ShareLayout): Promise<ShareCard> {
   const en = locale === "en";
   const content = entry.content.trim() || (en ? "Today was worth remembering." : "今天，也值得被记住。");
   const fontSize = content.length > 5000 ? 30 : content.length > 2500 ? 36 : content.length > 1200 ? 44 : content.length > 600 ? 50 : en ? 55 : 58;
   const lineHeight = Math.ceil(fontSize * 1.42);
   const contentFont = en ? `500 ${fontSize}px Georgia, serif` : `500 ${fontSize}px 'Songti SC', 'Noto Serif CJK SC', serif`;
+  let photo: HTMLImageElement | null = null;
+  try {
+    photo = await loadSharePhoto(entry.entry_media?.[0]?.signed_url);
+  } catch {
+    photo = null;
+  }
   const measureCanvas = document.createElement("canvas");
   measureCanvas.width = 1080;
   const measureContext = measureCanvas.getContext("2d");
-  if (!measureContext) return Promise.resolve({ blob: null, dataUrl: "", height: 1350 });
+  if (!measureContext) return { blob: null, dataUrl: "", height: 1350, photoLoaded: Boolean(photo) };
   measureContext.font = contentFont;
-  const lines = wrapText(measureContext, content, 920);
-  const contentTop = 420;
+  const overlay = layout === "overlay" && photo;
+  const lines = wrapText(measureContext, content, overlay ? 820 : 920);
+  const photoHeight = photo && !overlay ? Math.min(1120, Math.max(440, Math.round(928 * photo.naturalHeight / photo.naturalWidth))) : 0;
+  const dateTop = photoHeight ? 318 + photoHeight : 315;
+  const contentTop = overlay ? 390 : dateTop + 105;
   const contentBottom = contentTop + Math.max(0, lines.length - 1) * lineHeight + fontSize;
-  const tagTop = Math.max(1085, contentBottom + 64);
+  const tagTop = Math.max(overlay ? 1050 : photoHeight ? 1085 + photoHeight : 1085, contentBottom + 64);
   const cardHeight = Math.ceil(tagTop + 265);
 
   const canvas = document.createElement("canvas");
   canvas.width = 1080;
   canvas.height = cardHeight;
   const context = canvas.getContext("2d");
-  if (!context) return Promise.resolve({ blob: null, dataUrl: "", height: cardHeight });
-
-  context.fillStyle = "#f4f0e6";
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  context.fillStyle = "#143d2f";
-  context.fillRect(0, 0, canvas.width, 218);
-  context.fillStyle = "#d79b2f";
-  context.fillRect(76, 170, 82, 5);
-
-  context.fillStyle = "#ffffff";
-  context.font = "600 48px Georgia, serif";
-  context.fillText(en ? "A day I chose to keep" : "我选择留下的这一天", 76, 105);
-  context.fillStyle = "#d8e1dc";
-  context.font = "600 20px system-ui, sans-serif";
-  context.fillText("余生有刻 · LIFESCALE", 76, 151);
+  if (!context) return { blob: null, dataUrl: "", height: cardHeight, photoLoaded: Boolean(photo) };
 
   const entryDate = entry.entry_date.slice(0, 10);
   const date = new Date(`${entryDate}T12:00:00`).toLocaleDateString(en ? "en-GB" : locale === "zh-TW" ? "zh-TW" : "zh-CN", {
     year: "numeric", month: "long", day: "numeric", weekday: "long",
   });
-  context.fillStyle = "#8a6414";
-  context.font = "700 25px system-ui, sans-serif";
-  context.fillText(date, 76, 315);
-
-  context.fillStyle = "#143d2f";
-  context.font = contentFont;
-  lines.forEach((line, index) => context.fillText(line, 76, contentTop + index * lineHeight));
-
   const mood = moodLabels[entry.mood]?.[en ? "en" : "zh"] || entry.mood;
   const category = categoryLabels[entry.category]?.[en ? "en" : "zh"] || entry.category;
-  context.fillStyle = "rgba(20,61,47,.09)";
-  context.beginPath(); context.roundRect(76, tagTop, 928, 100, 26); context.fill();
-  context.fillStyle = "#143d2f";
-  context.font = "600 25px system-ui, sans-serif";
-  context.fillText(`${mood}  ·  ${category}`, 112, tagTop + 63);
 
-  context.fillStyle = "#64766e";
-  context.font = "500 21px system-ui, sans-serif";
-  context.fillText(en ? "See the life ahead. Make today count." : "看见余生，认真今天。", 76, tagTop + 178);
-  context.textAlign = "right";
-  context.fillStyle = "#8a6414";
-  context.fillText("app.lifescale.space", 1004, tagTop + 178);
+  if (overlay && photo) {
+    drawImageCover(context, photo, 0, 0, canvas.width, canvas.height);
+    const lightPhoto = imageLuminance(photo) > 0.56;
+    const ink = lightPhoto ? "#102f24" : "#fbfaf6";
+    const quietInk = lightPhoto ? "rgba(16,47,36,.78)" : "rgba(251,250,246,.78)";
+    context.fillStyle = lightPhoto ? "rgba(244,240,230,.40)" : "rgba(5,24,17,.52)";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    const panelTop = 245;
+    const panelBottom = tagTop + 112;
+    context.fillStyle = lightPhoto ? "rgba(251,250,246,.62)" : "rgba(8,32,23,.58)";
+    context.beginPath(); context.roundRect(54, panelTop, 972, panelBottom - panelTop, 34); context.fill();
+    context.strokeStyle = lightPhoto ? "rgba(16,47,36,.18)" : "rgba(251,250,246,.24)";
+    context.lineWidth = 2;
+    context.stroke();
+
+    context.fillStyle = ink;
+    context.font = "600 47px Georgia, serif";
+    context.fillText(en ? "A day I chose to keep" : "我选择留下的这一天", 76, 104);
+    context.fillStyle = quietInk;
+    context.font = "600 20px system-ui, sans-serif";
+    context.fillText("余生有刻 · LIFESCALE", 76, 150);
+    context.fillStyle = ink;
+    context.font = "700 25px system-ui, sans-serif";
+    context.fillText(date, 76, 294);
+    context.font = contentFont;
+    context.shadowColor = lightPhoto ? "rgba(251,250,246,.45)" : "rgba(0,0,0,.42)";
+    context.shadowBlur = 9;
+    lines.forEach((line, index) => context.fillText(line, 130, contentTop + index * lineHeight));
+    context.shadowBlur = 0;
+    context.fillStyle = lightPhoto ? "rgba(16,47,36,.12)" : "rgba(251,250,246,.16)";
+    context.beginPath(); context.roundRect(76, tagTop, 928, 100, 26); context.fill();
+    context.fillStyle = ink;
+    context.font = "600 25px system-ui, sans-serif";
+    context.fillText(`${mood}  ·  ${category}`, 112, tagTop + 63);
+    context.fillStyle = quietInk;
+    context.font = "500 21px system-ui, sans-serif";
+    context.fillText(en ? "See the life ahead. Make today count." : "看见余生，认真今天。", 76, tagTop + 178);
+    context.textAlign = "right";
+    context.fillText("app.lifescale.space", 1004, tagTop + 178);
+  } else {
+    context.fillStyle = "#f4f0e6";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "#143d2f";
+    context.fillRect(0, 0, canvas.width, 218);
+    context.fillStyle = "#d79b2f";
+    context.fillRect(76, 170, 82, 5);
+
+    context.fillStyle = "#ffffff";
+    context.font = "600 48px Georgia, serif";
+    context.fillText(en ? "A day I chose to keep" : "我选择留下的这一天", 76, 105);
+    context.fillStyle = "#d8e1dc";
+    context.font = "600 20px system-ui, sans-serif";
+    context.fillText("余生有刻 · LIFESCALE", 76, 151);
+
+    if (photo && photoHeight) {
+      context.save();
+      context.beginPath(); context.roundRect(76, 254, 928, photoHeight, 30); context.clip();
+      context.fillStyle = "#e7e1d4";
+      context.fillRect(76, 254, 928, photoHeight);
+      drawImageContain(context, photo, 76, 254, 928, photoHeight);
+      context.restore();
+    }
+
+    context.fillStyle = "#8a6414";
+    context.font = "700 25px system-ui, sans-serif";
+    context.fillText(date, 76, dateTop);
+    context.fillStyle = "#143d2f";
+    context.font = contentFont;
+    lines.forEach((line, index) => context.fillText(line, 76, contentTop + index * lineHeight));
+    context.fillStyle = "rgba(20,61,47,.09)";
+    context.beginPath(); context.roundRect(76, tagTop, 928, 100, 26); context.fill();
+    context.fillStyle = "#143d2f";
+    context.font = "600 25px system-ui, sans-serif";
+    context.fillText(`${mood}  ·  ${category}`, 112, tagTop + 63);
+    context.fillStyle = "#64766e";
+    context.font = "500 21px system-ui, sans-serif";
+    context.fillText(en ? "See the life ahead. Make today count." : "看见余生，认真今天。", 76, tagTop + 178);
+    context.textAlign = "right";
+    context.fillStyle = "#8a6414";
+    context.fillText("app.lifescale.space", 1004, tagTop + 178);
+  }
 
   const dataUrl = canvas.toDataURL("image/png", 0.94);
-  return new Promise((resolve) => canvas.toBlob((blob) => resolve({ blob, dataUrl, height: cardHeight }), "image/png", 0.94));
+  return { blob: await canvasBlob(canvas), dataUrl, height: cardHeight, photoLoaded: Boolean(photo) };
 }
 
 function downloadBlob(blob: Blob, entryDate: string) {
@@ -114,10 +227,14 @@ function downloadBlob(blob: Blob, entryDate: string) {
 export function EntryShareDialog({ entry, locale, onClose }: { entry: LifeEntry; locale: Locale; onClose: () => void }) {
   const en = locale === "en";
   const [card, setCard] = useState<Blob | null>(null);
-  const [preparing, setPreparing] = useState(true);
   const [status, setStatus] = useState("");
   const [cardUrl, setCardUrl] = useState("");
   const [cardHeight, setCardHeight] = useState(1350);
+  const [layout, setLayout] = useState<ShareLayout>("separate");
+  const [generatedKey, setGeneratedKey] = useState("");
+  const hasPhoto = Boolean(entry.entry_media?.[0]?.signed_url);
+  const generationKey = `${entry.id}:${entry.updated_at}:${locale}:${layout}`;
+  const preparing = generatedKey !== generationKey;
   const inWeChat = useMemo(() => typeof navigator !== "undefined" && /MicroMessenger/i.test(navigator.userAgent), []);
   const copy = useMemo(() => ({
     wechat: en ? "WeChat" : "微信好友", moments: en ? "WeChat Moments" : "朋友圈", facebook: "Facebook", instagram: "Instagram", more: en ? "More" : "更多",
@@ -125,15 +242,16 @@ export function EntryShareDialog({ entry, locale, onClose }: { entry: LifeEntry;
 
   useEffect(() => {
     let active = true;
-    void createShareCard(entry, locale).then(({ blob, dataUrl, height }) => {
+    void createShareCard(entry, locale, layout).then(({ blob, dataUrl, height, photoLoaded }) => {
       if (!active) return;
       setCardUrl(dataUrl);
       setCardHeight(height);
       setCard(blob);
-      setPreparing(false);
+      setGeneratedKey(generationKey);
+      if (hasPhoto && !photoLoaded) setStatus(en ? "The photo could not be loaded, so a text card was created instead." : "图片暂时无法读取，已为你生成纯文字分享卡。");
     });
     return () => { active = false; };
-  }, [entry, locale]);
+  }, [en, entry, generationKey, hasPhoto, layout, locale]);
 
   useEffect(() => {
     const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
@@ -183,6 +301,14 @@ export function EntryShareDialog({ entry, locale, onClose }: { entry: LifeEntry;
       <h2 id="share-dialog-title">{en ? "Share this day" : "分享这一天"}</h2>
       <p className="share-privacy">{en ? "Only the copy you confirm is shared. Your original entry stays private. The card contains no email, birth date or life target." : "只分享你确认的副本。原记录继续保持私密，分享卡不含邮箱、出生日期或人生目标。"}</p>
       {inWeChat ? <p className="wechat-direct-hint">{en ? "In WeChat: press and hold the card to send or save it. You do not need another browser." : "微信内直接操作：长按分享卡即可发送给朋友或保存图片，不需要转到浏览器。"}</p> : null}
+      <div className="share-layout-control">
+        <span>{en ? "Card layout" : "分享卡排版"}</span>
+        <div role="group" aria-label={en ? "Choose a share card layout" : "选择分享卡排版"}>
+          <button type="button" className={layout === "separate" ? "active" : ""} aria-pressed={layout === "separate"} onClick={() => { setStatus(""); setLayout("separate"); }}>{en ? "Photo + text" : "图文分开"}</button>
+          <button type="button" className={layout === "overlay" ? "active" : ""} aria-pressed={layout === "overlay"} disabled={!hasPhoto} onClick={() => { setStatus(""); setLayout("overlay"); }}>{en ? "Text on photo" : "文字镶嵌"}</button>
+        </div>
+        <small>{!hasPhoto ? (en ? "Add a photo to this entry to place text on it." : "这条记录没有图片，添加图片后可使用文字镶嵌。") : layout === "overlay" ? (en ? "LifeScale automatically reverses text contrast and adds a soft veil for clarity." : "系统会自动反转文字明暗并加入柔和遮罩，保证文字清楚。") : (en ? "The complete photo stays separate, with the full entry below it." : "完整图片单独保留，全部记录文字排在图片下方。")}</small>
+      </div>
       <div className="share-card-preview-image">{cardUrl ? <Image src={cardUrl} alt={en ? "Preview of the complete share card" : "完整分享卡预览"} width={1080} height={cardHeight} unoptimized /> : <span>{en ? "Preparing your share card…" : "正在生成分享卡…"}</span>}</div>
       <div className="share-platform-grid" aria-label={en ? "Share choices" : "分享方式"}>
         {(["wechat", "moments", "facebook", "instagram", "more"] as ShareTarget[]).map((target) => <button type="button" key={target} disabled={preparing} onClick={() => void share(target)}><b>{target === "wechat" ? "微" : target === "moments" ? "圈" : target === "facebook" ? "f" : target === "instagram" ? "◎" : "···"}</b><span>{copy[target]}</span></button>)}

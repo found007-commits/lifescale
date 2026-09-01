@@ -28,5 +28,13 @@ test("each daily entry offers an explicit private-safe share action", async () =
   assert.match(dialog, /微信内直接操作/);
   assert.match(dialog, /if \(inWeChat\)/);
   assert.match(dialog, /entry\.entry_date\.slice\(0, 10\)/);
+  assert.match(dialog, /type ShareLayout = "separate" \| "overlay"/);
+  assert.match(dialog, /图文分开/);
+  assert.match(dialog, /文字镶嵌/);
+  assert.match(dialog, /drawImageContain/);
+  assert.match(dialog, /drawImageCover/);
+  assert.match(dialog, /imageLuminance/);
+  assert.match(dialog, /自动反转文字明暗/);
+  assert.match(dialog, /disabled=!\{hasPhoto\}|disabled=\{!hasPhoto\}/);
   assert.doesNotMatch(dialog, /updateProfile|insertEntry|visibility:\s*["']public/);
 });
