@@ -1,10 +1,13 @@
+const Page = require("../../utils/localized-page");
 const { ageOnDate, calculateLifeMetrics, localDateString } = require("../../utils/life");
 const { getProfile, restoreSession } = require("../../utils/supabase");
+const { normalizeAge } = require("../../utils/preferences");
+const { formatDate } = require("../../utils/share-card");
 
 Page({
   data: {
     birthDate: "",
-    targetAge: "90",
+    targetAge: "",
     maxDate: localDateString(),
     minimumAge: 30,
     preview: null,
@@ -23,12 +26,13 @@ Page({
   onBirthChange(event) {
     const birthDate = event.detail.value;
     const minimumAge = Math.max(30, ageOnDate(birthDate) + 1);
-    const targetAge = Math.max(Number(this.data.targetAge) || 90, minimumAge);
-    this.setData({ birthDate, minimumAge, targetAge: String(targetAge), preview: null });
+    this.setData({ birthDate, birthLabel: formatDate(birthDate, this.data.locale), minimumAge, preview: null });
   },
 
   onAgeInput(event) {
-    this.setData({ targetAge: event.detail.value.replace(/\D/g, ""), preview: null });
+    const value = normalizeAge(event.detail.value);
+    this.setData({ targetAge: value, preview: null });
+    return value;
   },
 
   previewScale() {
@@ -45,4 +49,7 @@ Page({
     if (this.data.preview) wx.setStorageSync("lifescale:miniprogram-draft", { birthDate: this.data.birthDate, targetAge: Number(this.data.targetAge) });
     wx.navigateTo({ url: "/pages/auth/auth" });
   },
+  onShareAppMessage() { return { title: "余生有刻 · 看见余生，认真今天。", path: "/pages/index/index", imageUrl: "/images/lifescale-icon.png" }; },
+  onShareTimeline() { return { title: "余生有刻 · 看见余生，认真今天。", query: "", imageUrl: "/images/lifescale-icon.png" }; },
+  onLoad() { wx.showShareMenu({ menus: ["shareAppMessage", "shareTimeline"] }); },
 });

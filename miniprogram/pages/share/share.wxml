@@ -1,0 +1,26 @@
+<wxs src="../../utils/locale.wxs" module="i18n" />
+<view class="page-shell share-page">
+  <text class="eyebrow">SHARE A DAY</text>
+  <text class="section-title">{{i18n.t('分享这一天', locale)}}</text>
+  <text class="share-note">{{i18n.t('只分享你预览确认的图片。原记录保持私密，分享卡不含邮箱、出生日期、性别或人生目标。', locale)}}</text>
+  <view class="layout-options">
+    <button class="{{layout === 'separate' ? 'selected' : ''}}" data-layout="separate" bindtap="chooseLayout" disabled="{{busy}}">{{i18n.t('图文分开', locale)}}</button>
+    <button class="{{layout === 'overlay' ? 'selected' : ''}}" data-layout="overlay" bindtap="chooseLayout" disabled="{{busy || !hasPhoto}}">{{i18n.t('文字镶嵌', locale)}}</button>
+  </view>
+  <text class="share-note">{{i18n.t(hasPhoto ? (layout === 'overlay' ? '深色底板与米白文字，让照片上的文字清楚易读。' : '保留完整照片，文字自动排成长图。') : '此记录没有照片，生成纯文字分享卡。', locale)}}</text>
+  <text wx:if="{{busy}}" class="loading-copy">{{i18n.t('正在生成完整分享卡…', locale)}}</text>
+  <view wx:if="{{error}}" class="form-error">{{error}}<button bindtap="generate" class="secondary-button">{{i18n.t('重试', locale)}}</button></view>
+  <text wx:if="{{cards.length > 1}}" class="share-note">{{i18n.t('记录较长，为保证清晰度已完整分成', locale)}} {{cards.length}} {{i18n.t('张。请选择一张发送，或逐张保存全部内容。', locale)}}</text>
+  <scroll-view wx:if="{{cards.length}}" scroll-y="{{true}}" class="preview-scroll" enhanced="{{true}}">
+  <view wx:for="{{cards}}" wx:key="path" class="card-item {{selected === index ? 'chosen' : ''}}" data-index="{{index}}" bindtap="selectCard">
+    <image src="{{item.path}}" mode="widthFix" show-menu-by-longpress="{{true}}" />
+    <text wx:if="{{cards.length > 1}}">{{i18n.t(selected === index ? '已选中 · ' : '', locale)}}{{i18n.t('第', locale)}} {{index + 1}} {{i18n.t('张 /', locale)}} {{cards.length}}</text>
+  </view>
+  </scroll-view>
+  <view class="share-actions">
+    <button class="primary-button" bindtap="shareImage" disabled="{{busy || !cards.length}}">{{i18n.t('发送给朋友 / 朋友圈', locale)}}</button>
+    <button class="secondary-button" bindtap="saveImage" disabled="{{busy || !cards.length || saving}}" loading="{{saving}}">{{i18n.t('保存图片', locale)}}</button>
+    <text class="share-note">{{i18n.t('发送前由你确认。Facebook、Instagram 等平台可在保存图片后自行发布。', locale)}}</text>
+  </view>
+  <canvas type="2d" id="shareCanvas" class="render-canvas" />
+</view>

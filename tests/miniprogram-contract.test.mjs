@@ -32,7 +32,7 @@ test("mini program keeps email OTP as its only login method", async () => {
 test("the Chinese manifesto headline has intentional two-line copy", async () => {
   const [website, miniProgram] = await Promise.all([source("app/components/Experience.tsx"), source("miniprogram/pages/index/index.wxml")]);
   assert.match(website, /pillarsTitle: \["不是倒数生命，", "而是把今天留下。"\]/);
-  assert.match(miniProgram, /<text>不是倒数生命，<\/text><text>而是把今天留下。<\/text>/);
+  assert.match(miniProgram, /<text>\{\{i18n.t\('不是倒数生命，', locale\)\}\}<\/text><text>\{\{i18n.t\('而是把今天留下。', locale\)\}\}<\/text>/);
 });
 
 test("the mini program presents the Yusheng Youke product brand", async () => {

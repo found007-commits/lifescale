@@ -64,6 +64,13 @@ button::after { border: 0; }
 .privacy-note { color: #7f9188; font-size: 21rpx; line-height: 1.65; text-align: center; }
 .privacy-note navigator { display: inline; color: #365f50; font-weight: 650; }
 
+.entry-share { display: block; margin: 22rpx 0 0 auto; width: fit-content; padding: 0 28rpx; background: #143d2f; color: #fffdf8; font-size: 25rpx; border-radius: 999rpx; }
+.mode-options { display: flex; gap: 12rpx; margin-bottom: 28rpx; padding: 8rpx; border-radius: 24rpx; background: rgba(255,255,255,.12); }
+.mode-options button { flex: 1; padding: 0 12rpx; font-size: 28rpx; color: #fffdf8; background: transparent; border-radius: 18rpx; }
+.mode-options .chosen { background: #fffdf8; color: #143d2f; font-weight: 700; }
+.journey-note { padding: 28rpx; margin-top: 28rpx; font-size: 27rpx; line-height: 1.8; }
+.journey-note text { display: block; }
+.journey-note text:first-child { color: #a4731c; font-weight: 700; margin-bottom: 10rpx; }
 @media (prefers-color-scheme: dark) {
   page { background: #0f1c17; color: #edf3ef; }
   .page-shell { background: #0f1c17; }

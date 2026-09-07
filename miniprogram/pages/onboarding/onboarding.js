@@ -1,11 +1,15 @@
+const Page = require("../../utils/localized-page");
 const { ageOnDate, localDateString, targetDateFromAge } = require("../../utils/life");
 const { createProfile, requireSession } = require("../../utils/supabase");
+const { genders, genderLabels, normalizeAge } = require("../../utils/preferences");
+const { formatDate } = require("../../utils/share-card");
 
 Page({
   data: {
     displayName: "",
     birthDate: "",
-    targetAge: "90",
+    targetAge: "",
+    genders, genderLabels, genderIndex: -1,
     minimumAge: 30,
     maxDate: localDateString(),
     confirmed: false,
@@ -19,7 +23,7 @@ Page({
     const draft = wx.getStorageSync("lifescale:miniprogram-draft");
     if (draft?.birthDate) {
       const minimumAge = Math.max(30, ageOnDate(draft.birthDate) + 1);
-      this.setData({ birthDate: draft.birthDate, minimumAge, targetAge: String(Math.max(draft.targetAge || 90, minimumAge)) });
+      this.setData({ birthDate: draft.birthDate, birthLabel: formatDate(draft.birthDate), minimumAge, targetAge: normalizeAge(draft.targetAge) });
     }
   },
 
@@ -27,14 +31,17 @@ Page({
   onBirthChange(event) {
     const birthDate = event.detail.value;
     const minimumAge = Math.max(30, ageOnDate(birthDate) + 1);
-    this.setData({ birthDate, minimumAge, targetAge: String(Math.max(Number(this.data.targetAge) || 90, minimumAge)), error: "" });
+    this.setData({ birthDate, birthLabel: formatDate(birthDate, this.data.locale), minimumAge, error: "" });
   },
-  onAgeInput(event) { this.setData({ targetAge: event.detail.value.replace(/\D/g, ""), error: "" }); },
+  onAgeInput(event) { const value = normalizeAge(event.detail.value); this.setData({ targetAge: value, error: "" }); return value; },
+  chooseGender(event) { this.setData({ genderIndex: Number(event.detail.value) }); },
   onConfirmChange(event) { this.setData({ confirmed: event.detail.value.includes("confirmed") }); },
 
   async saveProfile() {
+    if (this.data.saving || !this.session) return;
     const targetAge = Number(this.data.targetAge);
     if (!this.data.birthDate) return this.setData({ error: "请填写出生日期。" });
+    if (this.data.genderIndex < 0) return this.setData({ error: "请选择性别，也可以选择保密。" });
     if (targetAge < this.data.minimumAge || targetAge > 150) return this.setData({ error: `目标年龄应为 ${this.data.minimumAge}-150 岁。` });
     if (!this.data.confirmed) return this.setData({ error: "请先确认这些重要数据已经核对无误。" });
     this.setData({ saving: true, error: "" });
@@ -44,14 +51,15 @@ Page({
         id: this.session.user.id,
         email: this.session.user.email,
         display_name: this.data.displayName.trim() || null,
-        locale: "zh",
+        gender_identity: genders[this.data.genderIndex],
+        locale: this.data.locale || getApp().globalData.locale || "zh",
         timezone: "Asia/Shanghai",
         birth_date: this.data.birthDate,
         target_age: targetAge,
         target_date: targetDateFromAge(this.data.birthDate, targetAge),
         display_mode: "gentle",
         onboarding_completed: true,
-        privacy_version: "2026-08-21",
+        privacy_version: "2026-09-07",
         privacy_accepted_at: now,
       });
       wx.removeStorageSync("lifescale:miniprogram-draft");

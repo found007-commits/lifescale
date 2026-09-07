@@ -1,26 +1,36 @@
+<wxs src="../../utils/locale.wxs" module="i18n" />
 <view class="page-shell safe-page settings-page">
   <text class="eyebrow">MY LIFESCALE</text>
-  <view class="display-title settings-title"><text>我的人生刻度</text></view>
-  <view wx:if="{{loading}}" class="loading-copy">正在读取资料</view>
+  <view class="display-title settings-title"><text>{{i18n.t('我的人生刻度', locale)}}</text></view>
+  <view wx:if="{{loading}}" class="loading-copy">{{i18n.t('正在读取资料', locale)}}</view>
   <view wx:if="{{error}}" class="form-error">{{error}}</view>
   <block wx:if="{{!loading && profile}}">
     <view class="paper-card profile-card">
       <text class="profile-name">{{profile.display_name || '余生有刻用户'}}</text>
       <text class="muted">{{email}}</text>
       <view class="profile-grid">
-        <view><text>出生日期</text><text>{{profile.birth_date}}</text></view>
-        <view><text>目标年龄</text><text>{{profile.target_age}} 岁</text></view>
-        <view><text>目标日期</text><text>{{profile.target_date}}</text></view>
+        <view><text>{{i18n.t('出生日期', locale)}}</text><text>{{birthLabel}}</text></view>
+        <view wx:if="{{profile.target_age}}"><text>{{i18n.t('目标年龄', locale)}}</text><text>{{profile.target_age}} {{i18n.t('岁', locale)}}</text></view>
+        <view><text>{{i18n.t('目标日期', locale)}}</text><text>{{targetLabel}}</text></view>
       </view>
-      <view class="lock-note"><text>核心人生刻度已锁定</text><text>锁定至 {{lockDate}}。到期后可重新设定，并再次锁定一年。</text></view>
+      <view class="lock-note"><text>{{i18n.t('核心人生刻度已永久确认', locale)}}</text><text>{{i18n.t('出生日期和人生目标只能确认一次，不能单独修改；如需清除，只能注销整个账户。', locale)}}</text></view>
+    </view>
+    <view class="paper-card profile-card">
+      <text class="section-title">{{i18n.t('个人偏好', locale)}}</text>
+      <view class="field"><text class="field-label">{{i18n.t('显示名称', locale)}}</text><input class="input" value="{{displayName}}" maxlength="80" bindinput="onNameInput" /></view>
+      <view class="field"><text class="field-label">{{i18n.t('性别', locale)}}</text><picker range="{{genderPickerLabels}}" value="{{genderIndex}}" bindchange="onGenderChange"><view class="picker-field">{{i18n.t(genderLabels[genderIndex], locale)}} ›</view></picker></view>
+      <view class="field"><text class="field-label">{{i18n.t('语言', locale)}}</text><picker range="{{languages}}" value="{{localeIndex}}" bindchange="onLocaleChange"><view class="picker-field">{{languages[localeIndex]}} ›</view></picker></view>
+      <view class="field"><text class="field-label">{{i18n.t('显示模式', locale)}}</text><picker range="{{modePickerLabels}}" value="{{modeIndex}}" bindchange="onModeChange"><view class="picker-field">{{i18n.t(modes[modeIndex], locale)}} ›</view></picker></view>
+      <button class="primary-button" bindtap="savePreferences" loading="{{saving}}" disabled="{{saving}}">{{i18n.t('保存个人偏好', locale)}}</button>
     </view>
     <view class="settings-list paper-card">
-      <button data-type="privacy" bindtap="openLegal"><text>隐私政策</text><text>›</text></button>
-      <button data-type="terms" bindtap="openLegal"><text>服务条款</text><text>›</text></button>
-      <button data-type="third" bindtap="openLegal"><text>第三方服务说明</text><text>›</text></button>
+      <button bindtap="exportData"><text>{{i18n.t('导出全部数据', locale)}}</text><text>JSON ↓</text></button>
+      <button data-type="privacy" bindtap="openLegal"><text>{{i18n.t('隐私政策', locale)}}</text><text>›</text></button>
+      <button data-type="terms" bindtap="openLegal"><text>{{i18n.t('服务条款', locale)}}</text><text>›</text></button>
+      <button data-type="third" bindtap="openLegal"><text>{{i18n.t('第三方服务说明', locale)}}</text><text>›</text></button>
     </view>
-    <button class="secondary-button signout-button" bindtap="signOut">退出登录</button>
-    <button class="danger-button delete-button" bindtap="removeAccount" disabled="{{deleting}}">永久注销账户</button>
-    <text class="account-note">注销会立即删除账户及全部个人数据。此操作无法撤销。</text>
+    <button class="secondary-button signout-button" bindtap="signOut">{{i18n.t('退出登录', locale)}}</button>
+    <button class="danger-button delete-button" bindtap="removeAccount" disabled="{{deleting}}">{{i18n.t('永久注销账户', locale)}}</button>
+    <text class="account-note">{{i18n.t('注销会立即删除账户及全部个人数据。此操作无法撤销。', locale)}}</text>
   </block>
 </view>

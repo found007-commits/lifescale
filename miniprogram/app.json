@@ -8,7 +8,8 @@
     "pages/history/history",
     "pages/report/report",
     "pages/settings/settings",
-    "pages/legal/legal"
+    "pages/legal/legal",
+    "pages/share/share"
   ],
   "window": {
     "navigationBarBackgroundColor": "#f3efe5",

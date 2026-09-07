@@ -3,6 +3,7 @@ const { localDateString, uuid } = require("./life");
 
 const SESSION_KEY = "lifescale:miniprogram-session";
 let runtimeConfig = null;
+let refreshInFlight = null;
 
 function wxRequest(options) {
   return new Promise((resolve, reject) => {
@@ -10,8 +11,12 @@ function wxRequest(options) {
       timeout: 20000,
       ...options,
       success(response) {
-        if (response.statusCode >= 200 && response.statusCode < 300) resolve(response.data);
-        else reject(new Error(response.data?.msg || response.data?.message || response.data?.error_description || "请求失败，请稍后重试。"));
+        if (response.statusCode >= 200 && response.statusCode < 300) resolve(options.includeResponse ? response : response.data);
+        else {
+          const error = new Error(response.data?.msg || response.data?.message || response.data?.error_description || response.data?.error || "请求失败，请稍后重试。");
+          error.status = response.statusCode;
+          reject(error);
+        }
       },
       fail(error) {
         reject(new Error(error.errMsg || "网络连接失败。"));
@@ -45,6 +50,7 @@ function storeSession(session) {
 
 function clearSession() {
   wx.removeStorageSync(SESSION_KEY);
+  wx.removeStorageSync("lifescale:miniprogram-draft");
   const app = getApp();
   if (app?.globalData) {
     app.globalData.session = null;
@@ -53,6 +59,12 @@ function clearSession() {
 }
 
 async function refreshSession(session) {
+  if (refreshInFlight) return refreshInFlight;
+  refreshInFlight = doRefreshSession(session);
+  try { return await refreshInFlight; } finally { refreshInFlight = null; }
+}
+
+async function doRefreshSession(session) {
   if (!session?.refresh_token) throw new Error("登录已过期，请重新获取验证码。" );
   const service = await ensureConfig();
   const data = await wxRequest({
@@ -67,6 +79,7 @@ async function refreshSession(session) {
 async function request(path, options = {}, retry = true) {
   const service = await ensureConfig();
   let session = restoreSession();
+  if (session?.expires_at && session.expires_at * 1000 < Date.now() + 60000) session = await refreshSession(session);
   const header = {
     apikey: service.publishableKey,
     Authorization: `Bearer ${session?.access_token || service.publishableKey}`,
@@ -80,9 +93,10 @@ async function request(path, options = {}, retry = true) {
       method: options.method || "GET",
       data: options.data,
       header,
+      includeResponse: options.includeResponse,
     });
   } catch (error) {
-    if (retry && session?.refresh_token && /jwt|token|401|expired/i.test(error.message)) {
+    if (retry && session?.refresh_token && (error.status === 401 || /jwt|token|expired/i.test(error.message))) {
       session = await refreshSession(session);
       return request(path, { ...options, header: { ...(options.header || {}), Authorization: `Bearer ${session.access_token}` } }, false);
     }
@@ -113,7 +127,19 @@ async function verifyOtp(email, token) {
 
 async function getProfile(userId) {
   const rows = await request(`/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}&select=*`);
-  return rows[0] || null;
+  const profile = rows[0] || null;
+  getApp().globalData.profile = profile;
+  return profile;
+}
+
+async function updateProfile(userId, changes) {
+  const allowed = ["display_name", "gender_identity", "locale", "timezone", "display_mode"];
+  const data = {};
+  allowed.forEach((key) => { if (Object.prototype.hasOwnProperty.call(changes, key)) data[key] = changes[key]; });
+  const rows = await request(`/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}`, { method: "PATCH", header: { Prefer: "return=representation" }, data });
+  if (!rows[0]) throw new Error("资料保存失败，请重新登录。");
+  getApp().globalData.profile = rows[0];
+  return rows[0];
 }
 
 async function createProfile(profile) {
@@ -144,6 +170,23 @@ async function getCheckins(userId, limit = 100) {
   return request(`/rest/v1/checkins?user_id=eq.${encodeURIComponent(userId)}&select=*&order=checkin_date.desc&limit=${limit}`);
 }
 
+async function getCheckinCount(userId) {
+  const response = await request(`/rest/v1/checkins?user_id=eq.${encodeURIComponent(userId)}&select=id&limit=1`, {
+    header: { Prefer: "count=exact" }, includeResponse: true,
+  });
+  const key = Object.keys(response.header || {}).find((name) => name.toLowerCase() === "content-range");
+  const total = key && String(response.header[key]).split("/")[1];
+  if (!total || total === "*" || !Number.isFinite(Number(total))) throw new Error("记录天数暂不可用，请重试。");
+  return Number(total);
+}
+
+async function exportAccount() {
+  let session = restoreSession();
+  if (session?.expires_at && session.expires_at * 1000 < Date.now() + 60000) session = await refreshSession(session);
+  if (!session?.access_token) throw new Error("请重新登录。");
+  return wxRequest({ url: `${config.apiBase}/api/account/export`, method: "GET", header: { Authorization: `Bearer ${session.access_token}` } });
+}
+
 async function createEntry({ userId, content, mood, category, image }) {
   const entryId = uuid();
   const rows = await request("/rest/v1/life_entries", {
@@ -162,7 +205,8 @@ async function createEntry({ userId, content, mood, category, image }) {
 
 async function uploadEntryImage(userId, entryId, image) {
   const service = await ensureConfig();
-  const session = restoreSession();
+  let session = restoreSession();
+  if (session?.expires_at && session.expires_at * 1000 < Date.now() + 60000) session = await refreshSession(session);
   const extension = (image.tempFilePath.split(".").pop() || "jpg").toLowerCase();
   const mediaTypes = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", gif: "image/gif" };
   const storagePath = `${userId}/${entryId}/${uuid()}.${extension}`;
@@ -194,7 +238,8 @@ async function deleteEntry(entry) {
 }
 
 async function deleteAccount() {
-  const session = restoreSession();
+  let session = restoreSession();
+  if (session?.expires_at && session.expires_at * 1000 < Date.now() + 60000) session = await refreshSession(session);
   if (!session?.access_token) throw new Error("登录已过期，请重新登录。" );
   return wxRequest({
     url: `${config.apiBase}/api/account/delete`,
@@ -218,6 +263,8 @@ module.exports = {
   createProfile,
   deleteAccount,
   deleteEntry,
+  exportAccount,
+  getCheckinCount,
   getCheckins,
   getEntries,
   getProfile,
@@ -225,4 +272,5 @@ module.exports = {
   restoreSession,
   sendOtp,
   verifyOtp,
+  updateProfile,
 };

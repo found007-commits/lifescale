@@ -1,14 +1,16 @@
+const Page = require("../../utils/localized-page");
 const { calculateLifeMetrics } = require("../../utils/life");
-const { getCheckins, getEntries, getProfile, requireSession } = require("../../utils/supabase");
+const { getCheckins, getCheckinCount, getEntries, getProfile, updateProfile, requireSession } = require("../../utils/supabase");
+const { journeyMessage, openShare } = require("../../utils/preferences");
+const { formatDate } = require("../../utils/share-card");
 
 const moodLabels = { calm: "平静", happy: "开心", grateful: "感恩", tired: "疲惫", sad: "难过", anxious: "焦虑", hopeful: "充满希望" };
 const categoryLabels = { daily: "日常", family: "家人", work: "工作", growth: "成长", health: "健康", travel: "旅行", reflection: "感悟", other: "其他" };
 
 function decorateEntry(entry) {
-  const date = new Date(entry.entry_date);
   return {
     ...entry,
-    dateLabel: `${date.getMonth() + 1}月${date.getDate()}日`,
+    dateLabel: formatDate(entry.entry_date, getApp().globalData.profile?.locale),
     moodLabel: moodLabels[entry.mood] || "平静",
     categoryLabel: categoryLabels[entry.category] || "日常",
     imageUrl: entry.entry_media?.[0]?.signed_url || "",
@@ -16,9 +18,9 @@ function decorateEntry(entry) {
 }
 
 Page({
-  data: { loading: true, profile: null, metrics: null, recentEntries: [], checkedToday: false, checkinCount: 0, error: "" },
+  data: { loading: true, profile: null, metrics: null, recentEntries: [], checkedToday: false, checkinCount: 0, journeyMessage: "", switching: false, error: "" },
 
-  onShow() { this.load(); },
+  onShow() { return this.load(); },
   onPullDownRefresh() { this.load(true); },
 
   async load(fromPull = false) {
@@ -31,7 +33,7 @@ Page({
         wx.redirectTo({ url: "/pages/onboarding/onboarding" });
         return;
       }
-      const [entries, checkins] = await Promise.all([getEntries(session.user.id, 3), getCheckins(session.user.id, 365)]);
+      const [entries, checkins, checkinCount] = await Promise.all([getEntries(session.user.id, 3), getCheckins(session.user.id, 7), getCheckinCount(session.user.id)]);
       const metrics = calculateLifeMetrics({ birthDate: profile.birth_date, targetAge: profile.target_age, targetDate: profile.target_date });
       this.setData({
         profile,
@@ -45,7 +47,8 @@ Page({
         },
         recentEntries: entries.map(decorateEntry),
         checkedToday: checkins.some((item) => item.checkin_date === metrics.today),
-        checkinCount: checkins.length,
+        checkinCount,
+        journeyMessage: journeyMessage(checkinCount),
       });
     } catch (error) {
       this.setData({ error: error.message || "人生刻度加载失败。" });
@@ -56,5 +59,16 @@ Page({
   },
 
   recordToday() { wx.navigateTo({ url: "/pages/record/record" }); },
+  shareEntry(event) { openShare(this.data.recentEntries[Number(event.currentTarget.dataset.index)], this.data.profile?.locale); },
+  async setMode(event) {
+    const mode = event.currentTarget.dataset.mode;
+    if (this.data.switching || !["gentle", "clear"].includes(mode)) return;
+    this.setData({ switching: true });
+    try {
+      const profile = await updateProfile(this.data.profile.id, { display_mode: mode });
+      this.setData({ profile });
+    } catch (error) { wx.showToast({ title: error.message || "保存失败", icon: "none" }); }
+    finally { this.setData({ switching: false }); }
+  },
   viewHistory() { wx.switchTab({ url: "/pages/history/history" }); },
 });

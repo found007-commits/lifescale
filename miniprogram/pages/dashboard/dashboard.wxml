@@ -1,50 +1,55 @@
+<wxs src="../../utils/locale.wxs" module="i18n" />
 <view class="page-shell safe-page dashboard-page">
-  <view wx:if="{{loading}}" class="loading-copy">正在打开今天</view>
+  <view wx:if="{{loading}}" class="loading-copy">{{i18n.t('正在打开今天', locale)}}</view>
   <block wx:else>
     <view wx:if="{{error}}" class="form-error">{{error}}</view>
     <block wx:if="{{profile && metrics}}">
       <view class="today-header">
         <text class="eyebrow">TODAY · {{metrics.today}}</text>
-        <view class="display-title today-title"><text>{{metrics.isBonus ? '生命加时，今天又赚到一天。' : '今天，也值得被记住。'}}</text></view>
-        <text class="muted">这不是死亡预测，而是你为自己设定的人生时间目标。</text>
+        <view class="display-title today-title"><text>{{i18n.t(metrics.isBonus ? '生命加时，今天又赚到一天。' : '今天，也值得被记住。', locale)}}</text></view>
+        <text class="muted">{{i18n.t('这不是死亡预测，而是你为自己设定的人生时间目标。', locale)}}</text>
       </view>
 
       <view class="life-card">
+        <view class="mode-options"><button class="{{profile.display_mode === 'gentle' ? 'chosen' : ''}}" data-mode="gentle" bindtap="setMode" disabled="{{switching}}">{{i18n.t('温和模式', locale)}}</button><button class="{{profile.display_mode === 'clear' ? 'chosen' : ''}}" data-mode="clear" bindtap="setMode" disabled="{{switching}}">{{i18n.t('清醒模式', locale)}}</button></view>
         <view class="dial" style="background: conic-gradient(#d99b2f {{metrics.progress}}%, rgba(243,239,229,.13) 0)">
           <view class="dial-inner">
-            <text>{{metrics.isBonus ? '生命加时' : '仍可书写'}}</text>
+            <text>{{i18n.t(metrics.isBonus ? '生命加时' : (profile.display_mode === 'clear' ? '剩余时间' : '仍可书写'), locale)}}</text>
             <text class="dial-number">{{metrics.displayDaysText}}</text>
-            <text>天</text>
+            <text>{{i18n.t('天', locale)}}</text>
           </view>
         </view>
         <view class="metric-grid">
-          <view><text>已走过</text><text class="metric-value">{{metrics.livedDaysText}} 天</text></view>
-          <view><text>生命进度</text><text class="metric-value">{{metrics.progressText}}%</text></view>
-          <view><text>剩余周数</text><text class="metric-value">{{metrics.weeksText}} 周</text></view>
-          <view><text>留下记录</text><text class="metric-value">{{checkinCount}} 天</text></view>
+          <view><text>{{i18n.t('已走过', locale)}}</text><text class="metric-value">{{metrics.livedDaysText}} {{i18n.t('天', locale)}}</text></view>
+          <view><text>{{i18n.t('生命进度', locale)}}</text><text class="metric-value">{{metrics.progressText}}%</text></view>
+          <view><text>{{i18n.t('剩余周数', locale)}}</text><text class="metric-value">{{metrics.weeksText}} {{i18n.t('周', locale)}}</text></view>
+          <view><text>{{i18n.t('留下记录', locale)}}</text><text class="metric-value">{{checkinCount}} {{i18n.t('天', locale)}}</text></view>
         </view>
         <button class="today-button {{checkedToday ? 'done' : ''}}" bindtap="recordToday" hover-class="button-press">
           <text class="today-plus">{{checkedToday ? '✓' : '+1'}}</text>
-          <view><text class="today-main">{{checkedToday ? '今天已经留下记录' : '记录今天 +1'}}</text><text class="today-note">一句话、一张图，也足够</text></view>
+          <view><text class="today-main">{{i18n.t(checkedToday ? '今天已经留下记录' : '记录今天 +1', locale)}}</text><text class="today-note">{{i18n.t('一句话、一张图，也足够', locale)}}</text></view>
         </button>
       </view>
 
+      <view class="paper-card journey-note"><text>{{i18n.t('第', locale)}} {{checkinCount || 1}} {{i18n.t('天', locale)}}</text><text>{{i18n.t(journeyMessage, locale)}}</text></view>
+
       <view class="recent-head">
-        <view><text class="eyebrow">RECENT DAYS</text><text class="section-title">最近留下的日子</text></view>
-        <button class="view-all" bindtap="viewHistory">查看全部</button>
+        <view><text class="eyebrow">RECENT DAYS</text><text class="section-title">{{i18n.t('最近留下的日子', locale)}}</text></view>
+        <button class="view-all" bindtap="viewHistory">{{i18n.t('查看全部', locale)}}</button>
       </view>
       <view wx:if="{{recentEntries.length}}" class="recent-list">
         <view wx:for="{{recentEntries}}" wx:key="id" class="paper-card entry-card">
           <image wx:if="{{item.imageUrl}}" class="entry-image" src="{{item.imageUrl}}" mode="aspectFill" />
-          <view class="entry-meta"><text>{{item.dateLabel}}</text><text>仅自己可见</text></view>
+          <view class="entry-meta"><text>{{item.dateLabel}}</text><text>{{i18n.t('仅自己可见', locale)}}</text></view>
           <text class="entry-content">{{item.content || '今天 +1'}}</text>
-          <view class="entry-tags"><text>{{item.moodLabel}}</text><text>{{item.categoryLabel}}</text></view>
+          <view class="entry-tags"><text>{{i18n.t(item.moodLabel, locale)}}</text><text>{{i18n.t(item.categoryLabel, locale)}}</text></view>
+          <button class="entry-share" data-index="{{index}}" bindtap="shareEntry">{{i18n.t('分享这一天 ↗', locale)}}</button>
         </view>
       </view>
       <view wx:else class="paper-card empty-state">
-        <text class="section-title">第一条记录，从今天开始。</text>
-        <text class="muted">无需写得完整，真实就好。</text>
-        <button class="primary-button empty-action" bindtap="recordToday">记录今天 +1</button>
+        <text class="section-title">{{i18n.t('第一条记录，从今天开始。', locale)}}</text>
+        <text class="muted">{{i18n.t('无需写得完整，真实就好。', locale)}}</text>
+        <button class="primary-button empty-action" bindtap="recordToday">{{i18n.t('记录今天 +1', locale)}}</button>
       </view>
     </block>
   </block>

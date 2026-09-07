@@ -1,29 +1,30 @@
+<wxs src="../../utils/locale.wxs" module="i18n" />
 <view class="page-shell record-page">
-  <text class="eyebrow">TODAY · 只属于你</text>
-  <view class="display-title record-title"><text>今天，发生了什么？</text></view>
-  <text class="record-intro">无需写得漂亮。一句话、一张图，或者只是此刻的心情。</text>
+  <text class="eyebrow">{{i18n.t('TODAY · 只属于你', locale)}}</text>
+  <view class="display-title record-title"><text>{{i18n.t('今天，发生了什么？', locale)}}</text></view>
+  <text class="record-intro">{{i18n.t('无需写得漂亮。一句话、一张图，或者只是此刻的心情。', locale)}}</text>
 
   <view class="paper-card composer">
-    <textarea class="textarea" value="{{content}}" bindinput="onContentInput" maxlength="2000" placeholder="写下你想记住的片刻……" auto-height="false" />
+    <textarea class="textarea" value="{{content}}" bindinput="onContentInput" maxlength="12000" placeholder="{{i18n.t('写下你想记住的片刻……', locale)}}" auto-height="false" />
     <view wx:if="{{image}}" class="image-preview">
       <image src="{{image.tempFilePath}}" mode="aspectFill" />
-      <button bindtap="removeImage">移除</button>
+      <button bindtap="removeImage">{{i18n.t('移除', locale)}}</button>
     </view>
-    <button wx:else class="photo-button" bindtap="chooseImage">＋ 添加一张照片</button>
+    <button wx:else class="photo-button" bindtap="chooseImage">{{i18n.t('＋ 添加一张照片', locale)}}</button>
 
     <view class="choice-block">
-      <text class="field-label">此刻的心情</text>
+      <text class="field-label">{{i18n.t('此刻的心情', locale)}}</text>
       <view class="choice-row">
-        <button wx:for="{{moods}}" wx:key="value" class="choice-pill {{mood === item.value ? 'active' : ''}}" data-value="{{item.value}}" bindtap="chooseMood">{{item.label}}</button>
+        <button wx:for="{{moods}}" wx:key="value" class="choice-pill {{mood === item.value ? 'active' : ''}}" data-value="{{item.value}}" bindtap="chooseMood">{{i18n.t(item.label, locale)}}</button>
       </view>
     </view>
     <view class="choice-block">
-      <text class="field-label">这段时间属于</text>
+      <text class="field-label">{{i18n.t('这段时间属于', locale)}}</text>
       <view class="choice-row">
-        <button wx:for="{{categories}}" wx:key="value" class="choice-pill {{category === item.value ? 'active' : ''}}" data-value="{{item.value}}" bindtap="chooseCategory">{{item.label}}</button>
+        <button wx:for="{{categories}}" wx:key="value" class="choice-pill {{category === item.value ? 'active' : ''}}" data-value="{{item.value}}" bindtap="chooseCategory">{{i18n.t(item.label, locale)}}</button>
       </view>
     </view>
     <view wx:if="{{error}}" class="form-error">{{error}}</view>
-    <button class="primary-button save-entry" bindtap="saveEntry" loading="{{saving}}" disabled="{{saving}}">仅自己可见，保存今天</button>
+    <button class="primary-button save-entry" bindtap="saveEntry" loading="{{saving}}" disabled="{{saving}}">{{i18n.t('仅自己可见，保存今天', locale)}}</button>
   </view>
 </view>

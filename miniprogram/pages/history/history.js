@@ -1,13 +1,15 @@
+const Page = require("../../utils/localized-page");
 const { deleteEntry, getEntries, requireSession } = require("../../utils/supabase");
+const { openShare } = require("../../utils/preferences");
+const { formatDate } = require("../../utils/share-card");
 
 const moodLabels = { calm: "平静", happy: "开心", grateful: "感恩", tired: "疲惫", sad: "难过", anxious: "焦虑", hopeful: "充满希望" };
 const categoryLabels = { daily: "日常", family: "家人", work: "工作", growth: "成长", health: "健康", travel: "旅行", reflection: "感悟", other: "其他" };
 
 function decorate(entry) {
-  const date = new Date(entry.entry_date);
   return {
     ...entry,
-    dateLabel: `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`,
+    dateLabel: formatDate(entry.entry_date, getApp().globalData.profile?.locale),
     moodLabel: moodLabels[entry.mood] || "平静",
     categoryLabel: categoryLabels[entry.category] || "日常",
     imageUrl: entry.entry_media?.[0]?.signed_url || "",
@@ -16,7 +18,7 @@ function decorate(entry) {
 
 Page({
   data: { loading: true, entries: [], error: "" },
-  onShow() { this.load(); },
+  onShow() { return this.load(); },
   onPullDownRefresh() { this.load(true); },
   async load(fromPull = false) {
     const session = requireSession();
@@ -33,6 +35,7 @@ Page({
     }
   },
   addEntry() { wx.navigateTo({ url: "/pages/record/record" }); },
+  shareEntry(event) { openShare(this.data.entries[Number(event.currentTarget.dataset.index)], getApp().globalData.profile?.locale); },
   removeEntry(event) {
     const index = Number(event.currentTarget.dataset.index);
     const entry = this.data.entries[index];

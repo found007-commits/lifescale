@@ -1,48 +1,50 @@
+<wxs src="../../utils/locale.wxs" module="i18n" />
 <view class="landing-page">
   <view class="landing-nav">
     <view class="brand-row">
       <image class="brand-logo" src="/images/lifescale-icon.png" mode="aspectFill" />
-      <view><text class="brand-name">余生有刻</text><text class="brand-note">LIFESCALE</text></view>
+      <view><text class="brand-name">{{i18n.t('余生有刻', locale)}}</text><text class="brand-note">LIFESCALE</text></view>
     </view>
-    <button class="mini-login" bindtap="goLogin" hover-class="button-press">登录</button>
+    <button class="mini-login" bindtap="goLogin" hover-class="button-press">{{i18n.t('登录', locale)}}</button>
   </view>
 
   <view class="landing-hero">
-    <text class="eyebrow">把时间还给自己</text>
-    <view class="display-title hero-title"><text>看见余生，</text><text>认真今天。</text></view>
-    <text class="hero-copy">看见仍可书写的时间，留下今天真实发生的事。</text>
-    <button class="primary-button hero-button" bindtap="goLogin" hover-class="button-press">邮箱登录</button>
+    <text class="eyebrow">{{i18n.t('把时间还给自己', locale)}}</text>
+    <view class="display-title hero-title"><text>{{i18n.t('看见余生，', locale)}}</text><text>{{i18n.t('认真今天。', locale)}}</text></view>
+    <text class="hero-copy">{{i18n.t('看见仍可书写的时间，留下今天真实发生的事。', locale)}}</text>
+    <button class="primary-button hero-button" bindtap="goLogin" hover-class="button-press">{{i18n.t('邮箱登录', locale)}}</button>
   </view>
 
   <view class="preview-card paper-card">
-    <text class="eyebrow">先看一眼</text>
-    <text class="section-title">我的人生刻度</text>
+    <text class="eyebrow">{{i18n.t('先看一眼', locale)}}</text>
+    <text class="section-title">{{i18n.t('我的人生刻度', locale)}}</text>
     <view class="field">
-      <text class="field-label">出生日期</text>
+      <text class="field-label">{{i18n.t('出生日期', locale)}}</text>
       <picker mode="date" value="{{birthDate}}" end="{{maxDate}}" bindchange="onBirthChange">
-        <view class="picker-field"><text>{{birthDate || '请选择出生日期'}}</text><text>›</text></view>
+        <view class="picker-field"><text>{{i18n.t(birthLabel || '请选择出生日期', locale)}}</text><text>›</text></view>
       </picker>
     </view>
     <view class="field">
-      <text class="field-label">希望活到的年龄</text>
-      <input class="input" type="number" value="{{targetAge}}" bindinput="onAgeInput" placeholder="最少 30 岁" />
-      <text class="field-help">可自由填写 {{minimumAge}}-150 岁。这是人生目标，不是寿命预测。</text>
+      <text class="field-label">{{i18n.t('希望活到的年龄', locale)}}</text>
+      <input class="input" type="number" maxlength="3" value="{{targetAge}}" bindinput="onAgeInput" placeholder="{{i18n.t('请填写你自己的目标年龄', locale)}}" />
+      <text class="field-help">{{i18n.t('可自由填写', locale)}} {{minimumAge}}{{i18n.t('-150 岁。这是人生目标，不是寿命预测。', locale)}}</text>
+      <text class="field-help">{{i18n.t('正式保存只能确认一次，请慎重选择。', locale)}}</text>
     </view>
-    <button class="secondary-button preview-button" bindtap="previewScale" hover-class="button-press">预览刻度</button>
+    <button class="secondary-button preview-button" bindtap="previewScale" hover-class="button-press">{{i18n.t('预览刻度', locale)}}</button>
 
     <view wx:if="{{preview}}" class="preview-result">
-      <text>仍可认真生活的日子</text>
+      <text>{{i18n.t('仍可认真生活的日子', locale)}}</text>
       <text class="preview-number">{{preview.remainingDays}}</text>
-      <text>天</text>
-      <button class="primary-button" bindtap="goLogin" hover-class="button-press">保存我的人生刻度</button>
+      <text>{{i18n.t('天', locale)}}</text>
+      <button class="primary-button" bindtap="goLogin" hover-class="button-press">{{i18n.t('保存我的人生刻度', locale)}}</button>
     </view>
   </view>
 
   <view class="landing-manifesto">
     <text class="eyebrow">LIFESCALE</text>
-    <view class="display-title manifesto-title"><text>不是倒数生命，</text><text>而是把今天留下。</text></view>
-    <view class="manifesto-line"><text>记录今天</text><text>一句话、一张图，也足够。</text></view>
-    <view class="manifesto-line"><text>回望七天</text><text>看见情绪、关系和时间去向。</text></view>
-    <view class="manifesto-line"><text>默认私密</text><text>你的记录只属于你。</text></view>
+    <view class="display-title manifesto-title"><text>{{i18n.t('不是倒数生命，', locale)}}</text><text>{{i18n.t('而是把今天留下。', locale)}}</text></view>
+    <view class="manifesto-line"><text>{{i18n.t('记录今天', locale)}}</text><text>{{i18n.t('一句话、一张图，也足够。', locale)}}</text></view>
+    <view class="manifesto-line"><text>{{i18n.t('回望七天', locale)}}</text><text>{{i18n.t('看见情绪、关系和时间去向。', locale)}}</text></view>
+    <view class="manifesto-line"><text>{{i18n.t('默认私密', locale)}}</text><text>{{i18n.t('你的记录只属于你。', locale)}}</text></view>
   </view>
 </view>

@@ -1,3 +1,4 @@
+const Page = require("../../utils/localized-page");
 const { localDateString } = require("../../utils/life");
 const { getCheckins, getEntries, requireSession } = require("../../utils/supabase");
 
@@ -29,7 +30,7 @@ function makeReport(entries, checkins) {
 
 Page({
   data: { loading: true, report: null, error: "" },
-  onShow() { this.load(); },
+  onShow() { return this.load(); },
   onPullDownRefresh() { this.load(true); },
   async load(fromPull = false) {
     const session = requireSession();

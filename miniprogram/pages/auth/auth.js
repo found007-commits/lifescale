@@ -1,3 +1,4 @@
+const Page = require("../../utils/localized-page");
 const { getProfile, sendOtp, verifyOtp } = require("../../utils/supabase");
 
 Page({
@@ -37,6 +38,7 @@ Page({
   },
 
   async sendCode() {
+    if (this.data.sending || this.data.seconds > 0) return;
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.data.email)) {
       this.setData({ error: "请输入有效的邮箱地址。" });
       return;
@@ -55,6 +57,7 @@ Page({
   },
 
   async verifyCode() {
+    if (this.data.verifying) return;
     if (!/^\d{6}$/.test(this.data.code)) {
       this.setData({ error: "请输入邮件中的 6 位验证码。" });
       return;

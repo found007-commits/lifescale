@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
+import { detectLocale } from "../../../../lib/i18n";
 
 export const dynamic = "force-dynamic";
 
-export function GET() {
+export function GET(request: Request) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
   const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim();
 
@@ -11,7 +12,7 @@ export function GET() {
   }
 
   return NextResponse.json(
-    { supabaseUrl, publishableKey },
-    { headers: { "Cache-Control": "public, max-age=300, s-maxage=300" } },
+    { supabaseUrl, publishableKey, locale: detectLocale(request.headers.get("x-vercel-ip-country"), request.headers.get("accept-language")) },
+    { headers: { "Cache-Control": "private, no-store" } },
   );
 }

@@ -1,3 +1,4 @@
+const Page = require("../../utils/localized-page");
 const { createEntry, requireSession } = require("../../utils/supabase");
 
 Page({
@@ -20,7 +21,7 @@ Page({
   },
 
   onLoad() { this.session = requireSession(); },
-  onContentInput(event) { this.setData({ content: event.detail.value.slice(0, 2000), error: "" }); },
+  onContentInput(event) { this.setData({ content: event.detail.value.slice(0, 12000), error: "" }); },
   chooseMood(event) { this.setData({ mood: event.currentTarget.dataset.value }); },
   chooseCategory(event) { this.setData({ category: event.currentTarget.dataset.value }); },
   chooseImage() {
@@ -33,7 +34,7 @@ Page({
   removeImage() { this.setData({ image: null }); },
 
   async saveEntry() {
-    if (!this.session) return;
+    if (!this.session || this.data.saving) return;
     if (!this.data.content.trim() && !this.data.image) return this.setData({ error: "写一句话或选择一张照片后再保存。" });
     this.setData({ saving: true, error: "" });
     try {

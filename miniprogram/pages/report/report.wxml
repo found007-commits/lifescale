@@ -1,30 +1,31 @@
+<wxs src="../../utils/locale.wxs" module="i18n" />
 <view class="page-shell safe-page report-page">
   <text class="eyebrow">THE LAST 7 DAYS</text>
-  <view class="display-title report-title"><text>回望，不是为了评判。</text></view>
-  <text class="report-intro">只是看看，这一周的时间去了哪里，哪些感受值得被听见。</text>
-  <view wx:if="{{loading}}" class="loading-copy">正在整理这一周</view>
+  <view class="display-title report-title"><text>{{i18n.t('回望，不是为了评判。', locale)}}</text></view>
+  <text class="report-intro">{{i18n.t('只是看看，这一周的时间去了哪里，哪些感受值得被听见。', locale)}}</text>
+  <view wx:if="{{loading}}" class="loading-copy">{{i18n.t('正在整理这一周', locale)}}</view>
   <view wx:if="{{error}}" class="form-error">{{error}}</view>
   <block wx:if="{{!loading && report}}">
-    <view class="report-period">{{report.start}} 至 {{report.end}}</view>
+    <view class="report-period">{{report.start}} {{i18n.t('至', locale)}} {{report.end}}</view>
     <view class="report-numbers">
-      <view><text class="report-number">{{report.recordedDays}}</text><text>有记录的日子</text></view>
-      <view><text class="report-number">{{report.entryCount}}</text><text>留下的片刻</text></view>
+      <view><text class="report-number">{{report.recordedDays}}</text><text>{{i18n.t('有记录的日子', locale)}}</text></view>
+      <view><text class="report-number">{{report.entryCount}}</text><text>{{i18n.t('留下的片刻', locale)}}</text></view>
     </view>
     <view class="paper-card report-card">
-      <text class="section-title">这一周的心情</text>
+      <text class="section-title">{{i18n.t('这一周的心情', locale)}}</text>
       <view wx:if="{{report.moodRows.length}}" class="mood-bars">
         <view wx:for="{{report.moodRows}}" wx:key="key" class="mood-row">
-          <text>{{item.label}}</text><view class="mood-track"><view style="width: {{item.width}}%"></view></view><text>{{item.count}}</text>
+          <text>{{i18n.t(item.label, locale)}}</text><view class="mood-track"><view style="width: {{item.width}}%"></view></view><text>{{item.count}}</text>
         </view>
       </view>
-      <text wx:else class="muted empty-copy">写下第一条记录后，这里会出现心情分布。</text>
+      <text wx:else class="muted empty-copy">{{i18n.t('写下第一条记录后，这里会出现心情分布。', locale)}}</text>
     </view>
     <view class="paper-card report-card">
-      <text class="section-title">时间的关键词</text>
-      <text wx:if="{{report.topCategory}}" class="top-category">{{report.topCategory}}</text>
-      <text wx:if="{{report.topCategory}}" class="muted">这是本周记录中出现最多的主题。</text>
-      <text wx:else class="muted empty-copy">暂时还没有足够的记录。</text>
+      <text class="section-title">{{i18n.t('时间的关键词', locale)}}</text>
+      <text wx:if="{{i18n.t(report.topCategory, locale)}}" class="top-category">{{i18n.t(report.topCategory, locale)}}</text>
+      <text wx:if="{{i18n.t(report.topCategory, locale)}}" class="muted">{{i18n.t('这是本周记录中出现最多的主题。', locale)}}</text>
+      <text wx:else class="muted empty-copy">{{i18n.t('暂时还没有足够的记录。', locale)}}</text>
     </view>
-    <button wx:if="{{!report.hasData}}" class="primary-button report-action" bindtap="recordToday">从今天开始记录</button>
+    <button wx:if="{{!report.hasData}}" class="primary-button report-action" bindtap="recordToday">{{i18n.t('从今天开始记录', locale)}}</button>
   </block>
 </view>

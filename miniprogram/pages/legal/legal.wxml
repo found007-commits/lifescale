@@ -1,11 +1,12 @@
+<wxs src="../../utils/locale.wxs" module="i18n" />
 <view class="page-shell legal-page">
   <text class="eyebrow">LIFESCALE</text>
-  <view class="display-title legal-title"><text>{{document.title}}</text></view>
-  <text class="updated">{{document.updated}}</text>
+  <view class="display-title legal-title"><text>{{i18n.t(document.title, locale)}}</text></view>
+  <text class="updated">{{i18n.t(document.updated, locale)}}</text>
   <view class="legal-sections">
     <view wx:for="{{document.sections}}" wx:key="heading" class="legal-section">
-      <text class="section-title">{{item.heading}}</text>
-      <text>{{item.body}}</text>
+      <text class="section-title">{{i18n.t(item.heading, locale)}}</text>
+      <text>{{i18n.t(item.body, locale)}}</text>
     </view>
   </view>
 </view>

@@ -1,10 +1,11 @@
+<wxs src="../../utils/locale.wxs" module="i18n" />
 <view class="page-shell safe-page history-page">
   <view class="history-head">
-    <view><text class="eyebrow">PRIVATE JOURNAL</text><text class="section-title">留下的日子</text></view>
-    <button class="add-button" bindtap="addEntry">＋ 记录</button>
+    <view><text class="eyebrow">PRIVATE JOURNAL</text><text class="section-title">{{i18n.t('留下的日子', locale)}}</text></view>
+    <button class="add-button" bindtap="addEntry">{{i18n.t('＋ 记录', locale)}}</button>
   </view>
-  <text class="history-note">所有记录默认仅自己可见。长按一条记录可以删除。</text>
-  <view wx:if="{{loading}}" class="loading-copy">正在翻开记录</view>
+  <text class="history-note">{{i18n.t('所有记录默认仅自己可见。长按一条记录可以删除。', locale)}}</text>
+  <view wx:if="{{loading}}" class="loading-copy">{{i18n.t('正在翻开记录', locale)}}</view>
   <view wx:if="{{error}}" class="form-error">{{error}}</view>
   <view wx:if="{{!loading && entries.length}}" class="timeline">
     <view wx:for="{{entries}}" wx:key="id" class="timeline-row" data-index="{{index}}" bindlongpress="removeEntry">
@@ -12,13 +13,14 @@
       <view class="paper-card history-card">
         <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />
         <text class="history-content">{{item.content || '今天 +1'}}</text>
-        <view class="entry-tags"><text>{{item.moodLabel}}</text><text>{{item.categoryLabel}}</text></view>
+        <view class="entry-tags"><text>{{i18n.t(item.moodLabel, locale)}}</text><text>{{i18n.t(item.categoryLabel, locale)}}</text></view>
+        <button class="entry-share" data-index="{{index}}" catchtap="shareEntry">{{i18n.t('分享这一天 ↗', locale)}}</button>
       </view>
     </view>
   </view>
   <view wx:if="{{!loading && !entries.length}}" class="paper-card empty-state">
-    <text class="section-title">这里会慢慢长出你的故事。</text>
-    <text class="muted">今天先留下一句话。</text>
-    <button class="primary-button empty-action" bindtap="addEntry">记录今天 +1</button>
+    <text class="section-title">{{i18n.t('这里会慢慢长出你的故事。', locale)}}</text>
+    <text class="muted">{{i18n.t('今天先留下一句话。', locale)}}</text>
+    <button class="primary-button empty-action" bindtap="addEntry">{{i18n.t('记录今天 +1', locale)}}</button>
   </view>
 </view>
