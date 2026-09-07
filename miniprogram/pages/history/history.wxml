@@ -11,7 +11,7 @@
     <view wx:for="{{entries}}" wx:key="id" class="timeline-row" data-index="{{index}}" bindlongpress="removeEntry">
       <view class="timeline-date"><text>{{item.dateLabel}}</text></view>
       <view class="paper-card history-card">
-        <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" />
+        <view class="entry-photo-grid"><image wx:for="{{item.imageUrls}}" wx:for-item="photo" wx:for-index="photoIndex" wx:key="*this" src="{{photo}}" mode="aspectFill" data-entry="{{index}}" data-photo="{{photoIndex}}" catchtap="previewPhoto" catchlongpress="previewPhoto" /></view>
         <text class="history-content">{{item.content || '今天 +1'}}</text>
         <view class="entry-tags"><text>{{i18n.t(item.moodLabel, locale)}}</text><text>{{i18n.t(item.categoryLabel, locale)}}</text></view>
         <button class="entry-share" data-index="{{index}}" catchtap="shareEntry">{{i18n.t('分享这一天 ↗', locale)}}</button>

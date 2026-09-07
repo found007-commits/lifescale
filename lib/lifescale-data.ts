@@ -57,7 +57,7 @@ export async function loadLifeScaleData(userId: string) {
   }
   const entriesWithUrls = entries.map((entry) => ({
     ...entry,
-    entry_media: (entry.entry_media || []).map((media) => ({ ...media, signed_url: signedUrls.get(media.storage_path) })),
+    entry_media: (entry.entry_media || []).slice().sort((a, b) => a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id)).map((media) => ({ ...media, signed_url: signedUrls.get(media.storage_path) })),
   }));
   return {
     profile: profileResult.data as LifeProfile | null,
@@ -83,7 +83,9 @@ export async function createEntry(input: { id?: string; userId: string; entryDat
   const parsed = entryInputSchema.parse({ user_id: input.userId, entry_date: input.entryDate, content: input.content, mood: input.mood, category: input.category, visibility: input.visibility });
   const id = input.id || crypto.randomUUID();
   const supabase = getSupabaseBrowserClient();
-  const { data, error } = await supabase.from("life_entries").insert({ id, ...parsed }).select("*").single();
+  let { data, error } = await supabase.from("life_entries").insert({ id, ...parsed }).select("*").single();
+  // Retrying a partially completed upload reuses this entry instead of duplicating it.
+  if (error?.code === "23505" && input.id) ({ data, error } = await supabase.from("life_entries").select("*").eq("id", id).eq("user_id", input.userId).single());
   if (error) throw new Error(errorMessage(error, "Could not save this entry."));
   const { error: checkinError } = await supabase.from("checkins").upsert({ user_id: input.userId, checkin_date: input.checkinDate }, { onConflict: "user_id,checkin_date", ignoreDuplicates: true });
   if (checkinError) throw new Error(errorMessage(checkinError, "Entry saved, but check-in could not be updated."));
@@ -97,17 +99,18 @@ export async function updateEntry(entryId: string, userId: string, input: { cont
   return data as LifeEntry;
 }
 
-export async function uploadEntryImage(userId: string, entryId: string, file: File) {
+export async function uploadEntryImage(userId: string, entryId: string, file: File, mediaId = crypto.randomUUID()) {
   if (!file.type.startsWith("image/")) throw new Error("Only image files are supported.");
   if (file.size > 10 * 1024 * 1024) throw new Error("Image must be 10 MB or smaller.");
   const extension = (file.name.split(".").pop() || "jpg").replace(/[^a-z0-9]/gi, "").toLowerCase();
-  const path = `${userId}/${entryId}/${crypto.randomUUID()}.${extension}`;
+  const path = `${userId}/${entryId}/${mediaId}.${extension}`;
   const supabase = getSupabaseBrowserClient();
   const { error: uploadError } = await supabase.storage.from("entry-media").upload(path, file, { contentType: file.type, upsert: false });
-  if (uploadError) throw new Error(errorMessage(uploadError, "Could not upload the image."));
-  const { data, error } = await supabase.from("entry_media").insert({ entry_id: entryId, user_id: userId, storage_path: path, media_type: file.type }).select("*").single();
+  if (uploadError && !/already exists|duplicate/i.test(uploadError.message)) throw new Error(errorMessage(uploadError, "Could not upload the image."));
+  let { data, error } = await supabase.from("entry_media").insert({ id: mediaId, entry_id: entryId, user_id: userId, storage_path: path, media_type: file.type }).select("*").single();
+  if (error?.code === "23505") ({ data, error } = await supabase.from("entry_media").select("*").eq("id", mediaId).eq("user_id", userId).single());
   if (error) {
-    await supabase.storage.from("entry-media").remove([path]);
+    // Keep the object for retry: a timeout can occur after the row was committed.
     throw new Error(errorMessage(error, "Could not attach the image."));
   }
   const { data: signed } = await supabase.storage.from("entry-media").createSignedUrl(path, 3600);

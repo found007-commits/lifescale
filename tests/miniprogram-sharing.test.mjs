@@ -9,6 +9,25 @@ const { normalizeAge, journeyMessage, openShare } = require("../miniprogram/util
 const t = require("../miniprogram/utils/locale-copy.js");
 const ctx = { measureText: (value) => ({ width: Array.from(value).length * 34 }) };
 
+test("multi-photo layouts retain each photo and all text within safe pages at web and mini widths", () => {
+  for (const width of [720, 1080]) for (const layout of ["separate", "overlay"]) for (const count of [2, 9, 25]) {
+    const photos = Array.from({ length: count }, (_, i) => ({ width: i % 2 ? 1200 : 600, height: i % 2 ? 600 : 1200 }));
+    const content = "今天🌿 another day. ".repeat(700);
+    const plan = planCard(ctx, content, photos, layout, { width, backgroundIndex: count - 1 });
+    assert.equal(plan.backgroundIndex, count - 1);
+    assert.deepEqual(plan.pages.flatMap(p => p.photoRows.flatMap(row => row.indices)), photos.map((_, i) => i));
+    assert.equal(plan.pages.flatMap(p => p.lines).join(""), content);
+    for (const page of plan.pages) {
+      assert.ok(page.height <= MAX_HEIGHT);
+      assert.ok(page.top + page.lines.length * plan.lineHeight <= page.height - 190 * plan.scale);
+      for (const row of page.photoRows) {
+        assert.ok(row.y + row.height <= page.height - 190 * plan.scale);
+        if (page.lines.length) assert.ok(row.y + row.height <= page.top || row.y >= page.top + page.lines.length * plan.lineHeight);
+      }
+    }
+  }
+});
+
 test("long records retain every character, paragraph and emoji across safe image sizes", () => {
   for (const layout of ["separate", "overlay"]) {
     for (const content of ["今天你好。🌿\n\nTomorrow's memories.", "记录🌿 hello ".repeat(1200), "\n".repeat(500)]) {

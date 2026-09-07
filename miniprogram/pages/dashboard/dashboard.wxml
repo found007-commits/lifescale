@@ -39,7 +39,7 @@
       </view>
       <view wx:if="{{recentEntries.length}}" class="recent-list">
         <view wx:for="{{recentEntries}}" wx:key="id" class="paper-card entry-card">
-          <image wx:if="{{item.imageUrl}}" class="entry-image" src="{{item.imageUrl}}" mode="aspectFill" />
+          <view class="entry-photo-grid"><image wx:for="{{item.imageUrls}}" wx:for-item="photo" wx:for-index="photoIndex" wx:key="*this" src="{{photo}}" mode="aspectFill" data-entry="{{index}}" data-photo="{{photoIndex}}" bindtap="previewPhoto" /></view>
           <view class="entry-meta"><text>{{item.dateLabel}}</text><text>{{i18n.t('仅自己可见', locale)}}</text></view>
           <text class="entry-content">{{item.content || '今天 +1'}}</text>
           <view class="entry-tags"><text>{{i18n.t(item.moodLabel, locale)}}</text><text>{{i18n.t(item.categoryLabel, locale)}}</text></view>

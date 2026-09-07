@@ -1,4 +1,13 @@
 {
+  "正在处理照片…": "Preparing photos…",
+  "正在上传照片…": "Uploading photos…",
+  "＋ 添加照片（可多选）": "+ Add photos (multi-select)",
+  "可继续添加。照片自动优化为静态 JPG，动图取单帧，不改变原文件。支持的相册格式由设备决定。": "Keep adding photos. They are optimized as static JPGs (one frame for animations), without changing the originals. Supported album formats depend on your device.",
+  "照片较大，处理和上传可能较慢，请保持页面打开。": "Large photos may take longer to process and upload. Please keep this page open.",
+  "重试剩余上传": "Retry remaining uploads",
+  "选择背景图 · 整组照片都会保留": "Choose background · the whole album is kept",
+  "深色底板与米白文字，整组照片保留在文字后面。": "High-contrast text, followed by the complete photo album.",
+  "所有照片按顺序完整排列，文字自动排成长图。": "All photos stay in order; the full text flows into a long image.",
   "更新于 2026 年 9 月 7 日": "Updated 7 September 2026",
   "更新于 2026 年 8 月 21 日": "Updated 21 August 2026",
   "我们收集什么": "What we collect",

@@ -5,12 +5,18 @@
   <text class="record-intro">{{i18n.t('无需写得漂亮。一句话、一张图，或者只是此刻的心情。', locale)}}</text>
 
   <view class="paper-card composer">
-    <textarea class="textarea" value="{{content}}" bindinput="onContentInput" maxlength="12000" placeholder="{{i18n.t('写下你想记住的片刻……', locale)}}" auto-height="false" />
-    <view wx:if="{{image}}" class="image-preview">
-      <image src="{{image.tempFilePath}}" mode="aspectFill" />
-      <button bindtap="removeImage">{{i18n.t('移除', locale)}}</button>
+    <textarea class="textarea" disabled="{{saving || persisted}}" value="{{content}}" bindinput="onContentInput" maxlength="12000" placeholder="{{i18n.t('写下你想记住的片刻……', locale)}}" auto-height="false" />
+    <view class="photo-choice-grid">
+    <view wx:for="{{images}}" wx:key="id" class="image-preview">
+      <image wx:if="{{item.tempFilePath}}" src="{{item.tempFilePath}}" mode="aspectFill" />
+      <text wx:else>{{item.error || i18n.t('正在处理照片…', locale)}}</text>
+      <button data-index="{{index}}" disabled="{{saving || processing || persisted}}" bindtap="removeImage">{{index + 1}} · {{i18n.t('移除', locale)}}</button>
     </view>
-    <button wx:else class="photo-button" bindtap="chooseImage">{{i18n.t('＋ 添加一张照片', locale)}}</button>
+    </view>
+    <button class="photo-button" disabled="{{saving || processing || persisted}}" bindtap="chooseImage">{{i18n.t(processing ? '正在处理照片…' : '＋ 添加照片（可多选）', locale)}}</button>
+    <text class="upload-hint">{{i18n.t('可继续添加。照片自动优化为静态 JPG，动图取单帧，不改变原文件。支持的相册格式由设备决定。', locale)}}</text>
+    <text wx:if="{{notice}}" class="upload-hint">{{i18n.t(notice, locale)}}</text>
+    <text wx:if="{{progress}}" class="upload-hint">{{i18n.t(processing ? '正在处理照片…' : '正在上传照片…', locale)}} {{progress}}</text>
 
     <view class="choice-block">
       <text class="field-label">{{i18n.t('此刻的心情', locale)}}</text>
@@ -25,6 +31,7 @@
       </view>
     </view>
     <view wx:if="{{error}}" class="form-error">{{error}}</view>
-    <button class="primary-button save-entry" bindtap="saveEntry" loading="{{saving}}" disabled="{{saving}}">{{i18n.t('仅自己可见，保存今天', locale)}}</button>
+    <button class="primary-button save-entry" bindtap="saveEntry" loading="{{saving}}" disabled="{{saving || processing}}">{{i18n.t(persisted ? '重试剩余上传' : '仅自己可见，保存今天', locale)}}</button>
   </view>
+  <canvas type="2d" id="photoCanvas" class="render-canvas" />
 </view>

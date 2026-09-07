@@ -7,7 +7,11 @@
     <button class="{{layout === 'separate' ? 'selected' : ''}}" data-layout="separate" bindtap="chooseLayout" disabled="{{busy}}">{{i18n.t('图文分开', locale)}}</button>
     <button class="{{layout === 'overlay' ? 'selected' : ''}}" data-layout="overlay" bindtap="chooseLayout" disabled="{{busy || !hasPhoto}}">{{i18n.t('文字镶嵌', locale)}}</button>
   </view>
-  <text class="share-note">{{i18n.t(hasPhoto ? (layout === 'overlay' ? '深色底板与米白文字，让照片上的文字清楚易读。' : '保留完整照片，文字自动排成长图。') : '此记录没有照片，生成纯文字分享卡。', locale)}}</text>
+  <view wx:if="{{layout === 'overlay' && imageUrls.length > 1}}" class="share-backgrounds">
+    <text>{{i18n.t('选择背景图 · 整组照片都会保留', locale)}}</text>
+    <button wx:for="{{imageUrls}}" wx:key="index" class="{{backgroundIndex === index ? 'selected' : ''}}" disabled="{{busy}}" data-index="{{index}}" bindtap="chooseBackground"><image src="{{item}}" mode="aspectFill" /><text>{{index + 1}}</text></button>
+  </view>
+  <text class="share-note">{{i18n.t(hasPhoto ? (layout === 'overlay' ? '深色底板与米白文字，整组照片保留在文字后面。' : '所有照片按顺序完整排列，文字自动排成长图。') : '此记录没有照片，生成纯文字分享卡。', locale)}}</text>
   <text wx:if="{{busy}}" class="loading-copy">{{i18n.t('正在生成完整分享卡…', locale)}}</text>
   <view wx:if="{{error}}" class="form-error">{{error}}<button bindtap="generate" class="secondary-button">{{i18n.t('重试', locale)}}</button></view>
   <text wx:if="{{cards.length > 1}}" class="share-note">{{i18n.t('记录较长，为保证清晰度已完整分成', locale)}} {{cards.length}} {{i18n.t('张。请选择一张发送，或逐张保存全部内容。', locale)}}</text>

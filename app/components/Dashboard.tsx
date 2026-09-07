@@ -2,7 +2,6 @@
 
 import type { CSSProperties } from "react";
 import type { Session } from "@supabase/supabase-js";
-import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { signOut } from "../../lib/auth-client";
 import { calculateLifeMetrics } from "../../lib/life-calculations";
@@ -14,6 +13,7 @@ import { useTheme } from "../../lib/use-theme";
 import { useTraditionalChinese } from "../../lib/use-traditional-chinese";
 import { Brand } from "./Brand";
 import { CoreTargetEditor } from "./CoreTargetEditor";
+import { EntryGallery } from "./EntryGallery";
 import { EntryComposer } from "./EntryComposer";
 import { EntryShareDialog } from "./EntryShareDialog";
 import { GenderSelector } from "./GenderSelector";
@@ -176,5 +176,5 @@ function EntryCard({ entry, locale, onShare }: { entry: LifeEntry; locale: Local
   const en = locale === "en";
   const mood = en ? { calm: "Calm", happy: "Happy", grateful: "Grateful", tired: "Tired", sad: "Sad", anxious: "Anxious", hopeful: "Hopeful" }[entry.mood] : moodLabels[entry.mood];
   const category = en ? { daily: "Daily life", family: "Family", work: "Work", growth: "Growth", health: "Health", travel: "Travel", reflection: "Reflection", other: "Other" }[entry.category] : categoryLabels[entry.category];
-  return <article className="entry-card"><div className="entry-meta"><span>{new Date(entry.entry_date).toLocaleDateString(en ? "en-US" : locale === "zh-TW" ? "zh-TW" : "zh-CN", { month: "long", day: "numeric", weekday: "short" })}</span><span>{en ? "Only me" : "仅自己可见"}</span></div>{entry.entry_media?.[0]?.signed_url ? <Image src={entry.entry_media[0].signed_url} alt={en ? "Journal image" : "记录图片"} width={720} height={480} unoptimized /> : null}<p className="ignore-opencc">{entry.content || (en ? "Today +1" : "今天 +1")}</p><div className="entry-footer"><div className="entry-tags"><span>{mood}</span><span>{category}</span></div><button className="entry-share-button" type="button" onClick={() => onShare(entry)}>{en ? "Share" : "分享"} ↗</button></div></article>;
+  return <article className="entry-card"><div className="entry-meta"><span>{new Date(entry.entry_date).toLocaleDateString(en ? "en-US" : locale === "zh-TW" ? "zh-TW" : "zh-CN", { month: "long", day: "numeric", weekday: "short" })}</span><span>{en ? "Only me" : "仅自己可见"}</span></div><EntryGallery media={entry.entry_media || []} en={en} /><p className="ignore-opencc">{entry.content || (en ? "Today +1" : "今天 +1")}</p><div className="entry-footer"><div className="entry-tags"><span>{mood}</span><span>{category}</span></div><button className="entry-share-button" type="button" onClick={() => onShare(entry)}>{en ? "Share" : "分享"} ↗</button></div></article>;
 }

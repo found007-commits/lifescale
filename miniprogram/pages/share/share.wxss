@@ -13,3 +13,8 @@
 .preview-scroll { height: 48vh; margin: 16rpx 0 24rpx; }
 .preview-scroll .card-item:first-child { margin-top: 0; }
 .render-canvas { position: fixed; left: -10000px; top: 0; width: 720px; height: 900px; pointer-events: none; }
+.share-backgrounds { display: flex; flex-wrap: wrap; gap: 12rpx; margin: 20rpx 0; }
+.share-backgrounds > text { width: 100%; font-size: 24rpx; line-height: 1.7; }
+.share-backgrounds button { width: 116rpx; padding: 6rpx; margin: 0; border: 3rpx solid transparent; background: #e5e8e1; font-size: 22rpx; }
+.share-backgrounds button.selected { border-color: #a87316; }
+.share-backgrounds image { display: block; width: 98rpx; height: 90rpx; }

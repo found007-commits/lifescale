@@ -20,8 +20,9 @@ test("each daily entry offers an explicit private-safe share action", async () =
   assert.match(dialog, /Instagram/);
   assert.match(dialog, /原记录继续保持私密/);
   assert.match(dialog, /canvas\.toBlob/);
-  assert.match(dialog, /canvas\.height = cardHeight/);
-  assert.match(dialog, /entry\.content\.trim\(\)\.split|text\.trim\(\)\.split/);
+  assert.match(dialog, /planCard\(ctx, entry\.content/);
+  assert.match(dialog, /for \(const media of entry.entry_media/);
+  assert.match(dialog, /for \(let index = 0; index < plan.pages.length/);
   assert.doesNotMatch(dialog, /wrapText\([^)]*,\s*9\)/);
   assert.doesNotMatch(dialog, /lines\[lines\.length - 1\].*…/);
   assert.match(dialog, /MicroMessenger/);
@@ -31,12 +32,9 @@ test("each daily entry offers an explicit private-safe share action", async () =
   assert.match(dialog, /type ShareLayout = "separate" \| "overlay"/);
   assert.match(dialog, /图文分开/);
   assert.match(dialog, /文字镶嵌/);
-  assert.match(dialog, /drawImageContain/);
-  assert.match(dialog, /drawImageCover/);
-  assert.match(dialog, /imageLuminance/);
-  assert.match(dialog, /blur\(14px\) saturate\(70%\) brightness\(72%\)/);
-  assert.match(dialog, /rgba\(6,30,22,\.82\)/);
-  assert.match(dialog, /加深文字底板并柔化文字区域/);
+  assert.match(dialog, /drawCard\(canvas, photos/);
+  assert.match(dialog, /setBackgroundIndex/);
+  assert.match(dialog, /加深文字底板/);
   assert.match(dialog, /disabled=!\{hasPhoto\}|disabled=\{!hasPhoto\}/);
   assert.doesNotMatch(dialog, /updateProfile|insertEntry|visibility:\s*["']public/);
 });

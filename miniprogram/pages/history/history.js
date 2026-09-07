@@ -13,6 +13,7 @@ function decorate(entry) {
     moodLabel: moodLabels[entry.mood] || "平静",
     categoryLabel: categoryLabels[entry.category] || "日常",
     imageUrl: entry.entry_media?.[0]?.signed_url || "",
+    imageUrls: (entry.entry_media || []).map((media) => media.signed_url).filter(Boolean),
   };
 }
 
@@ -33,6 +34,10 @@ Page({
       this.setData({ loading: false });
       if (fromPull) wx.stopPullDownRefresh();
     }
+  },
+  previewPhoto(event) {
+    const entry = this.data.entries[Number(event.currentTarget.dataset.entry)];
+    if (entry?.imageUrls.length) wx.previewImage({ urls: entry.imageUrls, current: entry.imageUrls[Number(event.currentTarget.dataset.photo)] });
   },
   addEntry() { wx.navigateTo({ url: "/pages/record/record" }); },
   shareEntry(event) { openShare(this.data.entries[Number(event.currentTarget.dataset.index)], getApp().globalData.profile?.locale); },

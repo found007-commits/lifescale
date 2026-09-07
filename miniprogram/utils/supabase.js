@@ -154,7 +154,7 @@ async function createProfile(profile) {
 async function getEntries(userId, limit = 100) {
   const rows = await request(`/rest/v1/life_entries?user_id=eq.${encodeURIComponent(userId)}&select=*,entry_media(*)&order=entry_date.desc&limit=${limit}`);
   return Promise.all(rows.map(async (entry) => {
-    const media = await Promise.all((entry.entry_media || []).map(async (item) => {
+    const media = await Promise.all((entry.entry_media || []).slice().sort((a, b) => a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id)).map(async (item) => {
       try {
         const signed = await request(`/storage/v1/object/sign/entry-media/${item.storage_path}`, { method: "POST", data: { expiresIn: 3600 } });
         return { ...item, signed_url: `${runtimeConfig.supabaseUrl}/storage/v1${signed.signedURL}` };
@@ -187,47 +187,56 @@ async function exportAccount() {
   return wxRequest({ url: `${config.apiBase}/api/account/export`, method: "GET", header: { Authorization: `Bearer ${session.access_token}` } });
 }
 
-async function createEntry({ userId, content, mood, category, image }) {
-  const entryId = uuid();
-  const rows = await request("/rest/v1/life_entries", {
+async function createEntry({ id, userId, content, mood, category }) {
+  const entryId = id || uuid();
+  let rows;
+  try { rows = await request("/rest/v1/life_entries", {
     method: "POST",
     header: { Prefer: "return=representation" },
     data: { id: entryId, user_id: userId, entry_date: new Date().toISOString(), content, mood, category, visibility: "private" },
-  });
+  }); } catch (error) {
+    if (!id || error.status !== 409) throw error;
+    rows = await request(`/rest/v1/life_entries?id=eq.${entryId}&user_id=eq.${encodeURIComponent(userId)}&select=*`);
+    if (!rows[0]) throw error;
+  }
   await request("/rest/v1/checkins?on_conflict=user_id,checkin_date", {
     method: "POST",
     header: { Prefer: "resolution=merge-duplicates,return=minimal" },
     data: { user_id: userId, checkin_date: localDateString() },
   });
-  if (image) await uploadEntryImage(userId, entryId, image);
   return rows[0];
 }
 
-async function uploadEntryImage(userId, entryId, image) {
+async function uploadEntryImage(userId, entryId, image, mediaId = uuid()) {
   const service = await ensureConfig();
   let session = restoreSession();
   if (session?.expires_at && session.expires_at * 1000 < Date.now() + 60000) session = await refreshSession(session);
-  const extension = (image.tempFilePath.split(".").pop() || "jpg").toLowerCase();
+  const extension = image.mediaType === "image/jpeg" ? "jpg" : (image.tempFilePath.split(".").pop() || "jpg").toLowerCase();
   const mediaTypes = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp", gif: "image/gif" };
-  const storagePath = `${userId}/${entryId}/${uuid()}.${extension}`;
+  const storagePath = `${userId}/${entryId}/${mediaId}.${extension}`;
   await new Promise((resolve, reject) => {
     wx.uploadFile({
+      timeout: 120000,
       url: `${service.supabaseUrl}/storage/v1/object/entry-media/${storagePath}`,
       filePath: image.tempFilePath,
       name: "file",
       header: { apikey: service.publishableKey, Authorization: `Bearer ${session.access_token}`, "x-upsert": "false" },
       success(response) {
-        if (response.statusCode >= 200 && response.statusCode < 300) resolve(response.data);
+        if (response.statusCode >= 200 && response.statusCode < 300 || response.statusCode === 409 || /already exists|duplicate/i.test(String(response.data))) resolve(response.data);
         else reject(new Error("照片上传失败。"));
       },
       fail() { reject(new Error("照片上传失败。")); },
     });
   });
-  await request("/rest/v1/entry_media", {
+  try { await request("/rest/v1/entry_media", {
     method: "POST",
     header: { Prefer: "return=minimal" },
-    data: { entry_id: entryId, user_id: userId, storage_path: storagePath, media_type: mediaTypes[extension] || "image/jpeg" },
-  });
+    data: { id: mediaId, entry_id: entryId, user_id: userId, storage_path: storagePath, media_type: mediaTypes[extension] || "image/jpeg" },
+  }); } catch (error) {
+    if (error.status !== 409) throw error;
+    const existing = await request(`/rest/v1/entry_media?id=eq.${mediaId}&user_id=eq.${encodeURIComponent(userId)}&select=id`);
+    if (!existing[0]) throw error;
+  }
 }
 
 async function deleteEntry(entry) {
@@ -273,4 +282,5 @@ module.exports = {
   sendOtp,
   verifyOtp,
   updateProfile,
+  uploadEntryImage,
 };

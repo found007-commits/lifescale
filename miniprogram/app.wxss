@@ -69,6 +69,9 @@ button::after { border: 0; }
 .mode-options button { flex: 1; padding: 0 12rpx; font-size: 28rpx; color: #fffdf8; background: transparent; border-radius: 18rpx; }
 .mode-options .chosen { background: #fffdf8; color: #143d2f; font-weight: 700; }
 .journey-note { padding: 28rpx; margin-top: 28rpx; font-size: 27rpx; line-height: 1.8; }
+.entry-photo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12rpx; margin: 18rpx 0; }
+.entry-photo-grid image { width: 100%; height: 220rpx; border-radius: 14rpx; margin: 0; }
+.entry-photo-grid image:only-child { grid-column: 1 / -1; height: 380rpx; }
 .journey-note text { display: block; }
 .journey-note text:first-child { color: #a4731c; font-weight: 700; margin-bottom: 10rpx; }
 @media (prefers-color-scheme: dark) {

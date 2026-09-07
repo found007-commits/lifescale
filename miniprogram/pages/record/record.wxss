@@ -12,3 +12,8 @@
 .choice-pill { width: auto; min-height: 64rpx; margin: 0; padding: 0 24rpx; border-radius: 999rpx; background: #eee9dc; color: #476b5d; font-size: 22rpx; line-height: 64rpx; }
 .choice-pill.active { background: #123f31; color: #fbfaf6; }
 .save-entry { margin-top: 38rpx; }
+.photo-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16rpx; }
+.photo-choice-grid .image-preview image { height: 210rpx; }
+.photo-choice-grid text { display: block; font-size: 22rpx; line-height: 1.6; overflow-wrap: anywhere; }
+.upload-hint { display: block; margin-top: 20rpx; color: #476b5d; font-size: 23rpx; line-height: 1.8; }
+.render-canvas { position: fixed; left: -10000px; top: 0; width: 720px; height: 900px; pointer-events: none; }

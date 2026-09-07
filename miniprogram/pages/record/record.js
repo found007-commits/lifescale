@@ -1,12 +1,14 @@
 const Page = require("../../utils/localized-page");
-const { createEntry, requireSession } = require("../../utils/supabase");
+const { createEntry, uploadEntryImage, requireSession } = require("../../utils/supabase");
+const { prepareImage } = require("../../utils/prepare-image");
+const { uuid } = require("../../utils/life");
 
 Page({
   data: {
     content: "",
     mood: "calm",
     category: "daily",
-    image: null,
+    images: [], processing: false, notice: "", progress: "", persisted: false,
     saving: false,
     error: "",
     moods: [
@@ -20,31 +22,66 @@ Page({
     ],
   },
 
-  onLoad() { this.session = requireSession(); },
+  onLoad() { this.session = requireSession(); this.entryId = uuid(); this.uploaded = new Set(); this.files = new Set(); },
+  onUnload() { this.closed = true; this.files.forEach((filePath) => wx.getFileSystemManager().unlink({ filePath, fail() {} })); },
   onContentInput(event) { this.setData({ content: event.detail.value.slice(0, 12000), error: "" }); },
-  chooseMood(event) { this.setData({ mood: event.currentTarget.dataset.value }); },
-  chooseCategory(event) { this.setData({ category: event.currentTarget.dataset.value }); },
-  chooseImage() {
-    wx.chooseMedia({ count: 1, mediaType: ["image"], sizeType: ["compressed"], success: (result) => {
-      const image = result.tempFiles[0];
-      if (image.size > 10 * 1024 * 1024) wx.showToast({ title: "照片不能超过 10MB", icon: "none" });
-      else this.setData({ image });
-    } });
+  chooseMood(event) { if (!this.data.saving && !this.data.persisted) this.setData({ mood: event.currentTarget.dataset.value }); },
+  chooseCategory(event) { if (!this.data.saving && !this.data.persisted) this.setData({ category: event.currentTarget.dataset.value }); },
+  async chooseImage() {
+    if (this.picking || this.data.saving || this.data.persisted) return;
+    this.picking = true; this.setData({ processing: true, error: "" });
+    try {
+      const result = await new Promise((resolve, reject) => wx.chooseMedia({ count: 9, mediaType: ["image"], sizeType: ["original"], success: resolve, fail: reject }));
+      if (result.tempFiles.some((file) => file.size > 10 * 1024 * 1024)) this.setData({ notice: "照片较大，处理和上传可能较慢，请保持页面打开。" });
+      const canvas = this.canvas || await new Promise((resolve, reject) => wx.createSelectorQuery().in(this).select("#photoCanvas").fields({ node: true }).exec((rows) => rows[0]?.node ? resolve(rows[0].node) : reject(new Error("图片组件尚未准备好，请重试。"))));
+      this.canvas = canvas;
+      for (let i = 0; i < result.tempFiles.length; i++) {
+        if (this.closed) break;
+        const id = uuid();
+        this.setData({ progress: `${i + 1} / ${result.tempFiles.length}`, images: [...this.data.images, { id, processing: true }] });
+        try {
+          const image = await prepareImage(canvas, result.tempFiles[i]);
+          if (this.closed) { wx.getFileSystemManager().unlink({ filePath: image.tempFilePath, fail() {} }); break; }
+          this.files.add(image.tempFilePath);
+          this.setData({ images: this.data.images.map((item) => item.id === id ? { id, ...image } : item) });
+        } catch (error) {
+          this.setData({ images: this.data.images.map((item) => item.id === id ? { id, error: error.message || "图片无法读取，请转存为 JPG 或 PNG。" } : item) });
+        }
+      }
+    } catch (error) { if (!/cancel/i.test(error.errMsg || "")) this.setData({ error: error.message || "选择图片失败，请重试。" }); }
+    finally { this.picking = false; if (!this.closed) this.setData({ processing: false, progress: "" }); }
   },
-  removeImage() { this.setData({ image: null }); },
+  removeImage(event) {
+    if (this.data.saving || this.data.persisted || this.data.processing) return;
+    const image = this.data.images[Number(event.currentTarget.dataset.index)];
+    if (image?.tempFilePath) { wx.getFileSystemManager().unlink({ filePath: image.tempFilePath, fail() {} }); this.files.delete(image.tempFilePath); }
+    this.setData({ images: this.data.images.filter((item) => item.id !== image?.id) });
+  },
 
   async saveEntry() {
-    if (!this.session || this.data.saving) return;
-    if (!this.data.content.trim() && !this.data.image) return this.setData({ error: "写一句话或选择一张照片后再保存。" });
+    if (!this.session || this.data.saving || this.picking) return;
+    if (!this.data.content.trim() && !this.data.images.length) return this.setData({ error: "写一句话或选择照片后再保存。" });
+    if (this.data.images.some((image) => image.error || !image.tempFilePath)) return this.setData({ error: "请先移除无法读取的图片，再保存。" });
     this.setData({ saving: true, error: "" });
     try {
-      await createEntry({ userId: this.session.user.id, content: this.data.content.trim(), mood: this.data.mood, category: this.data.category, image: this.data.image });
+      if (!this.data.persisted) {
+        await createEntry({ id: this.entryId, userId: this.session.user.id, content: this.data.content.trim(), mood: this.data.mood, category: this.data.category });
+        this.setData({ persisted: true });
+      }
+      for (let i = 0; i < this.data.images.length; i++) {
+        if (this.closed) return;
+        const image = this.data.images[i];
+        if (this.uploaded.has(image.id)) continue;
+        this.setData({ progress: `${i + 1} / ${this.data.images.length}` });
+        await uploadEntryImage(this.session.user.id, this.entryId, image, image.id);
+        this.uploaded.add(image.id);
+      }
       wx.showToast({ title: "今天已留下", icon: "success", duration: 1200 });
-      setTimeout(() => wx.reLaunch({ url: "/pages/dashboard/dashboard" }), 800);
+      setTimeout(() => { if (!this.closed) wx.reLaunch({ url: "/pages/dashboard/dashboard" }); }, 800);
     } catch (error) {
-      this.setData({ error: error.message || "记录保存失败。" });
+      this.setData({ error: (error.message || "记录保存失败。") + (this.data.persisted ? " 记录和已上传照片已保留，重试只继续剩余上传。" : "") });
     } finally {
-      this.setData({ saving: false });
+      if (!this.closed) this.setData({ saving: false });
     }
   },
 });
