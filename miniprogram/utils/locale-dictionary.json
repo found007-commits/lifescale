@@ -214,6 +214,10 @@
   "调整目标年龄": "Adjust target age",
   "确认调整目标？": "Confirm this adjustment?",
   "确认调整": "Confirm",
+  "我已阅读并同意": "I have read and agree to the",
+  "是否同意由你选择；不同意也可以先浏览。": "It is your choice. You can browse without agreeing.",
+  "暂不同意，先浏览": "Not now — browse first",
+  "请先阅读并自行选择是否同意服务条款和隐私政策。": "Please read the Terms and Privacy Policy and choose whether to agree before signing in.",
   "请选择尚未到达的目标年龄（30-150 岁）。": "Choose a future target age between 30 and 150.",
   "距离上次设定尚未满一年，请刷新查看下次可调整时间。": "A full year has not yet passed. Refresh to see the next available date."
 }

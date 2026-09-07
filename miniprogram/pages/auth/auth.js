@@ -1,5 +1,6 @@
 const Page = require("../../utils/localized-page");
 const { getProfile, sendOtp, verifyOtp } = require("../../utils/supabase");
+const t = require("../../utils/locale-copy");
 
 Page({
   data: {
@@ -10,6 +11,7 @@ Page({
     verifying: false,
     seconds: 0,
     error: "",
+    agreed: false,
   },
 
   onUnload() {
@@ -19,6 +21,18 @@ Page({
   onEmailInput(event) {
     this.setData({ email: event.detail.value.trim(), error: "" });
   },
+
+  onConsentChange(event) {
+    this.setData({ agreed: event.detail.value.includes("agree"), error: "" });
+  },
+
+  checkConsent() {
+    if (this.data.agreed === true) return true;
+    this.setData({ error: t("请先阅读并自行选择是否同意服务条款和隐私政策。", this.data.locale) });
+    return false;
+  },
+
+  browseWithoutLogin() { wx.reLaunch({ url: "/pages/index/index" }); },
 
   onCodeInput(event) {
     this.setData({ code: event.detail.value.replace(/\D/g, "").slice(0, 6), error: "" });
@@ -38,6 +52,7 @@ Page({
   },
 
   async sendCode() {
+    if (!this.checkConsent()) return;
     if (this.data.sending || this.data.seconds > 0) return;
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.data.email)) {
       this.setData({ error: "请输入有效的邮箱地址。" });
@@ -57,6 +72,7 @@ Page({
   },
 
   async verifyCode() {
+    if (!this.checkConsent()) return;
     if (this.data.verifying) return;
     if (!/^\d{6}$/.test(this.data.code)) {
       this.setData({ error: "请输入邮件中的 6 位验证码。" });

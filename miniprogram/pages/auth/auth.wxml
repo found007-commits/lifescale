@@ -16,20 +16,27 @@
       <text class="field-label">{{i18n.t('邮箱地址', locale)}}</text>
       <input class="input" type="text" value="{{email}}" bindinput="onEmailInput" placeholder="name@example.com" disabled="{{sent}}" />
     </view>
-    <button wx:if="{{!sent}}" class="primary-button auth-action" bindtap="sendCode" loading="{{sending}}" disabled="{{sending}}">{{i18n.t('发送验证码', locale)}}</button>
+    <view class="consent-row">
+      <checkbox-group bindchange="onConsentChange">
+        <label class="consent-choice"><checkbox value="agree" checked="{{agreed}}" disabled="{{sending || verifying}}" color="#123f31" /><text>{{i18n.t('我已阅读并同意', locale)}}</text></label>
+      </checkbox-group>
+      <view class="consent-links"><navigator class="policy-link" url="/pages/legal/legal?type=terms">{{i18n.t('服务条款', locale)}}</navigator><text>{{i18n.t('和', locale)}}</text><navigator class="policy-link" url="/pages/legal/legal?type=privacy">{{i18n.t('隐私政策', locale)}}</navigator></view>
+    </view>
+    <text wx:if="{{!agreed}}" class="consent-help">{{i18n.t('是否同意由你选择；不同意也可以先浏览。', locale)}}</text>
+    <button wx:if="{{!sent}}" class="primary-button auth-action {{sending || !agreed ? 'auth-disabled' : ''}}" bindtap="sendCode" loading="{{sending}}" disabled="{{sending || !agreed}}">{{i18n.t('发送验证码', locale)}}</button>
 
     <block wx:else>
       <view class="field">
         <text class="field-label">{{i18n.t('6 位验证码', locale)}}</text>
         <input class="input code-input" type="number" maxlength="6" value="{{code}}" bindinput="onCodeInput" placeholder="000000" focus="{{sent}}" />
       </view>
-      <button class="primary-button auth-action" bindtap="verifyCode" loading="{{verifying}}" disabled="{{verifying}}">{{i18n.t('验证并继续', locale)}}</button>
-      <button class="text-button" bindtap="sendCode" disabled="{{seconds > 0 || sending}}">{{i18n.t(seconds > 0 ? seconds + ' 秒后重新发送' : '重新发送验证码', locale)}}</button>
+      <button class="primary-button auth-action {{verifying || !agreed ? 'auth-disabled' : ''}}" bindtap="verifyCode" loading="{{verifying}}" disabled="{{verifying || !agreed}}">{{i18n.t('验证并继续', locale)}}</button>
+      <button class="text-button {{seconds > 0 || sending || !agreed ? 'auth-text-disabled' : ''}}" bindtap="sendCode" disabled="{{seconds > 0 || sending || !agreed}}">{{i18n.t(seconds > 0 ? seconds + ' 秒后重新发送' : '重新发送验证码', locale)}}</button>
       <text class="delivery-note">{{i18n.t('验证码通常几分钟内到达，请同时检查垃圾邮件。', locale)}}</text>
     </block>
     <view wx:if="{{error}}" class="form-error">{{error}}</view>
   </view>
 
   <view class="privacy-note">{{i18n.t('记录按账户隔离，默认仅本人可见。分享需由你主动确认。产品没有供创作者浏览私密记录的管理入口；具体保护范围请阅读隐私政策。', locale)}}</view>
-  <view class="privacy-note">{{i18n.t('继续即表示你同意', locale)}}<navigator url="/pages/legal/legal?type=terms">{{i18n.t('服务条款', locale)}}</navigator>{{i18n.t('和', locale)}}<navigator url="/pages/legal/legal?type=privacy">{{i18n.t('隐私政策', locale)}}</navigator>。</view>
+  <button class="text-button browse-action" bindtap="browseWithoutLogin">{{i18n.t('暂不同意，先浏览', locale)}}</button>
 </view>

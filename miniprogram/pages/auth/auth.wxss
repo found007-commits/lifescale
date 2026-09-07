@@ -6,6 +6,13 @@
 .auth-action { margin-top: 34rpx; }
 .code-input { letter-spacing: 18rpx; font-size: 38rpx; font-weight: 700; }
 .text-button { margin-top: 24rpx; background: transparent; color: #365f50; font-size: 24rpx; }
-.text-button[disabled] { color: #99aaa2; }
+.auth-text-disabled { color: #99aaa2; }
 .delivery-note { display: block; margin-top: 12rpx; color: #7f9188; font-size: 21rpx; line-height: 1.55; text-align: center; }
 .privacy-note { margin: 34rpx 20rpx 0; }
+.consent-row { margin-top: 28rpx; color: #365f50; font-size: 25rpx; line-height: 1.7; }
+.consent-choice { display: flex; align-items: center; min-height: 72rpx; gap: 8rpx; }
+.consent-links { display: flex; flex-wrap: wrap; align-items: center; gap: 10rpx; padding-left: 60rpx; }
+.policy-link { text-decoration: underline; text-underline-offset: 5rpx; font-weight: 600; padding: 8rpx 0; }
+.consent-help { display: block; margin-top: 14rpx; font-size: 23rpx; line-height: 1.6; color: #51685d; }
+.auth-card .auth-disabled { background: #e1e6e1; color: #51685d; box-shadow: none; opacity: 1; }
+.browse-action { text-decoration: underline; padding: 18rpx; }
