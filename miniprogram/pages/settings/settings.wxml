@@ -13,7 +13,16 @@
         <view wx:if="{{profile.target_age}}"><text>{{i18n.t('目标年龄', locale)}}</text><text>{{profile.target_age}} {{i18n.t('岁', locale)}}</text></view>
         <view><text>{{i18n.t('目标日期', locale)}}</text><text>{{targetLabel}}</text></view>
       </view>
-      <view class="lock-note"><text>{{i18n.t('核心人生刻度已永久确认', locale)}}</text><text>{{i18n.t('出生日期和人生目标只能确认一次，不能单独修改；如需清除，只能注销整个账户。', locale)}}</text></view>
+      <view class="lock-note"><text>{{i18n.t('首次设定后，每满一年可调整一次，累计最多 3 次。认真选择，给未来留一点余地。', locale)}}</text><text>{{i18n.t('出生日期确认后不可修改。', locale)}}</text></view>
+      <text wx:if="{{policy.configured}}" class="field-help">{{i18n.t('剩余调整次数', locale)}} {{policy.remaining}} / 3</text>
+      <text wx:if="{{!policy.configured}}" class="field-help">{{i18n.t('暂时无法读取调整资格，请刷新后重试。', locale)}}</text>
+      <text wx:elif="{{!policy.remaining}}" class="field-help">{{i18n.t('累计 3 次调整机会已用完。', locale)}}</text>
+      <text wx:elif="{{!policy.canChange}}" class="field-help">{{i18n.t('下次可调整', locale)}} {{nextTargetLabel}}</text>
+      <view wx:if="{{policy.canChange}}" class="field">
+        <text class="field-label">{{i18n.t('目标年龄', locale)}}</text>
+        <input class="input" type="number" maxlength="3" value="{{targetAgeInput}}" bindinput="onTargetAgeInput" disabled="{{adjusting}}" />
+        <button class="primary-button" bindtap="adjustTarget" loading="{{adjusting}}" disabled="{{adjusting}}">{{i18n.t('调整目标年龄', locale)}}</button>
+      </view>
     </view>
     <view class="paper-card profile-card">
       <text class="section-title">{{i18n.t('个人偏好', locale)}}</text>

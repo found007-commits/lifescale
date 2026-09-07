@@ -6,7 +6,7 @@
 
   <view class="warning-card">
     <text class="warning-label">{{i18n.t('填写前请注意', locale)}}</text>
-    <text>{{i18n.t('出生日期和目标年龄只能确认一次，保存后永久锁定，不能单独修改；如需清除，只能注销整个账户。请务必核对准确。', locale)}}</text>
+    <text>{{i18n.t('出生日期确认后不可修改；目标年龄每满一年可调整一次，累计最多 3 次。首次设定不占次数，每次调整后重新等待一年。', locale)}}</text>
   </view>
 
   <view class="paper-card onboarding-form">
@@ -30,7 +30,7 @@
       <text class="field-help">{{i18n.t('可自由填写', locale)}} {{minimumAge}}{{i18n.t('-150 岁。这是你设定的人生目标，不是寿命预测。', locale)}}</text>
     </view>
     <checkbox-group bindchange="onConfirmChange">
-      <label class="confirm-row"><checkbox value="confirmed" checked="{{confirmed}}" color="#123f31" /><text>{{i18n.t('我已认真核对，并理解出生日期和人生目标只能确认一次，保存后永久锁定。', locale)}}</text></label>
+      <label class="confirm-row"><checkbox value="confirmed" checked="{{confirmed}}" color="#123f31" /><text>{{i18n.t('我已认真核对，并理解出生日期不可修改，目标每满一年可调整一次、累计最多 3 次。', locale)}}</text></label>
     </checkbox-group>
     <view wx:if="{{error}}" class="form-error">{{error}}</view>
     <button class="primary-button save-profile" bindtap="saveProfile" loading="{{saving}}" disabled="{{saving}}">{{i18n.t('确认并进入 LifeScale', locale)}}</button>

@@ -16,6 +16,7 @@ export type LifeProfile = {
   target_age: number | null;
   target_date: string;
   target_locked_until: string;
+  target_change_count?: number;
   actual_death_date: string | null;
   display_mode: DisplayMode;
   onboarding_completed: boolean;

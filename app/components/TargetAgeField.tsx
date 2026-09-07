@@ -1,6 +1,7 @@
 "use client";
 
 import type { Locale } from "../../lib/types";
+import { RULE_ZH, RULE_EN } from "../../miniprogram/utils/target-policy";
 
 export function normalizeTargetAge(raw: string) {
   const digits = raw.replace(/\D/g, "").replace(/^0+/, "");
@@ -43,8 +44,8 @@ export function TargetAgeField({
       </label>
       <small id="target-age-guidance" className="target-age-guidance">
         {en
-          ? `Enter an integer from ${minimumAge} to 150. LifeScale does not suggest a number or define your life for you. Your final choice can only be confirmed once.`
-          : `请输入 ${minimumAge}-150 岁之间的整数。系统不推荐任何数字，也不替你定义人生。正式保存后只能确认一次，请慎重选择。`}
+          ? `Enter an integer from ${minimumAge} to 150. ${RULE_EN}`
+          : `请输入 ${minimumAge}-150 岁之间的整数。${RULE_ZH}`}
       </small>
     </fieldset>
   );

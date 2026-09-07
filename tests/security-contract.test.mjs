@@ -14,17 +14,18 @@ test("email OTP is the only enabled login method", async () => {
   assert.match(config, /facebook:\s*false/);
 });
 
-test("database migrations enforce ownership and a permanent core-target lock", async () => {
+test("database migrations enforce ownership and bounded annual target adjustments", async () => {
   const [sql, permanentLock, privateOnly] = await Promise.all([
     source("supabase/migrations/20260821000000_lifescale_core.sql"),
-    source("supabase/migrations/20260821193000_permanent_core_target_lock.sql"),
+    source("supabase/migrations/20260907150000_annual_target_adjustments.sql"),
     source("supabase/migrations/20260822090000_private_records_only.sql"),
   ]);
   assert.match(sql, /enable row level security/);
   assert.match(sql, /auth\.uid\(\)/);
   assert.match(permanentLock, /enforce_profile_target_lock/);
-  assert.match(permanentLock, /can only be confirmed once/);
-  assert.doesNotMatch(permanentLock, /interval '1 year'/);
+  assert.match(permanentLock, /old.target_change_count >= 3/);
+  assert.match(permanentLock, /interval '1 year'/);
+  assert.match(permanentLock, /old.birth_date is distinct from new.birth_date/);
   assert.match(sql, /actual_death_date/);
   assert.match(sql, /storage\.objects/);
   assert.match(sql, /bucket_id = 'entry-media'/);
@@ -43,7 +44,7 @@ test("registration explains the privacy boundary and records have no public opti
   ]);
   assert.match(auth, /记录默认仅你可见/);
   assert.match(auth, /没有供创作者或运营人员浏览、修改/);
-  assert.match(onboarding, /核心资料只确认一次/);
+  assert.match(onboarding, /累计最多 3 次/);
   assert.match(composer, /不提供公开选项/);
   assert.doesNotMatch(composer, /option value="public"/);
 });

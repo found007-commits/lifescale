@@ -133,7 +133,7 @@ async function getProfile(userId) {
 }
 
 async function updateProfile(userId, changes) {
-  const allowed = ["display_name", "gender_identity", "locale", "timezone", "display_mode"];
+  const allowed = ["display_name", "gender_identity", "locale", "timezone", "display_mode", "target_age", "target_date"];
   const data = {};
   allowed.forEach((key) => { if (Object.prototype.hasOwnProperty.call(changes, key)) data[key] = changes[key]; });
   const rows = await request(`/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}`, { method: "PATCH", header: { Prefer: "return=representation" }, data });

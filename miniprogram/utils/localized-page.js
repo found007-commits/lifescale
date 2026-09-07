@@ -19,7 +19,8 @@ module.exports = function localizedPage(definition) {
     if (this.data.modes) localized.modePickerLabels = this.data.modes.map((label) => t(label, locale));
     this.setData(localized);
     const titles = { index: "余生有刻", auth: "邮箱验证码登录", onboarding: "第一次设定", dashboard: "我的人生刻度", history: "留下的日子", report: "回望七天", settings: "个人偏好", record: "记录今天", share: "分享这一天", legal: this.data.document?.title || "隐私政策" };
-    const name = this.route.split("/").pop();
+    const pages = getCurrentPages();
+    const name = (this.route || pages[pages.length - 1]?.route || "pages/index/index").split("/").pop();
     wx.setNavigationBarTitle({ title: t(titles[name] || "余生有刻", currentLocale()) });
     ["我的人生刻度", "留下的日子", "回望七天", "个人偏好"].forEach((text, index) => wx.setTabBarItem({ index, text: t(text, currentLocale()), fail() {} }));
     return result;
