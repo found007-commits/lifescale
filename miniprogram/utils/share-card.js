@@ -31,7 +31,7 @@ function planCard(ctx, content, photo, layout, options = {}) {
   const photos = photoList(photo), width = options.width || 720, scale = width / 720;
   const overlay = layout === "overlay" && photos.length > 0;
   const fontSize = Math.round((content.length > 2500 ? 26 : content.length > 1000 ? 30 : 34) * scale);
-  const lineHeight = Math.ceil(fontSize * 1.6), startY = 230 * scale, footer = 190 * scale;
+  const lineHeight = Math.ceil(fontSize * 1.6), startY = (options.showDate === false ? 190 : 230) * scale, footer = 190 * scale;
   ctx.font = "500 " + fontSize + "px sans-serif";
   const lines = wrapText(ctx, content, width - 128 * scale);
   const rows = [];
@@ -87,7 +87,8 @@ function drawCard(canvas, photo, entry, plan, pageIndex, locale = "zh") {
   ctx.font = 16 * s + "px sans-serif"; ctx.fillText(t("余生有刻", locale) + " · LIFESCALE", 48 * s, 100 * s);
   ctx.fillStyle = "#d99b2f"; ctx.fillRect(48 * s, 115 * s, 54 * s, 3 * s);
   ctx.fillStyle = plan.overlay ? "#f1c66d" : "#805d14"; ctx.font = "600 " + 18 * s + "px sans-serif";
-  ctx.fillText(formatDate(entry.entry_date, locale), 64 * s, 202 * s);
+  const date = formatDate(entry.entry_date, locale);
+  if (date) ctx.fillText(date, 64 * s, 202 * s);
   for (const row of page.photoRows) {
     const gap = 16 * s, cellWidth = (624 * s - (row.indices.length - 1) * gap) / row.indices.length;
     row.indices.forEach((index, column) => {
@@ -106,10 +107,22 @@ function drawCard(canvas, photo, entry, plan, pageIndex, locale = "zh") {
   page.lines.forEach((line, i) => ctx.fillText(line, 64 * s, page.top + i * plan.lineHeight));
   ctx.shadowBlur = 0; ctx.shadowColor = "transparent"; ctx.textBaseline = "alphabetic";
   const footerY = page.height - 115 * s;
-  ctx.fillStyle = plan.overlay ? "rgba(255,253,248,.12)" : "rgba(20,61,47,.08)";
-  ctx.fillRect(48 * s, footerY - 30 * s, 624 * s, 48 * s);
+  const tags = [entry.moodLabel, entry.categoryLabel].filter(Boolean).map((label) => t(label, locale)).join(" · ");
+  if (tags) {
+    ctx.fillStyle = plan.overlay ? "rgba(255,253,248,.12)" : "rgba(20,61,47,.08)";
+    ctx.fillRect(48 * s, footerY - 30 * s, 624 * s, 48 * s);
+  }
   ctx.fillStyle = plan.overlay ? "#fffdf8" : "#143d2f"; ctx.font = 18 * s + "px sans-serif";
-  ctx.fillText([entry.moodLabel, entry.categoryLabel].filter(Boolean).map((label) => t(label, locale)).join(" · "), 64 * s, footerY);
+  if (tags) ctx.fillText(tags, 64 * s, footerY);
+  if (entry.signature) {
+    ctx.font = 18 * s + "px sans-serif";
+    const characters = Array.from(String(entry.signature));
+    let signature = characters.join("");
+    while (characters.length && ctx.measureText(signature).width > 592 * s) {
+      characters.pop(); signature = characters.join("") + "…";
+    }
+    ctx.fillText(signature, 64 * s, page.height - 78 * s);
+  }
   ctx.font = 15 * s + "px sans-serif";
   ctx.fillText(locale === "en" ? "Make today count." : t("看见余生，认真今天。", locale), 48 * s, page.height - 52 * s);
   ctx.textAlign = "right";

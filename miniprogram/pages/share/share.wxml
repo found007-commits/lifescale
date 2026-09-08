@@ -2,8 +2,8 @@
 <view class="page-shell share-page">
   <text class="eyebrow">SHARE A DAY</text>
   <text class="section-title">{{i18n.t('分享这一天', locale)}}</text>
-  <text class="share-note">{{i18n.t('只分享你预览确认的图片。原记录保持私密，分享卡不含邮箱、出生日期、性别或人生目标。', locale)}}</text>
-  <button wx:if="{{!editing}}" class="secondary-button" bindtap="editSelection" disabled="{{busy || saving}}">{{i18n.t('选择分享的文字和照片', locale)}}</button>
+  <text class="share-note">{{i18n.t('只分享你选中的内容，原记录仍仅自己可见。', locale)}}</text>
+  <button wx:if="{{!editing}}" class="secondary-button" bindtap="editSelection" disabled="{{busy || saving || sharing}}">{{i18n.t('选择分享的文字和照片', locale)}}</button>
   <view wx:if="{{editing}}" class="selection-panel paper-card">
     <text class="field-label">{{i18n.t('分享副本里的文字', locale)}}</text>
     <text class="share-note">{{i18n.t('可以删减或改写。只修改分享副本，不影响原记录。', locale)}}</text>
@@ -19,6 +19,14 @@
     <button class="secondary-button" bindtap="cancelSelection">{{i18n.t('取消本次修改', locale)}}</button>
   </view>
   <block wx:if="{{!editing}}">
+  <button class="settings-toggle" bindtap="toggleSettings" disabled="{{busy || saving || sharing}}" aria-expanded="{{settingsOpen}}">{{i18n.t('分享设置', locale)}} · {{i18n.t(settingsOpen ? '收起' : '展开', locale)}}</button>
+  <view wx:if="{{settingsOpen}}" class="share-settings paper-card">
+    <label class="setting-row"><text>{{i18n.t('显示日期', locale)}}</text><switch checked="{{showDate}}" data-option="showDate" bindchange="changeShareOption" disabled="{{busy || saving || sharing}}" color="#143d2f" /></label>
+    <label class="setting-row"><text>{{i18n.t('显示心情与分类', locale)}}</text><switch checked="{{showMood}}" data-option="showMood" bindchange="changeShareOption" disabled="{{busy || saving || sharing}}" color="#143d2f" /></label>
+    <label class="setting-row"><text>{{i18n.t('显示昵称署名', locale)}}</text><switch checked="{{showSignature}}" data-option="showSignature" bindchange="changeShareOption" disabled="{{busy || saving || sharing || !nickname}}" color="#143d2f" /></label>
+    <text class="settings-note">{{i18n.t(nickname ? '开启后将显示此昵称：' : '尚未设置昵称。可在个人偏好中设置，也可以不署名。', locale)}}{{nickname}}</text>
+    <text class="settings-note">{{i18n.t('仅影响本次分享；更改后会重新生成预览。', locale)}}</text>
+  </view>
   <view class="layout-options">
     <button class="{{layout === 'separate' ? 'selected' : ''}}" data-layout="separate" bindtap="chooseLayout" disabled="{{busy}}">{{i18n.t('图文分开', locale)}}</button>
     <button class="{{layout === 'overlay' ? 'selected' : ''}}" data-layout="overlay" bindtap="chooseLayout" disabled="{{busy || !hasPhoto}}">{{i18n.t('文字镶嵌', locale)}}</button>
@@ -37,10 +45,13 @@
     <text wx:if="{{cards.length > 1}}">{{i18n.t(selected === index ? '已选中 · ' : '', locale)}}{{i18n.t('第', locale)}} {{index + 1}} {{i18n.t('张 /', locale)}} {{cards.length}}</text>
   </view>
   </scroll-view>
+  <text class="share-note">{{i18n.t('图片发出后，无法阻止他人保存、截图或再次转发，请确认后分享。', locale)}}</text>
   <view class="share-actions">
-    <button class="primary-button" bindtap="shareImage" disabled="{{busy || !cards.length}}">{{i18n.t('发送给朋友 / 朋友圈', locale)}}</button>
-    <button class="secondary-button" bindtap="saveImage" disabled="{{busy || !cards.length || saving}}" loading="{{saving}}">{{i18n.t('保存图片', locale)}}</button>
-    <text class="share-note">{{i18n.t('发送前由你确认。Facebook、Instagram 等平台可在保存图片后自行发布。', locale)}}</text>
+    <text wx:if="{{cards.length > 1}}" class="share-action-note">{{i18n.t('当前选择', locale)}} {{selected + 1}} / {{cards.length}}</text>
+    <view class="share-action-buttons">
+    <button class="primary-button" bindtap="shareImage" disabled="{{busy || !cards.length || saving || sharing}}" loading="{{sharing}}">{{i18n.t('发送给朋友', locale)}}</button>
+    <button class="secondary-button" bindtap="saveImage" disabled="{{busy || !cards.length || saving || sharing}}" loading="{{saving}}">{{i18n.t('保存图片', locale)}}</button>
+    </view>
   </view>
   </block>
   <canvas type="2d" id="shareCanvas" class="render-canvas" />

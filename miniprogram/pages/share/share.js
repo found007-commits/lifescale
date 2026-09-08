@@ -1,6 +1,6 @@
 const Page = require("../../utils/localized-page");
 const { planCard, drawCard } = require("../../utils/share-card");
-const { buildShareCopy } = require("../../utils/share-selection");
+const { buildShareCopy, normalizeNickname } = require("../../utils/share-selection");
 const t = require("../../utils/locale-copy");
 
 function call(name, options) {
@@ -8,7 +8,7 @@ function call(name, options) {
 }
 
 Page({
-  data: { layout: "separate", hasPhoto: false, imageUrls: [], backgroundIndex: 0, busy: true, saving: false, cards: [], selected: 0, error: "", editing: false, shareText: "", photoChoices: [], selectionError: "" },
+  data: { layout: "separate", hasPhoto: false, imageUrls: [], backgroundIndex: 0, busy: true, saving: false, sharing: false, cards: [], selected: 0, error: "", editing: false, shareText: "", photoChoices: [], selectionError: "", settingsOpen: false, showDate: true, showMood: true, showSignature: false, nickname: "" },
   onLoad() {
     // Receive one explicitly selected entry in memory; never put private data in a URL/storage.
     this.files = new Set();
@@ -16,6 +16,7 @@ Page({
       clearTimeout(this.entryTimer);
       this.entry = entry;
       this.locale = locale || "zh";
+      this.setData({ nickname: normalizeNickname(getApp().globalData.profile?.display_name) });
       const imageUrls = entry.entry_media?.length ? entry.entry_media.map((item) => item.signed_url || "") : entry.imageUrls || (entry.imageUrl ? [entry.imageUrl] : []);
       this.originalPhotos = imageUrls.map((url) => ({ url, selected: true }));
       try { this.selection = buildShareCopy(entry, entry.content, this.originalPhotos); }
@@ -44,7 +45,7 @@ Page({
     this.appliedPhotos = null;
   },
   editSelection() {
-    if (this.data.busy || this.data.saving || !this.selection) return;
+    if (this.data.busy || this.data.saving || this.data.sharing || !this.selection) return;
     this.setData({ editing: true, shareText: this.selection.entry.content, photoChoices: this.appliedPhotos.map((photo) => ({ ...photo })), selectionError: "" });
   },
   onShareText(event) { this.setData({ shareText: event.detail.value.slice(0, 12000), selectionError: "" }); },
@@ -55,9 +56,9 @@ Page({
   },
   cancelSelection() { this.setData({ editing: false, selectionError: "" }); },
   applySelection() {
-    if (!this.data.editing || this.data.busy || this.data.saving) return;
+    if (!this.data.editing || this.data.busy || this.data.saving || this.data.sharing) return;
     try {
-      this.selection = buildShareCopy(this.entry, this.data.shareText, this.data.photoChoices);
+      this.selection = buildShareCopy(this.entry, this.data.shareText, this.data.photoChoices, this.shareOptions());
       this.appliedPhotos = this.data.photoChoices.map((photo) => ({ ...photo }));
       this.photos = null;
       const imageUrls = this.selection.imageUrls;
@@ -65,20 +66,36 @@ Page({
       return this.generate();
     } catch (error) { this.setData({ selectionError: t(error.message, this.data.locale) }); }
   },
+  shareOptions() {
+    return { showDate: this.data.showDate, showMood: this.data.showMood, showSignature: this.data.showSignature, nickname: this.data.nickname };
+  },
+  toggleSettings() {
+    if (this.data.busy || this.data.saving || this.data.sharing || this.data.editing) return;
+    this.setData({ settingsOpen: !this.data.settingsOpen });
+  },
+  async changeShareOption(event) {
+    const key = event.currentTarget.dataset.option;
+    if (!this.selection || this.data.busy || this.data.saving || this.data.sharing || this.data.editing || !["showDate", "showMood", "showSignature"].includes(key)) return;
+    if (key === "showSignature" && !this.data.nickname) return;
+    this.setData({ [key]: event.detail.value === true });
+    this.selection = buildShareCopy(this.entry, this.selection.entry.content, this.appliedPhotos, this.shareOptions());
+    // Discard the previous image before rendering; it must not remain shareable.
+    return this.generate();
+  },
   chooseLayout(event) {
     const layout = event.currentTarget.dataset.layout;
-    if (this.data.busy || this.data.saving || this.data.editing || !["separate", "overlay"].includes(layout) || (layout === "overlay" && !this.data.hasPhoto)) return;
+    if (this.data.busy || this.data.saving || this.data.sharing || this.data.editing || !["separate", "overlay"].includes(layout) || (layout === "overlay" && !this.data.hasPhoto)) return;
     this.setData({ layout });
     this.generate();
   },
-  selectCard(event) { this.setData({ selected: Number(event.currentTarget.dataset.index) }); },
+  selectCard(event) { if (!this.data.saving && !this.data.sharing) this.setData({ selected: Number(event.currentTarget.dataset.index) }); },
   chooseBackground(event) {
-    if (this.data.busy || this.data.saving || this.data.editing) return;
+    if (this.data.busy || this.data.saving || this.data.sharing || this.data.editing) return;
     this.setData({ backgroundIndex: Number(event.currentTarget.dataset.index) });
     this.generate();
   },
   async generate() {
-    if (!this.selection || this.generating || this.closed || this.data.editing || this.data.saving) return;
+    if (!this.selection || this.generating || this.closed || this.data.editing || this.data.saving || this.data.sharing) return;
     this.generating = true;
     this.data.cards.forEach((card) => { wx.getFileSystemManager().unlink({ filePath: card.path, fail() {} }); this.files.delete(card.path); });
     this.setData({ busy: true, error: "", cards: [], selected: 0 });
@@ -118,7 +135,7 @@ Page({
         this.photos = photos;
       }
       const content = this.selection.entry.content;
-      const plan = planCard(canvas.getContext("2d"), content, this.photos, this.data.layout, { backgroundIndex: this.data.backgroundIndex });
+      const plan = planCard(canvas.getContext("2d"), content, this.photos, this.data.layout, { backgroundIndex: this.data.backgroundIndex, showDate: this.data.showDate });
       const cards = [];
       for (let i = 0; i < plan.pages.length; i++) {
         if (this.closed) return;
@@ -141,21 +158,22 @@ Page({
   },
   async shareImage() {
     const card = this.data.cards[this.data.selected];
-    if (!card || this.data.busy || this.data.editing || this.data.saving) return;
+    if (!card || this.data.busy || this.data.editing || this.data.saving || this.data.sharing) return;
+    this.setData({ sharing: true });
+    try {
     if (typeof wx.showShareImageMenu !== "function") {
-      wx.previewImage({ urls: this.data.cards.map((item) => item.path), current: card.path });
+      await call("previewImage", { urls: this.data.cards.map((item) => item.path), current: card.path });
       return;
     }
-    try {
       await call("showShareImageMenu", { path: card.path, needShowEntrance: true, entrancePath: "pages/index/index" });
     } catch (error) {
       if (/cancel/i.test(error.errMsg || "")) return;
-      wx.showModal({ title: "也可以长按图片分享", content: "如果当前微信版本没有朋友圈选项，请保存图片后在朋友圈发布，或更新微信。", showCancel: false });
-    }
+      wx.showModal({ title: t("也可以长按图片分享", this.locale), content: t("请长按预览图片发送，或保存图片后分享。", this.locale), showCancel: false });
+    } finally { if (!this.closed) this.setData({ sharing: false }); }
   },
   async saveImage() {
     const card = this.data.cards[this.data.selected];
-    if (!card || this.data.saving || this.data.busy || this.data.editing) return;
+    if (!card || this.data.saving || this.data.sharing || this.data.busy || this.data.editing) return;
     this.setData({ saving: true });
     try {
       await call("saveImageToPhotosAlbum", { filePath: card.path });
