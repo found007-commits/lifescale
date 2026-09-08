@@ -2,6 +2,7 @@ const Page = require("../../utils/localized-page");
 const { getProfile, sendOtp, verifyOtp, restoreSession } = require("../../utils/supabase");
 const { wechatStatus, wechatAuth, acceptWechatSession, visibleEmail, errorText } = require("../../utils/wechat-auth");
 const t = require("../../utils/locale-copy");
+const { requiresWechatSetup } = require("../../utils/setup-policy");
 
 Page({
   data: {
@@ -132,9 +133,14 @@ Page({
     }
   },
 
-  async finishLogin(session) {
+  async finishLogin(session, newWechatAccount = false) {
     if (this.data.manageMode) { wx.navigateBack(); return; }
     const profile = await getProfile(session.user.id);
+    if (requiresWechatSetup(session, profile) || newWechatAccount && !profile?.onboarding_completed) {
+      const resumeRecord = this.returnTo === "record" && getCurrentPages().slice(-2)[0]?.route === "pages/record/record";
+      wx.redirectTo({ url: "/pages/onboarding/onboarding?required=1" + (resumeRecord ? "&returnTo=record" : "") });
+      return;
+    }
     if (this.returnTo === "record" && getCurrentPages().slice(-2)[0]?.route === "pages/record/record") {
       // Resume only after this explicit, consented login completed successfully.
       getCurrentPages().slice(-2)[0].resumeSave = true;
@@ -151,15 +157,9 @@ Page({
   useEmailOnly() { this.setData({ binding: false, accountChoice: false, error: "" }); },
   async loginWithWechat() { return this.runWechat("login"); },
   async createWechatAccount() {
-    if (!this.checkConsent() || this.data.wechatBusy || this.confirmingNew) return;
-    this.confirmingNew = true;
-    const answer = await new Promise(resolve => wx.showModal({
-      title: t("确认创建新账户？", this.data.locale),
-      content: t("如果以前用邮箱记录过，请返回并绑定原账户。新账户不会包含原邮箱里的记录，也不会自动合并。", this.data.locale),
-      confirmText: t("我是新用户", this.data.locale), cancelText: t("返回", this.data.locale), success: resolve, fail: () => resolve({ confirm: false }),
-    }));
-    this.confirmingNew = false;
-    if (answer.confirm) return this.runWechat("create");
+    // The explicit "I'm new" choice is the confirmation. No second native modal.
+    if (!this.data.accountChoice || this.data.binding || this.data.manageMode) return;
+    return this.runWechat("create");
   },
   async runWechat(action) {
     if (!this.checkConsent() || this.data.wechatBusy || this.data.sending || this.data.verifying) return;
@@ -167,7 +167,7 @@ Page({
     try {
       const result = await wechatAuth(action, { agreed: this.data.agreed, newAccountConfirmed: action === "create" });
       if (result.needsAccountChoice) this.setData({ accountChoice: true });
-      else await this.finishLogin(acceptWechatSession(result));
+      else await this.finishLogin(acceptWechatSession(result), action === "create");
     } catch (error) { this.setData({ error: errorText(error, this.data.locale) }); }
     finally { this.setData({ wechatBusy: false }); }
   },

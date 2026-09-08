@@ -1,5 +1,6 @@
 const Page = require("../../utils/localized-page");
-const { createEntry, uploadEntryImage, restoreSession } = require("../../utils/supabase");
+const { createEntry, uploadEntryImage, restoreSession, getProfile } = require("../../utils/supabase");
+const { isWechatOnly, requiresWechatSetup } = require("../../utils/setup-policy");
 const { topics, questionAt } = require("../../utils/record-prompts");
 const { prepareImage } = require("../../utils/prepare-image");
 const { uuid } = require("../../utils/life");
@@ -103,6 +104,14 @@ Page({
     }
     this.setData({ saving: true, error: "" });
     try {
+      if (!this.data.persisted && isWechatOnly(this.session) && requiresWechatSetup(this.session, getApp().globalData.profile)) {
+        const profile = await getProfile(this.session.user.id);
+        if (requiresWechatSetup(this.session, profile)) {
+          this.pendingSave = true;
+          wx.navigateTo({ url: "/pages/onboarding/onboarding?required=1&returnTo=record", fail: () => { this.pendingSave = false; } });
+          return;
+        }
+      }
       if (!this.data.persisted) {
         await createEntry({ id: this.entryId, userId: this.session.user.id, content: this.data.content.trim(), mood: this.data.mood, category: this.data.category });
         this.setData({ persisted: true });

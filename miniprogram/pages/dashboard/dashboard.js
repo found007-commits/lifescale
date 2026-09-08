@@ -4,6 +4,7 @@ const { getCheckins, getCheckinCount, getEntries, getProfile, updateProfile, req
 const { journeyMessage, openShare } = require("../../utils/preferences");
 const { formatDate } = require("../../utils/share-card");
 const { confirmDeleteEntry } = require("../../utils/entry-actions");
+const { requiresWechatSetup } = require("../../utils/setup-policy");
 
 const moodLabels = { calm: "平静", happy: "开心", grateful: "感恩", tired: "疲惫", sad: "难过", anxious: "焦虑", hopeful: "充满希望" };
 const categoryLabels = { daily: "日常", family: "家人", work: "工作", growth: "成长", health: "健康", travel: "旅行", reflection: "感悟", other: "其他" };
@@ -31,6 +32,10 @@ Page({
     this.setData({ loading: !fromPull, error: "" });
     try {
       const profile = await getProfile(session.user.id);
+      if (requiresWechatSetup(session, profile)) {
+        wx.reLaunch({ url: "/pages/onboarding/onboarding?required=1" });
+        return;
+      }
       if (!profile?.onboarding_completed) {
         this.setData({ profile: null, metrics: null });
         return;

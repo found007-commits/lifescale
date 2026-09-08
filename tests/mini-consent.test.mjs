@@ -11,6 +11,7 @@ function setup() {
   const sandbox = { require(path) {
     if (path.endsWith('localized-page')) return definition => { page = definition; };
     if (path.endsWith('locale-copy')) return require('../miniprogram/utils/locale-copy.js');
+    if (path.endsWith('setup-policy')) return require('../miniprogram/utils/setup-policy.js');
     return {
       sendOtp: async()=>{calls.send++;},
       verifyOtp:async()=>{calls.verify++;return {user:{id:'qa-only'}};},

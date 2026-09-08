@@ -5,17 +5,18 @@ import { createRequire } from 'node:module';
 import vm from 'node:vm';
 const require = createRequire(import.meta.url);
 const source = path => readFileSync(new URL('../miniprogram/' + path, import.meta.url), 'utf8');
-function harness(result = {needsAccountChoice:true}) {
+function harness(result = {needsAccountChoice:true}, profile = {onboarding_completed:true}) {
   let page;
   const calls={wechat:[],send:[],accept:0,profile:[],destinations:[],modals:[]};
   const wx={showToast(){},navigateBack:()=>calls.destinations.push('back'),reLaunch:o=>calls.destinations.push(o.url),redirectTo:o=>calls.destinations.push(o.url),
     showModal(o){calls.modals.push(o); if(o.success)o.success({confirm:true}); if(o.complete)o.complete({confirm:true});}};
-  const api={wechatStatus:async()=>({enabled:true}),wechatAuth:async(...args)=>{calls.wechat.push(args);return result;},acceptWechatSession:r=>{calls.accept++;return r.session;},visibleEmail:e=>e,errorText:e=>e.message};
+  const api={wechatStatus:async()=>({enabled:true}),wechatAuth:async(...args)=>{calls.wechat.push(args);return api.request ? api.request(...args) : result;},acceptWechatSession:r=>{calls.accept++;return r.session;},visibleEmail:e=>e,errorText:e=>e.message};
   const context={wx,setInterval:()=>1,clearInterval(){},getCurrentPages:()=>[],require(path){
     if(path.endsWith('localized-page'))return definition=>{page=definition;};
     if(path.endsWith('wechat-auth'))return api;
     if(path.endsWith('locale-copy'))return require('../miniprogram/utils/locale-copy.js');
-    return {sendOtp:async(...args)=>calls.send.push(args),verifyOtp:async()=>({user:{id:'original'}}),restoreSession:()=>({user:{id:'original',email:'old@example.invalid'}}),getProfile:async id=>{calls.profile.push(id);return{onboarding_completed:true};}};
+    if(path.endsWith('setup-policy'))return require('../miniprogram/utils/setup-policy.js');
+    return {sendOtp:async(...args)=>calls.send.push(args),verifyOtp:async()=>({user:{id:'original'}}),restoreSession:()=>({user:{id:'original',email:'old@example.invalid'}}),getProfile:async id=>{calls.profile.push(id);return profile;}};
   }};
   vm.runInNewContext(source('pages/auth/auth.js'),context);
   page.setData=function(values){Object.assign(this.data,values);};
@@ -83,12 +84,43 @@ test('settings bind and unlink use authenticated requests and return without onb
     assert.equal(h.calls.profile.length,0);assert.deepEqual(h.calls.destinations,['back']);
   }
 });
-test('new user requires an extra explicit confirmation; bound WeChat preserves draft return route',async()=>{
+test('explicit new-user choice needs no native confirmation; existing account preserves draft return route',async()=>{
   const h=harness({session:{user:{id:'original'}}});h.page.onLoad({returnTo:'record'});
-  const composer={route:'pages/record/record'};h.context.getCurrentPages=()=>[composer,{}];h.page.setData({agreed:true});
-  await h.page.createWechatAccount();assert.match(h.calls.modals[0].content,/不会包含/);
+  const composer={route:'pages/record/record'};h.context.getCurrentPages=()=>[composer,{}];h.page.setData({agreed:true,accountChoice:true});
+  await h.page.createWechatAccount();assert.equal(h.calls.modals.length,0);
   assert.equal(h.calls.wechat[0][1].newAccountConfirmed,true);assert.equal(composer.resumeSave,true);
   assert.deepEqual(h.calls.destinations,['back']);
+});
+test('1.3.8 new WeChat choice directly creates and opens required setup in every language',async()=>{
+  for(const locale of ['zh','zh-TW','en']) {
+    const h=harness({session:{user:{id:'new',email:'new@wechat.lifescale.invalid'}}},null);
+    h.page.setData({agreed:true,accountChoice:true,locale});
+    await h.page.createWechatAccount();
+    assert.equal(h.calls.modals.length,0);
+    assert.deepEqual(h.calls.wechat.map(args=>args[0]),['create']);
+    assert.equal(h.calls.wechat[0][1].newAccountConfirmed,true);
+    assert.deepEqual(h.calls.destinations,['/pages/onboarding/onboarding?required=1']);
+    assert.equal(h.page.data.wechatBusy,false);
+  }
+});
+test('1.3.8 incomplete WeChat setup takes priority over resuming a draft',async()=>{
+  const h=harness({session:{user:{id:'new',email:'new@wechat.lifescale.invalid'}}},null);
+  h.page.onLoad({returnTo:'record'});
+  const composer={route:'pages/record/record',pendingSave:true};h.context.getCurrentPages=()=>[composer,{}];
+  h.page.setData({agreed:true});await h.page.loginWithWechat();
+  assert.equal(composer.resumeSave,undefined);
+  assert.deepEqual(h.calls.destinations,['/pages/onboarding/onboarding?required=1&returnTo=record']);
+});
+test('1.3.8 create has a double-tap lock, explicit choice gate, and visible retryable errors',async()=>{
+  const h=harness();h.page.setData({agreed:true});await h.page.createWechatAccount();
+  assert.equal(h.calls.wechat.length,0);
+  h.page.setData({accountChoice:true});let finish,count=0;
+  h.api.request=()=>{count++;return new Promise((_,reject)=>{finish=reject;});};
+  const pending=h.page.createWechatAccount();await h.page.createWechatAccount();assert.equal(count,1);
+  finish(Error('Synthetic failure'));await pending;
+  assert.equal(h.page.data.error,'Synthetic failure');assert.equal(h.page.data.wechatBusy,false);
+  h.api.request=async()=>({session:{user:{id:'original'}}});await h.page.createWechatAccount();
+  assert.deepEqual(h.calls.destinations,['/pages/dashboard/dashboard']);
 });
 test('client adapter never stores login codes; private placeholder email is never displayed',async()=>{
   const code=source('utils/wechat-auth.js');const calls=[];let accepted=0;
