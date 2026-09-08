@@ -12,7 +12,7 @@ const messages = {
     sendError: "验证码发送失败，请稍后再试。", verifyError: "验证码不正确或已过期，请重新获取。", legalA: "继续即表示你同意",
     terms: "服务条款", legalB: "并知悉", privacy: "隐私说明", privacyTitle: "记录默认仅你可见",
     privacyBody: "产品内没有供创作者或运营人员浏览、修改用户私密记录的内容后台。云服务仅按隐私说明处理登录、同步、存储、安全与注销所需的数据。",
-    coreTitle: "目标可审慎调整", coreBody: "出生日期确认后不可修改；目标年龄每满一年可调整一次，累计最多 3 次。首次设定不占次数，每次调整后重新等待一年。",
+    coreTitle: "目标可审慎调整", coreBody: "出生日期确认后不可修改。首次设定后一年内，目标年龄可修改 3 次；满一年后，每次修改需间隔一年，累计最多 7 次。首次设定不计次数。",
     acknowledge: "我已了解隐私边界和目标调整规则",
   },
   en: {
@@ -22,7 +22,7 @@ const messages = {
     sendError: "We could not send the code. Please try again.", verifyError: "That code is incorrect or expired. Request a new one.", legalA: "By continuing, you agree to the ",
     terms: "Terms", legalB: " and acknowledge the ", privacy: "Privacy Notice", privacyTitle: "Your records are private by default",
     privacyBody: "There is no product or operations console for the creator or staff to browse or edit private records. Cloud services process only the data needed for sign-in, sync, storage, security and account deletion, as described in the Privacy Notice.",
-    coreTitle: "Room to adjust your target", coreBody: "Your birth date stays fixed. Your target may be adjusted after a full year, up to 3 times in total. Initial setup does not count; each adjustment starts a new one-year wait.",
+    coreTitle: "Room to adjust your target", coreBody: "Your birth date stays fixed. You can change your target 3 times in the first year after setup. After that, changes must be a year apart, with 7 changes in total. Initial setup does not count.",
     acknowledge: "I understand the privacy boundary and target-adjustment rules",
   },
 } as const;

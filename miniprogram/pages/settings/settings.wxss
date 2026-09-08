@@ -1,4 +1,5 @@
 .settings-page { padding-top: 50rpx; }
+.profile-card > .field-help { display: block; margin-top: 12rpx; line-height: 1.6; overflow-wrap: break-word; }
 .settings-title { margin-top: 25rpx; font-size: 58rpx; }
 .profile-card { margin-top: 42rpx; padding: 32rpx; }
 .profile-name { display: block; margin-bottom: 8rpx; font-family: "Songti SC", serif; font-size: 40rpx; }

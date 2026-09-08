@@ -3,7 +3,7 @@ const { clearSession, deleteAccount, exportAccount, getProfile, updateProfile, r
 const { genders, genderLabels } = require("../../utils/preferences");
 const { formatDate } = require("../../utils/share-card");
 const t = require("../../utils/locale-copy");
-const { targetPolicy, targetError } = require("../../utils/target-policy");
+const { targetPolicy, targetError, targetConfirmation } = require("../../utils/target-policy");
 const { normalizeAge } = require("../../utils/preferences");
 const { targetDateFromAge, localDateString } = require("../../utils/life");
 const { wechatStatus, visibleEmail } = require("../../utils/wechat-auth");
@@ -47,7 +47,7 @@ Page({
     const date = targetDateFromAge(this.data.profile.birth_date, age);
     if (age === this.data.profile.target_age && date === this.data.profile.target_date) return;
     const en = this.data.locale === "en";
-    const confirmation = en ? `New target: ${age} years. This uses one adjustment; ${policy.remaining - 1} will remain. The next change requires another full year.` : this.data.locale === "zh-TW" ? `新目標：${age} 歲。本次將使用一次機會，之後剩餘 ${policy.remaining - 1} 次；下次調整需再滿一年。` : `新目标：${age} 岁。本次将使用一次机会，之后剩余 ${policy.remaining - 1} 次；下次调整需再满一年。`;
+    const confirmation = targetConfirmation(age, policy, en, this.data.locale === "zh-TW");
     this.setData({ adjusting: true, error: "" });
     try {
       const answer = await new Promise((resolve, reject) => wx.showModal({ title: t("确认调整目标？", this.data.locale), content: confirmation, confirmText: t("确认调整", this.data.locale), success: resolve, fail: reject }));

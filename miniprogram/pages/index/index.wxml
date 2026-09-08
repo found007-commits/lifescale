@@ -29,7 +29,7 @@
       <text class="field-label">{{i18n.t('希望活到的年龄', locale)}}</text>
       <input class="input" type="number" maxlength="3" value="{{targetAge}}" bindinput="onAgeInput" placeholder="{{i18n.t('请填写你自己的目标年龄', locale)}}" />
       <text class="field-help">{{i18n.t('可自由填写', locale)}} {{minimumAge}}{{i18n.t('-150 岁。这是人生目标，不是寿命预测。', locale)}}</text>
-      <text class="field-help">{{i18n.t('首次设定后，每满一年可调整一次，累计最多 3 次。认真选择，给未来留一点余地。', locale)}}</text>
+      <text class="field-help">{{i18n.t('首次设定后一年内可修改 3 次；满一年后，每次修改需间隔一年，累计最多 7 次。首次设定不计次数。', locale)}}</text>
     </view>
     <button class="secondary-button preview-button" bindtap="previewScale" hover-class="button-press">{{i18n.t('预览刻度', locale)}}</button>
 

@@ -31,7 +31,7 @@ module.exports = function localizedPage(definition) {
     const pages = getCurrentPages();
     const name = (this.route || pages[pages.length - 1]?.route || "pages/index/index").split("/").pop();
     wx.setNavigationBarTitle({ title: t(titles[name] || "余生有刻", currentLocale()) });
-    ["我的人生刻度", "留下的日子", "回望七天", "个人偏好"].forEach((text, index) => wx.setTabBarItem({ index, text: t(text, currentLocale()), fail() {} }));
+    ["历史", "今天", "小回顾", "设置"].forEach((text, index) => wx.setTabBarItem({ index, text: t(text, currentLocale()), fail() {} }));
   }
   definition.onShow = async function (...args) {
     const generation = this.localeGeneration = (this.localeGeneration || 0) + 1;
