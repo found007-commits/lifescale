@@ -1,5 +1,7 @@
 # 1.3.9 — distinct gentle and clear modes
 
+Copy revision, 2026-09-08 22:16: replaced the ordinary clear-mode prompt with the user-approved “今天，你想留下什么？” / “What would you like to capture today?” / “今天，你想留下什麼？”. Bonus-state copy and all behavior are unchanged. All 122 automated tests passed and native compilation reported zero errors. Re-uploaded under the same 1.3.9 version; DevTools confirmed code upload success and no code-quality issues at 22:16. Not submitted for review or published.
+
 - Gentle mode uses a pale green panel, a slim circular dial and a calm message. Clear mode uses a charcoal panel, a peach active selection, large sans-serif day count, visible goal progress, lived days and remaining weeks. The contrast is structural and informational, not just a label change.
 - Both modes use the same existing target calculation. The card explicitly states that the result is based on the user's chosen target age, not a lifespan prediction. Beyond the target, both show positive bonus days; clear mode hides remaining weeks and labels the target as exceeded.
 - Switching updates the view immediately and saves only `display_mode`. Duplicate/same-mode changes are ignored; a failed save restores the prior view and displays the error. No record, age goal or other preference is changed.

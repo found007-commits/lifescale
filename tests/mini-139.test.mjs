@@ -47,9 +47,17 @@ test('gentle and clear modes have different layouts; truthful target labels and 
 });
 test('new mode copy is translated in English and Traditional Chinese',()=>{
   const t=require('../miniprogram/utils/locale-copy.js');
-  for(const copy of ['慢慢来，认真过好今天。','目标之外，生活仍在继续。','已超过设定目标','距设定目标还剩','目标已走过，今天仍由你安排。','时间不会暂停。今天，留给什么？','设定目标进度','按你设定的目标年龄计算，并非寿命预测。']) {
+  for(const copy of ['慢慢来，认真过好今天。','目标之外，生活仍在继续。','已超过设定目标','距设定目标还剩','目标已走过，今天仍由你安排。','今天，你想留下什么？','设定目标进度','按你设定的目标年龄计算，并非寿命预测。']) {
     assert.doesNotMatch(t(copy,'en'),/[\u4e00-\u9fff]/);assert.ok(t(copy,'zh-TW').length);
   }
+});
+test('clear mode uses the confirmed recording prompt, not the retired slogan',()=>{
+  const wxml=read('pages/dashboard/dashboard.wxml');
+  assert.match(wxml,/今天，你想留下什么？/);
+  assert.doesNotMatch(wxml,/时间不会暂停|今天，留给什么/);
+  const t=require('../miniprogram/utils/locale-copy.js');
+  assert.equal(t('今天，你想留下什么？','en'),'What would you like to capture today?');
+  assert.equal(t('今天，你想留下什么？','zh-TW'),'今天，你想留下什麼？');
 });
 test('dashboard template expressions have valid JavaScript syntax',()=>{
   for(const [,expression] of read('pages/dashboard/dashboard.wxml').matchAll(/\{\{([\s\S]*?)\}\}/g)) {

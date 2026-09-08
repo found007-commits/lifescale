@@ -37,7 +37,7 @@
         <view wx:else class="clear-view">
           <text class="clear-label">{{i18n.t(metrics.isBonus ? '已超过设定目标' : '距设定目标还剩', locale)}}</text>
           <view class="clear-count"><text class="clear-number">{{metrics.displayDaysText}}</text><text class="clear-unit">{{i18n.t('天', locale)}}</text></view>
-          <text class="clear-message">{{i18n.t(metrics.isBonus ? '目标已走过，今天仍由你安排。' : '时间不会暂停。今天，留给什么？', locale)}}</text>
+          <text class="clear-message">{{i18n.t(metrics.isBonus ? '目标已走过，今天仍由你安排。' : '今天，你想留下什么？', locale)}}</text>
           <view class="clear-progress-head"><text>{{i18n.t('设定目标进度', locale)}}</text><text class="clear-percent">{{metrics.progressText}}%</text></view>
           <view class="clear-progress-track"><view class="clear-progress-fill" style="width: {{metrics.progress}}%"></view></view>
           <view class="clear-facts"><text>{{i18n.t('已走过', locale)}} {{metrics.livedDaysText}} {{i18n.t('天', locale)}}</text><text wx:if="{{!metrics.isBonus}}">{{i18n.t('剩余周数', locale)}} {{metrics.weeksText}} {{i18n.t('周', locale)}}</text></view>
