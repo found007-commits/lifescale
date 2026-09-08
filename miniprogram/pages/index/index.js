@@ -1,6 +1,6 @@
 const Page = require("../../utils/localized-page");
 const { ageOnDate, calculateLifeMetrics, localDateString } = require("../../utils/life");
-const { getProfile, restoreSession } = require("../../utils/supabase");
+const { restoreSession } = require("../../utils/supabase");
 const { normalizeAge } = require("../../utils/preferences");
 const { formatDate } = require("../../utils/share-card");
 
@@ -13,14 +13,11 @@ Page({
     preview: null,
   },
 
-  async onShow() {
+  onLoad(options = {}) { this.browsing = options.browse === "1"; },
+  onShow() {
     const session = restoreSession();
-    if (!session?.user?.id) return;
-    try {
-      const profile = await getProfile(session.user.id);
-      if (profile?.onboarding_completed) wx.switchTab({ url: "/pages/dashboard/dashboard" });
-      else wx.switchTab({ url: "/pages/history/history" });
-    } catch {}
+    if (session?.user?.id) wx.switchTab({ url: "/pages/dashboard/dashboard" });
+    else if (!this.browsing) wx.redirectTo({ url: "/pages/auth/auth" });
   },
 
   onBirthChange(event) {

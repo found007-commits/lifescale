@@ -1,5 +1,5 @@
 const { restoreSession } = require("./utils/supabase");
-const config = require("./config");
+const { loadRuntimeConfig } = require("./utils/runtime-config");
 
 App({
   globalData: {
@@ -12,13 +12,15 @@ App({
     this.globalData.session = restoreSession();
     const language = (wx.getAppBaseInfo ? wx.getAppBaseInfo() : wx.getSystemInfoSync()).language || "zh";
     this.globalData.locale = /^zh[_-](tw|hk|mo|hant)/i.test(language) ? "zh-TW" : /^zh/i.test(language) ? "zh" : "en";
-    this.localeReady = new Promise((resolve) => wx.request({
-      url: `${config.apiBase}/api/miniprogram/config`, timeout: 4000,
-      header: { "Accept-Language": language.replace("_", "-") },
-      success: (result) => {
-        if (["zh", "zh-TW", "en"].includes(result.data?.locale)) this.globalData.locale = result.data.locale;
-      },
-      complete: resolve,
-    }));
+    try {
+      const cached = wx.getStorageSync("lifescale:startup-locale");
+      if (["zh", "zh-TW", "en"].includes(cached)) this.globalData.locale = cached;
+    } catch {}
+    this.localeReady = loadRuntimeConfig(language).then(result => {
+      if (["zh", "zh-TW", "en"].includes(result.locale)) {
+        this.globalData.locale = result.locale;
+        try { wx.setStorageSync("lifescale:startup-locale", result.locale); } catch {}
+      }
+    }).catch(() => {});
   },
 });

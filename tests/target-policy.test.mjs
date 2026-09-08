@@ -48,12 +48,12 @@ test('mini settings confirms, sends target only, then locks the returned profile
 test('mini API allows target changes but strips caller-supplied quota and birth date', async()=>{
   const require = createRequire(import.meta.url), requests=[];
   const app={globalData:{}};
-  const sandbox={module:{exports:{}},require(path){return path==='../config'?{apiBase:'https://qa.invalid'}:require('../miniprogram/utils/life.js');},getApp:()=>app,wx:{
+  const sandbox={module:{exports:{}},require(path){return path==='../config'?{apiBase:'https://qa.invalid'}:path==='./runtime-config'?{loadRuntimeConfig:async()=>({supabaseUrl:'https://qa.invalid',publishableKey:'test-only'})}:require('../miniprogram/utils/life.js');},getApp:()=>app,wx:{
     getStorageSync:()=>({access_token:'test-only',user:{id:'qa-only'}}),
     request(o){requests.push(o);o.success({statusCode:200,data:o.url.endsWith('/config')?{supabaseUrl:'https://qa.invalid',publishableKey:'test-only'}:[{id:'qa-only',...o.data,target_change_count:1}]});}
   }};
   vm.runInNewContext(readFileSync(new URL('../miniprogram/utils/supabase.js',import.meta.url),'utf8'),sandbox);
   await sandbox.module.exports.updateProfile('qa-only',{target_age:81,target_date:'2061-02-28',target_change_count:0,target_locked_until:'2000-01-01',birth_date:'2000-01-01'});
-  assert.deepEqual(JSON.parse(JSON.stringify(requests[1].data)),{target_age:81,target_date:'2061-02-28'});
+  assert.deepEqual(JSON.parse(JSON.stringify(requests[0].data)),{target_age:81,target_date:'2061-02-28'});
   assert.equal(app.globalData.profile.target_change_count,1);
 });

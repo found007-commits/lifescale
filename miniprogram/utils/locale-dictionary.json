@@ -315,5 +315,8 @@
   "选择背景图 · 已选照片都会保留": "Choose a background · All selected photos are kept",
   "深色底板与米白文字，已选照片保留在文字后面。": "High-contrast text, with your selected photos kept below.",
   "已选照片按顺序完整排列，文字自动排成长图。": "Selected photos stay in order, with all your chosen text in a long image.",
-  "未选择照片，生成纯文字分享卡。": "No photos selected. Your share card will contain text only."
+  "未选择照片，生成纯文字分享卡。": "No photos selected. Your share card will contain text only.",
+  "正在准备微信登录…": "Preparing WeChat sign-in…",
+  "登录，记录今天": "Sign in to record today",
+  "微信或邮箱登录后即可记录，年龄目标可以以后再设。": "Sign in with WeChat or email to record today. You can set your age target later."
 }

@@ -20,7 +20,7 @@
     </view>
     <text wx:if="{{!agreed}}" class="consent-help">{{i18n.t('是否同意由你选择；不同意也可以先浏览。', locale)}}</text>
     <block wx:if="{{!manageMode && !binding}}">
-      <button wx:if="{{wechatEnabled && !accountChoice}}" class="primary-button auth-action {{!agreed ? 'auth-disabled' : ''}}" bindtap="loginWithWechat" loading="{{wechatBusy}}" disabled="{{wechatBusy || sending || verifying || !agreed}}">{{i18n.t('微信一键登录', locale)}}</button>
+      <button wx:if="{{(wechatEnabled || wechatChecking) && !accountChoice}}" class="primary-button auth-action {{!agreed || wechatChecking ? 'auth-disabled' : ''}}" bindtap="loginWithWechat" loading="{{wechatBusy || wechatChecking}}" disabled="{{wechatChecking || wechatBusy || sending || verifying || !agreed}}">{{i18n.t(wechatChecking ? '正在准备微信登录…' : '微信一键登录', locale)}}</button>
       <view wx:if="{{accountChoice}}" class="account-choice">
         <text class="choice-title">{{i18n.t('这个微信还未绑定账户', locale)}}</text>
         <text class="consent-help">{{i18n.t('以前用邮箱记录过？绑定原账户，不会丢失记录。', locale)}}</text>

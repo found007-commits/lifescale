@@ -25,7 +25,7 @@ async function api(data, authenticated = false) {
   if (authenticated && !session?.access_token) throw Object.assign(new Error("UNAUTHORIZED"), { code: "UNAUTHORIZED" });
   if (session?.expires_at && session.expires_at * 1000 < Date.now() + 60000) session = await refreshSession(session);
   return new Promise((resolve, reject) => wx.request({
-    url: `${config.apiBase}/api/miniprogram/wechat`, method: data ? "POST" : "GET", timeout: 20000,
+    url: `${config.apiBase}/api/miniprogram/wechat`, method: data ? "POST" : "GET", timeout: !data && !authenticated ? 4000 : 20000,
     header: { "Content-Type": "application/json", ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}) },
     ...(data ? { data } : {}),
     success(response) {

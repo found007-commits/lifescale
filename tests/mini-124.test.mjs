@@ -78,7 +78,7 @@ test('writing starters are optional, never overwrite text and are translated in 
 
 test('auth return route is whitelisted, respects explicit opt-in, and preserves guest composer', async () => {
   let verifies=0;
-  const {page,calls,context}=pageHarness('auth',{verifyOtp:async()=>{verifies++;return{user:{id:'qa-only'}};},getProfile:async()=>null});
+  const {page,calls,context}=pageHarness('auth',{restoreSession:()=>null,verifyOtp:async()=>{verifies++;return{user:{id:'qa-only'}};},getProfile:async()=>null});
   page.onLoad({returnTo:'https://evil.invalid'});assert.equal(page.returnTo,'');
   page.onLoad({returnTo:'record'});
   const composer={route:'pages/record/record'};
@@ -93,7 +93,7 @@ test('auth return route is whitelisted, respects explicit opt-in, and preserves 
 
 test('explicit timeline preview can still proceed to setup while ordinary first login goes to journal', async () => {
   for (const [returnTo,url] of [['onboarding','/pages/onboarding/onboarding'],['','/pages/history/history']]) {
-    const {page,calls}=pageHarness('auth',{verifyOtp:async()=>({user:{id:'qa-only'}}),getProfile:async()=>null});
+    const {page,calls}=pageHarness('auth',{restoreSession:()=>null,verifyOtp:async()=>({user:{id:'qa-only'}}),getProfile:async()=>null});
     page.onLoad({returnTo});page.setData({agreed:true,code:'123456'});await page.verifyCode();
     assert.equal(calls[0].url,url);
   }
@@ -142,7 +142,7 @@ test('share editor hides stale cards, applies a filtered copy, blocks sending wh
 
 test('repeat daily check-in uses ignore-duplicates so saving another entry needs no UPDATE policy', async () => {
   const requests=[], app={globalData:{}};
-  const context={module:{exports:{}},getApp:()=>app,require(path){return path==='../config'?{apiBase:'https://qa.invalid'}:require('../miniprogram/utils/life.js');},wx:{
+  const context={module:{exports:{}},getApp:()=>app,require(path){return path==='../config'?{apiBase:'https://qa.invalid'}:path==='./runtime-config'?{loadRuntimeConfig:async()=>({supabaseUrl:'https://qa.invalid',publishableKey:'test-only'})}:require('../miniprogram/utils/life.js');},wx:{
     getStorageSync:()=>({access_token:'test-only',user:{id:'qa-only'}}),
     request(o){requests.push(o);o.success({statusCode:200,data:o.url.endsWith('/config')?{supabaseUrl:'https://qa.invalid',publishableKey:'test-only'}:[{id:'qa-entry'}]});}
   }};

@@ -14,6 +14,7 @@ Page({
     error: "",
     agreed: false,
     wechatEnabled: false,
+    wechatChecking: true,
     wechatBusy: false,
     accountChoice: false,
     binding: false,
@@ -21,8 +22,16 @@ Page({
   },
 
   onLoad(options = {}) {
+    this.unloaded = false;
     this.returnTo = ["record", "onboarding"].includes(options.returnTo) ? options.returnTo : "";
     const manageMode = ["bind", "unbind"].includes(options.mode) ? options.mode : "";
+    const existing = restoreSession();
+    if (!manageMode && !this.returnTo && existing?.access_token && existing.user?.id &&
+      (existing.refresh_token || !existing.expires_at || existing.expires_at * 1000 > Date.now())) {
+      // Routing is local; the destination still authenticates every data request.
+      wx.switchTab({ url: "/pages/dashboard/dashboard" });
+      return;
+    }
     if (manageMode) {
       const session = restoreSession();
       if (!session?.user?.id || !visibleEmail(session.user.email)) {
@@ -31,9 +40,14 @@ Page({
       }
       this.setData({ manageMode, binding: manageMode === "bind", email: visibleEmail(session.user.email) });
     }
-    wechatStatus().then(status => this.setData({ wechatEnabled: status.enabled === true })).catch(() => {});
+    wechatStatus().then(status => {
+      if (!this.unloaded) this.setData({ wechatEnabled: status.enabled === true });
+    }).catch(() => {}).finally(() => {
+      if (!this.unloaded) this.setData({ wechatChecking: false });
+    });
   },
   onUnload() {
+    this.unloaded = true;
     if (this.timer) clearInterval(this.timer);
   },
 
@@ -53,7 +67,7 @@ Page({
 
   browseWithoutLogin() {
     if (this.data.manageMode || this.returnTo === "record" && getCurrentPages().slice(-2)[0]?.route === "pages/record/record") wx.navigateBack();
-    else wx.reLaunch({ url: "/pages/index/index" });
+    else wx.reLaunch({ url: "/pages/index/index?browse=1" });
   },
 
   onCodeInput(event) {

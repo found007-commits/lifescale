@@ -1,8 +1,8 @@
 const config = require("../config");
 const { localDateString, uuid } = require("./life");
+const { loadRuntimeConfig: ensureConfig } = require("./runtime-config");
 
 const SESSION_KEY = "lifescale:miniprogram-session";
-let runtimeConfig = null;
 let refreshInFlight = null;
 
 function wxRequest(options) {
@@ -23,14 +23,6 @@ function wxRequest(options) {
       },
     });
   });
-}
-
-async function ensureConfig() {
-  if (runtimeConfig) return runtimeConfig;
-  const remote = await wxRequest({ url: `${config.apiBase}/api/miniprogram/config`, method: "GET" });
-  if (!remote.supabaseUrl || !remote.publishableKey) throw new Error("服务配置暂不可用。" );
-  runtimeConfig = remote;
-  return runtimeConfig;
 }
 
 function restoreSession() {

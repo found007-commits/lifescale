@@ -28,7 +28,7 @@ test('mini login defaults to no consent and blocks every auth request',async()=>
   await page.sendCode();await page.verifyCode();
   assert.equal(calls.send,0);assert.equal(calls.verify,0);assert.equal(calls.profile,0);
   assert.match(page.data.error,/自行选择/);
-  page.browseWithoutLogin();assert.deepEqual(calls.destinations,['/pages/index/index']);
+  page.browseWithoutLogin();assert.deepEqual(calls.destinations,['/pages/index/index?browse=1']);
   assert.equal(page.data.agreed,false);
 });
 test('only active opt-in enables auth; withdrawing blocks resend and verify',async()=>{
