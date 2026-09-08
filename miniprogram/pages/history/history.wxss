@@ -2,7 +2,8 @@
 .history-head { display: flex; align-items: flex-end; justify-content: space-between; }
 .history-head .section-title { display: block; margin-top: 10rpx; }
 .add-button { width: auto; margin: 0; padding: 0 26rpx; border-radius: 999rpx; background: #123f31; color: #fbfaf6; font-size: 23rpx; }
-.history-note { display: block; margin-top: 20rpx; color: #7f9188; font-size: 21rpx; line-height: 1.6; }
+.history-reflection { margin-top: 28rpx; padding: 22rpx 26rpx; border-left: 4rpx solid #a57c32; border-radius: 0 16rpx 16rpx 0; background: #eee9dc; color: #365f50; font-size: 26rpx; line-height: 1.8; }
+.history-note { display: block; margin-top: 18rpx; color: #51685d; font-size: 22rpx; line-height: 1.7; }
 .timeline { margin-top: 46rpx; }
 .timeline-row { padding: 0 0 40rpx 30rpx; border-left: 2rpx solid rgba(18,63,49,.15); position: relative; }
 .timeline-row::before { content: ""; position: absolute; left: -8rpx; top: 10rpx; width: 14rpx; height: 14rpx; border-radius: 50%; background: #d99b2f; }
