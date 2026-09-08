@@ -29,18 +29,19 @@
 - 73 automated tests passed, including old-account identity continuity, conflicts, replay, missing consent, failed OTP, concurrent create/bind, unlink protections, guest-draft continuation and existing sharing features.
 - In-memory Postgres executes the real migration, verifies role restrictions (including Supabase-style default grants), uniqueness, rate windows, recovery RPC and deletion cascade, using synthetic records only.
 - TypeScript, ESLint and production build passed with the existing pinned Supabase 2.112.3 dependency.
-- Native WeChat DevTools preview: checkbox remains unchecked, disabled buttons readable, English choice/binding layouts fit the simulator. Preview used temporary display-only state; no real user was bound, logged in or modified. Real `code2Session` end-to-end validation is still pending the secret.
+- Native WeChat DevTools preview: checkbox remains unchecked, disabled buttons readable, English choice/binding layouts fit the simulator. Display-only preview did not bind, sign in or modify any real account. After activation, the unmodified login page fetched readiness and displayed both WeChat and email methods with consent still unchecked.
 - Applied only migration `20260908170000_wechat_login.sql` to linked project `utcgiopwbfcmnryerynr`. Existing user data untouched. Production anon read of the binding table returned HTTP 401 / PostgreSQL 42501.
-- Backend preparation deployed to `https://app.lifescale.space`, Vercel deployment `dpl_H1dtAdwWtG7G2gmDvHtMwFvWxdMG`, READY. WeChat remains disabled because the Production AppSecret is not configured.
-- **Mini 1.3.0 has not been uploaded, submitted for review or published.** Finish the activation checks below first. Do not describe a disabled/unverified login as live.
+- Owner saved Production `WECHAT_MINIPROGRAM_APP_SECRET`; confirmed only name, scope and Secret type without reading its value. Added `WECHAT_LOGIN_ENABLED=true`. Activated backend deployed to `https://app.lifescale.space`, deployment `dpl_BfmpTbxYugeru7DungrojsLues7R`, READY (Next.js; remote build 26 seconds; implementation commit `7d1e2ce`).
+- Production smoke checks: readiness HTTP 200 / enabled true; missing consent HTTP 403 / CONSENT_REQUIRED; invalid Bearer status HTTP 401 / UNAUTHORIZED; homepage HTTP 200. Authentication responses retain private, no-store. No broad production log/user-data scan was performed.
+- Re-ran all 17 WeChat-specific core, client and real-migration tests: passed. A fresh native DevTools `wx.login` code was exchanged through the Production login endpoint as a developer connectivity diagnostic: HTTP 200, needsAccountChoice true, no session returned. No account creation, binding, record access or session persistence was performed; only status/booleans were printed. This validates AppSecret/provider/database connectivity, not the complete real-account binding/session flow.
+- **Mini 1.3.0 uploaded successfully at 17:41 on 2026-09-08** through native WeChat DevTools. Receipt: “代码上传成功”; scan: “小程序表现良好，未发现代码质量问题”. It has not been submitted for review or published. The upload dialog reported online version 1.2.3. Existing online/review versions were not withdrawn or replaced.
 
 ## Remaining activation checklist
 
-1. Owner adds the existing mini-program AppSecret in Vercel → lifescale-overseas → Settings → Environment Variables → Production, key `WECHAT_MINIPROGRAM_APP_SECRET`. Do not reset/reissue the secret unnecessarily.
-2. Set `WECHAT_LOGIN_ENABLED=true` and redeploy. Check public GET readiness and error handling, then test a fresh real `wx.login` exchange without creating or binding a real account automatically.
-3. Owner verifies an existing email account once and confirms it opens the same records and age target after WeChat sign-in; use a dedicated disposable test identity for the new-account flow. Never create a reviewer backdoor.
-4. Update WeChat privacy declarations to accurately cover optional OpenID/login handling as well as email and user-selected photos. Retain active, unchecked consent.
-5. Upload mini version **1.3.0**. Verify the upload receipt. Administrator submits it for code review, then publishes after approval. Current automation cannot operate the WeChat public-platform admin webpage.
+1. Administrator sets uploaded **1.3.0** as the experience version in the WeChat console.
+2. Owner chooses **Link my existing email account**, verifies the original email once, then signs out and signs in with WeChat. Confirm the same records and age target remain. Use a dedicated disposable test identity for the new-account flow; do not test it using an old user's WeChat identity by mistake. Never create a reviewer backdoor.
+3. Update WeChat privacy declarations to accurately cover optional OpenID/login handling as well as email and user-selected photos. Retain active, unchecked consent.
+4. After experience acceptance, administrator submits **1.3.0** for code review, then publishes after approval. Current automation cannot operate the WeChat public-platform admin webpage. Do not describe the development upload as live.
 
 Suggested review description:
 
