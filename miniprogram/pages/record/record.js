@@ -1,5 +1,6 @@
 const Page = require("../../utils/localized-page");
-const { createEntry, uploadEntryImage, requireSession } = require("../../utils/supabase");
+const { createEntry, uploadEntryImage, restoreSession } = require("../../utils/supabase");
+const { topics, questionAt } = require("../../utils/record-prompts");
 const { prepareImage } = require("../../utils/prepare-image");
 const { uuid } = require("../../utils/life");
 
@@ -11,6 +12,7 @@ Page({
     images: [], processing: false, notice: "", progress: "", persisted: false,
     saving: false,
     error: "",
+    guest: true, saved: false, topics, topic: -1, promptIndex: 0, prompt: "",
     moods: [
       { value: "calm", label: "平静" }, { value: "happy", label: "开心" }, { value: "grateful", label: "感恩" },
       { value: "tired", label: "疲惫" }, { value: "sad", label: "难过" }, { value: "anxious", label: "焦虑" }, { value: "hopeful", label: "充满希望" },
@@ -22,7 +24,24 @@ Page({
     ],
   },
 
-  onLoad() { this.session = requireSession(); this.entryId = uuid(); this.uploaded = new Set(); this.files = new Set(); },
+  onLoad() { this.entryId = uuid(); this.uploaded = new Set(); this.files = new Set(); },
+  onShow() {
+    this.session = restoreSession();
+    this.setData({ guest: !this.session?.user?.id });
+    const resume = this.pendingSave && this.resumeSave;
+    this.pendingSave = false;
+    this.resumeSave = false;
+    if (resume && this.session?.user?.id) return this.saveEntry();
+  },
+  chooseTopic(event) {
+    if (this.data.saving || this.data.persisted) return;
+    const topic = Number(event.currentTarget.dataset.index);
+    this.setData({ topic, promptIndex: 0, prompt: questionAt(topic) });
+  },
+  nextPrompt() {
+    const promptIndex = this.data.promptIndex + 1;
+    this.setData({ promptIndex, prompt: questionAt(this.data.topic, promptIndex) });
+  },
   onUnload() { this.closed = true; this.files.forEach((filePath) => wx.getFileSystemManager().unlink({ filePath, fail() {} })); },
   onContentInput(event) { this.setData({ content: event.detail.value.slice(0, 12000), error: "" }); },
   chooseMood(event) { if (!this.data.saving && !this.data.persisted) this.setData({ mood: event.currentTarget.dataset.value }); },
@@ -59,9 +78,16 @@ Page({
   },
 
   async saveEntry() {
-    if (!this.session || this.data.saving || this.picking) return;
+    if (this.data.saving || this.data.saved || this.picking) return;
     if (!this.data.content.trim() && !this.data.images.length) return this.setData({ error: "写一句话或选择照片后再保存。" });
     if (this.data.images.some((image) => image.error || !image.tempFilePath)) return this.setData({ error: "请先移除无法读取的图片，再保存。" });
+    this.session = restoreSession();
+    if (!this.session?.user?.id) {
+      if (this.pendingSave) return;
+      this.pendingSave = true;
+      wx.navigateTo({ url: "/pages/auth/auth?returnTo=record", fail: () => { this.pendingSave = false; } });
+      return;
+    }
     this.setData({ saving: true, error: "" });
     try {
       if (!this.data.persisted) {
@@ -76,8 +102,9 @@ Page({
         await uploadEntryImage(this.session.user.id, this.entryId, image, image.id);
         this.uploaded.add(image.id);
       }
+      this.setData({ saved: true });
       wx.showToast({ title: "今天已留下", icon: "success", duration: 1200 });
-      setTimeout(() => { if (!this.closed) wx.reLaunch({ url: "/pages/dashboard/dashboard" }); }, 800);
+      setTimeout(() => { if (!this.closed) wx.reLaunch({ url: "/pages/history/history" }); }, 800);
     } catch (error) {
       this.setData({ error: (error.message || "记录保存失败。") + (this.data.persisted ? " 记录和已上传照片已保留，重试只继续剩余上传。" : "") });
     } finally {

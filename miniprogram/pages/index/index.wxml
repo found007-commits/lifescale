@@ -12,7 +12,8 @@
     <text class="eyebrow">{{i18n.t('把时间还给自己', locale)}}</text>
     <view class="display-title hero-title"><text>{{i18n.t('看见余生，', locale)}}</text><text>{{i18n.t('认真今天。', locale)}}</text></view>
     <text class="hero-copy">{{i18n.t('看见仍可书写的时间，留下今天真实发生的事。', locale)}}</text>
-    <button class="primary-button hero-button" bindtap="goLogin" hover-class="button-press">{{i18n.t('邮箱登录', locale)}}</button>
+    <button class="primary-button hero-button" bindtap="startWriting" hover-class="button-press">{{i18n.t('先留下今天', locale)}}</button>
+    <text class="field-help">{{i18n.t('先写一句话，保存时再登录。年龄目标可以以后再设。', locale)}}</text>
   </view>
 
   <view class="preview-card paper-card">

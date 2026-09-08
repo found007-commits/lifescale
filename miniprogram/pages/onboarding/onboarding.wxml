@@ -34,5 +34,6 @@
     </checkbox-group>
     <view wx:if="{{error}}" class="form-error">{{error}}</view>
     <button class="primary-button save-profile" bindtap="saveProfile" loading="{{saving}}" disabled="{{saving}}">{{i18n.t('确认并进入 LifeScale', locale)}}</button>
+    <button class="secondary-button" bindtap="skipSetup" disabled="{{saving}}">{{i18n.t('稍后设定，先去记录', locale)}}</button>
   </view>
 </view>

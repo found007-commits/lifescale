@@ -201,7 +201,8 @@ async function createEntry({ id, userId, content, mood, category }) {
   }
   await request("/rest/v1/checkins?on_conflict=user_id,checkin_date", {
     method: "POST",
-    header: { Prefer: "resolution=merge-duplicates,return=minimal" },
+    // A second entry on the same day must not UPDATE a check-in (RLS is insert-only).
+    header: { Prefer: "resolution=ignore-duplicates,return=minimal" },
     data: { user_id: userId, checkin_date: localDateString() },
   });
   return rows[0];

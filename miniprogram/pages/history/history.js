@@ -9,7 +9,7 @@ const categoryLabels = { daily: "日常", family: "家人", work: "工作", grow
 function decorate(entry) {
   return {
     ...entry,
-    dateLabel: formatDate(entry.entry_date, getApp().globalData.profile?.locale),
+    dateLabel: formatDate(entry.entry_date, getApp().globalData.profile?.locale || getApp().globalData.locale),
     moodLabel: moodLabels[entry.mood] || "平静",
     categoryLabel: categoryLabels[entry.category] || "日常",
     imageUrl: entry.entry_media?.[0]?.signed_url || "",
@@ -40,7 +40,7 @@ Page({
     if (entry?.imageUrls.length) wx.previewImage({ urls: entry.imageUrls, current: entry.imageUrls[Number(event.currentTarget.dataset.photo)] });
   },
   addEntry() { wx.navigateTo({ url: "/pages/record/record" }); },
-  shareEntry(event) { openShare(this.data.entries[Number(event.currentTarget.dataset.index)], getApp().globalData.profile?.locale); },
+  shareEntry(event) { openShare(this.data.entries[Number(event.currentTarget.dataset.index)], getApp().globalData.profile?.locale || getApp().globalData.locale); },
   removeEntry(event) {
     const index = Number(event.currentTarget.dataset.index);
     const entry = this.data.entries[index];

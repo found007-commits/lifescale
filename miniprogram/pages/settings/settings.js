@@ -26,6 +26,7 @@ Page({
     }
   },
   openLegal(event) { wx.navigateTo({ url: `/pages/legal/legal?type=${event.currentTarget.dataset.type}` }); },
+  setupTimeline() { wx.navigateTo({ url: "/pages/onboarding/onboarding" }); },
   refreshTargetPolicy() {
     const policy = targetPolicy(this.data.profile);
     const next = policy.nextAt ? new Date(policy.nextAt) : null;

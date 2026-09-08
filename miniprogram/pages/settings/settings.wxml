@@ -4,8 +4,14 @@
   <view class="display-title settings-title"><text>{{i18n.t('我的人生刻度', locale)}}</text></view>
   <view wx:if="{{loading}}" class="loading-copy">{{i18n.t('正在读取资料', locale)}}</view>
   <view wx:if="{{error}}" class="form-error">{{error}}</view>
-  <block wx:if="{{!loading && profile}}">
-    <view class="paper-card profile-card">
+  <block wx:if="{{!loading}}">
+    <view wx:if="{{!profile && !error}}" class="paper-card profile-card">
+      <text class="section-title">{{i18n.t('年龄目标，可以慢慢想。', locale)}}</text>
+      <text class="muted">{{email}}</text>
+      <text class="field-help">{{i18n.t('不急着设定年龄。你可以先记录，想好了再开启人生刻度。', locale)}}</text>
+      <button class="primary-button" bindtap="setupTimeline">{{i18n.t('设定人生刻度（可稍后）', locale)}}</button>
+    </view>
+    <view wx:if="{{profile}}" class="paper-card profile-card">
       <text class="profile-name">{{profile.display_name || '余生有刻用户'}}</text>
       <text class="muted">{{email}}</text>
       <view class="profile-grid">
@@ -24,7 +30,7 @@
         <button class="primary-button" bindtap="adjustTarget" loading="{{adjusting}}" disabled="{{adjusting}}">{{i18n.t('调整目标年龄', locale)}}</button>
       </view>
     </view>
-    <view class="paper-card profile-card">
+    <view wx:if="{{profile}}" class="paper-card profile-card">
       <text class="section-title">{{i18n.t('个人偏好', locale)}}</text>
       <view class="field"><text class="field-label">{{i18n.t('显示名称', locale)}}</text><input class="input" value="{{displayName}}" maxlength="80" bindinput="onNameInput" /></view>
       <view class="field"><text class="field-label">{{i18n.t('性别', locale)}}</text><picker range="{{genderPickerLabels}}" value="{{genderIndex}}" bindchange="onGenderChange"><view class="picker-field">{{i18n.t(genderLabels[genderIndex], locale)}} ›</view></picker></view>

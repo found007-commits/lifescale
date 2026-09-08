@@ -5,6 +5,12 @@
   <text class="record-intro">{{i18n.t('无需写得漂亮。一句话、一张图，或者只是此刻的心情。', locale)}}</text>
 
   <view class="paper-card composer">
+    <text class="field-label">{{i18n.t('想从哪里写起？（可跳过）', locale)}}</text>
+    <view class="choice-row inspiration-topics">
+      <button class="choice-pill {{topic === -1 ? 'active' : ''}}" data-index="-1" bindtap="chooseTopic">{{i18n.t('自由写', locale)}}</button>
+      <button wx:for="{{topics}}" wx:key="label" class="choice-pill {{topic === index ? 'active' : ''}}" data-index="{{index}}" bindtap="chooseTopic">{{i18n.t(item.label, locale)}}</button>
+    </view>
+    <view wx:if="{{prompt}}" class="inspiration-card"><text>{{i18n.t(prompt, locale)}}</text><button bindtap="nextPrompt">{{i18n.t('换一句', locale)}}</button></view>
     <textarea class="textarea" disabled="{{saving || persisted}}" value="{{content}}" bindinput="onContentInput" maxlength="12000" placeholder="{{i18n.t('写下你想记住的片刻……', locale)}}" auto-height="false" />
     <view class="photo-choice-grid">
     <view wx:for="{{images}}" wx:key="id" class="image-preview">
@@ -31,7 +37,8 @@
       </view>
     </view>
     <view wx:if="{{error}}" class="form-error">{{error}}</view>
-    <button class="primary-button save-entry" bindtap="saveEntry" loading="{{saving}}" disabled="{{saving || processing}}">{{i18n.t(persisted ? '重试剩余上传' : '仅自己可见，保存今天', locale)}}</button>
+    <text wx:if="{{guest}}" class="upload-hint">{{i18n.t('此时尚未上传。登录后会继续保存；离开或关闭小程序会丢失未保存内容。', locale)}}</text>
+    <button class="primary-button save-entry" bindtap="saveEntry" loading="{{saving}}" disabled="{{saving || processing || saved}}">{{i18n.t(saved ? '今天已留下' : (guest ? '登录并私密保存' : (persisted ? '重试剩余上传' : '仅自己可见，保存今天')), locale)}}</button>
   </view>
   <canvas type="2d" id="photoCanvas" class="render-canvas" />
 </view>

@@ -14,6 +14,9 @@ Page({
     agreed: false,
   },
 
+  onLoad(options = {}) {
+    this.returnTo = ["record", "onboarding"].includes(options.returnTo) ? options.returnTo : "";
+  },
   onUnload() {
     if (this.timer) clearInterval(this.timer);
   },
@@ -32,7 +35,10 @@ Page({
     return false;
   },
 
-  browseWithoutLogin() { wx.reLaunch({ url: "/pages/index/index" }); },
+  browseWithoutLogin() {
+    if (this.returnTo === "record" && getCurrentPages().slice(-2)[0]?.route === "pages/record/record") wx.navigateBack();
+    else wx.reLaunch({ url: "/pages/index/index" });
+  },
 
   onCodeInput(event) {
     this.setData({ code: event.detail.value.replace(/\D/g, "").slice(0, 6), error: "" });
@@ -82,8 +88,14 @@ Page({
     try {
       const session = await verifyOtp(this.data.email, this.data.code);
       const profile = await getProfile(session.user.id);
-      if (profile?.onboarding_completed) wx.reLaunch({ url: "/pages/dashboard/dashboard" });
-      else wx.redirectTo({ url: "/pages/onboarding/onboarding" });
+      if (this.returnTo === "record" && getCurrentPages().slice(-2)[0]?.route === "pages/record/record") {
+        // Resume only after this explicit, consented login completed successfully.
+        getCurrentPages().slice(-2)[0].resumeSave = true;
+        wx.navigateBack();
+      }
+      else if (profile?.onboarding_completed) wx.reLaunch({ url: "/pages/dashboard/dashboard" });
+      else if (this.returnTo === "onboarding") wx.redirectTo({ url: "/pages/onboarding/onboarding" });
+      else wx.reLaunch({ url: "/pages/history/history" });
     } catch (error) {
       this.setData({ error: error.message || "验证码错误或已失效。" });
     } finally {

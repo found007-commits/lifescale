@@ -28,6 +28,7 @@ Page({
   },
 
   onNameInput(event) { this.setData({ displayName: event.detail.value.slice(0, 30) }); },
+  skipSetup() { if (!this.data.saving) wx.switchTab({ url: "/pages/history/history" }); },
   onBirthChange(event) {
     const birthDate = event.detail.value;
     const minimumAge = Math.max(30, ageOnDate(birthDate) + 1);

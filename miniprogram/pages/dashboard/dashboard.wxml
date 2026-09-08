@@ -3,6 +3,14 @@
   <view wx:if="{{loading}}" class="loading-copy">{{i18n.t('正在打开今天', locale)}}</view>
   <block wx:else>
     <view wx:if="{{error}}" class="form-error">{{error}}</view>
+    <view wx:if="{{!profile && !error}}" class="paper-card empty-state">
+      <text class="eyebrow">TODAY · JUST FOR YOU</text>
+      <text class="section-title">{{i18n.t('先留下今天', locale)}}</text>
+      <text class="muted">{{i18n.t('不急着设定年龄。你可以先记录，想好了再开启人生刻度。', locale)}}</text>
+      <button class="primary-button empty-action" bindtap="recordToday">{{i18n.t('记录今天 +1', locale)}}</button>
+      <button class="secondary-button empty-action" bindtap="viewHistory">{{i18n.t('查看我的记录', locale)}}</button>
+      <button class="secondary-button empty-action" bindtap="setupTimeline">{{i18n.t('设定人生刻度（可稍后）', locale)}}</button>
+    </view>
     <block wx:if="{{profile && metrics}}">
       <view class="today-header">
         <text class="eyebrow">TODAY · {{metrics.today}}</text>

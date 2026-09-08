@@ -31,7 +31,7 @@ Page({
     try {
       const profile = await getProfile(session.user.id);
       if (!profile?.onboarding_completed) {
-        wx.redirectTo({ url: "/pages/onboarding/onboarding" });
+        this.setData({ profile: null, metrics: null });
         return;
       }
       const [entries, checkins, checkinCount] = await Promise.all([getEntries(session.user.id, 3), getCheckins(session.user.id, 7), getCheckinCount(session.user.id)]);
@@ -64,10 +64,11 @@ Page({
     if (entry?.imageUrls.length) wx.previewImage({ urls: entry.imageUrls, current: entry.imageUrls[Number(event.currentTarget.dataset.photo)] });
   },
   recordToday() { wx.navigateTo({ url: "/pages/record/record" }); },
+  setupTimeline() { wx.navigateTo({ url: "/pages/onboarding/onboarding" }); },
   shareEntry(event) { openShare(this.data.recentEntries[Number(event.currentTarget.dataset.index)], this.data.profile?.locale); },
   async setMode(event) {
     const mode = event.currentTarget.dataset.mode;
-    if (this.data.switching || !["gentle", "clear"].includes(mode)) return;
+    if (!this.data.profile || this.data.switching || !["gentle", "clear"].includes(mode)) return;
     this.setData({ switching: true });
     try {
       const profile = await updateProfile(this.data.profile.id, { display_mode: mode });

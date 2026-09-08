@@ -40,7 +40,7 @@ test('only active opt-in enables auth; withdrawing blocks resend and verify',asy
   assert.equal(calls.send,1);assert.equal(calls.verify,0);
   page.onConsentChange({detail:{value:['agree']}});await page.verifyCode();
   assert.equal(calls.verify,1);assert.equal(calls.profile,1);
-  assert.deepEqual(calls.destinations,['/pages/onboarding/onboarding']);
+  assert.deepEqual(calls.destinations,['/pages/history/history']);
   assert.equal(setup().page.data.agreed,false); // consent isn't silently persisted
 });
 test('legal links are separate from checkbox and all auth buttons require opt-in',()=>{

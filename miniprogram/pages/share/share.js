@@ -1,12 +1,14 @@
 const Page = require("../../utils/localized-page");
 const { planCard, drawCard } = require("../../utils/share-card");
+const { buildShareCopy } = require("../../utils/share-selection");
+const t = require("../../utils/locale-copy");
 
 function call(name, options) {
   return new Promise((resolve, reject) => wx[name]({ ...options, success: resolve, fail: reject }));
 }
 
 Page({
-  data: { layout: "separate", hasPhoto: false, imageUrls: [], backgroundIndex: 0, busy: true, saving: false, cards: [], selected: 0, error: "" },
+  data: { layout: "separate", hasPhoto: false, imageUrls: [], backgroundIndex: 0, busy: true, saving: false, cards: [], selected: 0, error: "", editing: false, shareText: "", photoChoices: [], selectionError: "" },
   onLoad() {
     // Receive one explicitly selected entry in memory; never put private data in a URL/storage.
     this.files = new Set();
@@ -15,6 +17,10 @@ Page({
       this.entry = entry;
       this.locale = locale || "zh";
       const imageUrls = entry.entry_media?.length ? entry.entry_media.map((item) => item.signed_url || "") : entry.imageUrls || (entry.imageUrl ? [entry.imageUrl] : []);
+      this.originalPhotos = imageUrls.map((url) => ({ url, selected: true }));
+      try { this.selection = buildShareCopy(entry, entry.content, this.originalPhotos); }
+      catch (error) { this.setData({ busy: false, error: t(error.message, this.locale) }); return; }
+      this.appliedPhotos = this.originalPhotos.map((photo) => ({ ...photo }));
       this.setData({ hasPhoto: imageUrls.length > 0, imageUrls });
       if (this.ready) this.generate();
     });
@@ -33,21 +39,46 @@ Page({
     this.files.forEach((filePath) => wx.getFileSystemManager().unlink({ filePath, fail() {} }));
     this.entry = null;
     this.photos = null;
+    this.selection = null;
+    this.originalPhotos = null;
+    this.appliedPhotos = null;
+  },
+  editSelection() {
+    if (this.data.busy || this.data.saving || !this.selection) return;
+    this.setData({ editing: true, shareText: this.selection.entry.content, photoChoices: this.appliedPhotos.map((photo) => ({ ...photo })), selectionError: "" });
+  },
+  onShareText(event) { this.setData({ shareText: event.detail.value.slice(0, 12000), selectionError: "" }); },
+  togglePhoto(event) {
+    if (!this.data.editing) return;
+    const index = Number(event.currentTarget.dataset.index);
+    this.setData({ photoChoices: this.data.photoChoices.map((photo, i) => i === index ? { ...photo, selected: !photo.selected } : photo), selectionError: "" });
+  },
+  cancelSelection() { this.setData({ editing: false, selectionError: "" }); },
+  applySelection() {
+    if (!this.data.editing || this.data.busy || this.data.saving) return;
+    try {
+      this.selection = buildShareCopy(this.entry, this.data.shareText, this.data.photoChoices);
+      this.appliedPhotos = this.data.photoChoices.map((photo) => ({ ...photo }));
+      this.photos = null;
+      const imageUrls = this.selection.imageUrls;
+      this.setData({ editing: false, imageUrls, hasPhoto: imageUrls.length > 0, backgroundIndex: 0, layout: imageUrls.length ? this.data.layout : "separate", selectionError: "" });
+      return this.generate();
+    } catch (error) { this.setData({ selectionError: t(error.message, this.data.locale) }); }
   },
   chooseLayout(event) {
     const layout = event.currentTarget.dataset.layout;
-    if (this.data.busy || !["separate", "overlay"].includes(layout) || (layout === "overlay" && !this.data.hasPhoto)) return;
+    if (this.data.busy || this.data.saving || this.data.editing || !["separate", "overlay"].includes(layout) || (layout === "overlay" && !this.data.hasPhoto)) return;
     this.setData({ layout });
     this.generate();
   },
   selectCard(event) { this.setData({ selected: Number(event.currentTarget.dataset.index) }); },
   chooseBackground(event) {
-    if (this.data.busy) return;
+    if (this.data.busy || this.data.saving || this.data.editing) return;
     this.setData({ backgroundIndex: Number(event.currentTarget.dataset.index) });
     this.generate();
   },
   async generate() {
-    if (!this.entry || this.generating || this.closed) return;
+    if (!this.selection || this.generating || this.closed || this.data.editing || this.data.saving) return;
     this.generating = true;
     this.data.cards.forEach((card) => { wx.getFileSystemManager().unlink({ filePath: card.path, fail() {} }); this.files.delete(card.path); });
     this.setData({ busy: true, error: "", cards: [], selected: 0 });
@@ -86,12 +117,12 @@ Page({
         if (this.closed) return;
         this.photos = photos;
       }
-      const content = this.entry.content || (this.locale === "en" ? "Today was worth remembering." : "今天，也值得被记住。");
+      const content = this.selection.entry.content;
       const plan = planCard(canvas.getContext("2d"), content, this.photos, this.data.layout, { backgroundIndex: this.data.backgroundIndex });
       const cards = [];
       for (let i = 0; i < plan.pages.length; i++) {
         if (this.closed) return;
-        drawCard(canvas, this.photos, this.entry, plan, i, this.locale);
+        drawCard(canvas, this.photos, this.selection.entry, plan, i, this.locale);
         const result = await call("canvasToTempFilePath", {
           canvas, x: 0, y: 0, width: plan.width, height: plan.pages[i].height,
           destWidth: plan.width, destHeight: plan.pages[i].height, fileType: "png",
@@ -110,7 +141,7 @@ Page({
   },
   async shareImage() {
     const card = this.data.cards[this.data.selected];
-    if (!card || this.data.busy) return;
+    if (!card || this.data.busy || this.data.editing || this.data.saving) return;
     if (typeof wx.showShareImageMenu !== "function") {
       wx.previewImage({ urls: this.data.cards.map((item) => item.path), current: card.path });
       return;
@@ -124,7 +155,7 @@ Page({
   },
   async saveImage() {
     const card = this.data.cards[this.data.selected];
-    if (!card || this.data.saving) return;
+    if (!card || this.data.saving || this.data.busy || this.data.editing) return;
     this.setData({ saving: true });
     try {
       await call("saveImageToPhotosAlbum", { filePath: card.path });

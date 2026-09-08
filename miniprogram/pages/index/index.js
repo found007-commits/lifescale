@@ -19,7 +19,7 @@ Page({
     try {
       const profile = await getProfile(session.user.id);
       if (profile?.onboarding_completed) wx.switchTab({ url: "/pages/dashboard/dashboard" });
-      else wx.redirectTo({ url: "/pages/onboarding/onboarding" });
+      else wx.switchTab({ url: "/pages/history/history" });
     } catch {}
   },
 
@@ -45,8 +45,9 @@ Page({
     this.setData({ preview });
   },
 
+  startWriting() { wx.navigateTo({ url: "/pages/record/record" }); },
   goLogin() {
     if (this.data.preview) wx.setStorageSync("lifescale:miniprogram-draft", { birthDate: this.data.birthDate, targetAge: Number(this.data.targetAge) });
-    wx.navigateTo({ url: "/pages/auth/auth" });
+    wx.navigateTo({ url: this.data.preview ? "/pages/auth/auth?returnTo=onboarding" : "/pages/auth/auth" });
   },
 });
