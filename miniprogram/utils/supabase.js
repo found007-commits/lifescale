@@ -44,7 +44,10 @@ function restoreSession() {
 function storeSession(session) {
   wx.setStorageSync(SESSION_KEY, session);
   const app = getApp();
-  if (app?.globalData) app.globalData.session = session;
+  if (app?.globalData) {
+    if (app.globalData.session?.user?.id !== session.user?.id) app.globalData.profile = null;
+    app.globalData.session = session;
+  }
   return session;
 }
 
@@ -104,13 +107,13 @@ async function request(path, options = {}, retry = true) {
   }
 }
 
-async function sendOtp(email) {
+async function sendOtp(email, createUser = true) {
   const service = await ensureConfig();
   return wxRequest({
     url: `${service.supabaseUrl}/auth/v1/otp`,
     method: "POST",
     header: { apikey: service.publishableKey, "Content-Type": "application/json" },
-    data: { email: email.trim().toLowerCase(), create_user: true },
+    data: { email: email.trim().toLowerCase(), create_user: createUser },
   });
 }
 
@@ -280,6 +283,8 @@ module.exports = {
   getProfile,
   requireSession,
   restoreSession,
+  refreshSession,
+  storeSession,
   sendOtp,
   verifyOtp,
   updateProfile,

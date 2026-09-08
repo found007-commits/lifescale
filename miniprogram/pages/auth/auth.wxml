@@ -6,37 +6,48 @@
   </view>
 
   <view class="auth-copy">
-    <text class="eyebrow">{{i18n.t('邮箱验证码登录', locale)}}</text>
+    <text class="eyebrow">{{i18n.t(manageMode ? '管理登录方式' : '登录余生有刻', locale)}}</text>
     <view class="display-title auth-title"><text>{{i18n.t('从一个安静的此刻开始。', locale)}}</text></view>
-    <text class="muted auth-intro">{{i18n.t('不需要密码。我们会向你的邮箱发送 6 位验证码。', locale)}}</text>
+    <text class="muted auth-intro">{{i18n.t(manageMode === 'unbind' ? '验证当前邮箱后解除微信绑定，原记录不受影响。' : binding ? '验证原邮箱，再绑定当前微信。原记录和人生目标都保留。' : wechatEnabled ? '微信或邮箱，都可以。以前记录过？首次使用微信时请绑定原邮箱。' : '不需要密码。我们会向你的邮箱发送 6 位验证码。', locale)}}</text>
   </view>
 
   <view class="paper-card auth-card">
-    <view class="field">
-      <text class="field-label">{{i18n.t('邮箱地址', locale)}}</text>
-      <input class="input" type="text" value="{{email}}" bindinput="onEmailInput" placeholder="name@example.com" disabled="{{sent}}" />
-    </view>
     <view class="consent-row">
       <checkbox-group bindchange="onConsentChange">
-        <label class="consent-choice"><checkbox value="agree" checked="{{agreed}}" disabled="{{sending || verifying}}" color="#123f31" /><text>{{i18n.t('我已阅读并同意', locale)}}</text></label>
+        <label class="consent-choice"><checkbox value="agree" checked="{{agreed}}" disabled="{{sending || verifying || wechatBusy}}" color="#123f31" /><text>{{i18n.t('我已阅读并同意', locale)}}</text></label>
       </checkbox-group>
       <view class="consent-links"><navigator class="policy-link" url="/pages/legal/legal?type=terms">{{i18n.t('服务条款', locale)}}</navigator><text>{{i18n.t('和', locale)}}</text><navigator class="policy-link" url="/pages/legal/legal?type=privacy">{{i18n.t('隐私政策', locale)}}</navigator></view>
     </view>
     <text wx:if="{{!agreed}}" class="consent-help">{{i18n.t('是否同意由你选择；不同意也可以先浏览。', locale)}}</text>
-    <button wx:if="{{!sent}}" class="primary-button auth-action {{sending || !agreed ? 'auth-disabled' : ''}}" bindtap="sendCode" loading="{{sending}}" disabled="{{sending || !agreed}}">{{i18n.t('发送验证码', locale)}}</button>
+    <block wx:if="{{!manageMode && !binding}}">
+      <button wx:if="{{wechatEnabled && !accountChoice}}" class="primary-button auth-action {{!agreed ? 'auth-disabled' : ''}}" bindtap="loginWithWechat" loading="{{wechatBusy}}" disabled="{{wechatBusy || sending || verifying || !agreed}}">{{i18n.t('微信一键登录', locale)}}</button>
+      <view wx:if="{{accountChoice}}" class="account-choice">
+        <text class="choice-title">{{i18n.t('这个微信还未绑定账户', locale)}}</text>
+        <text class="consent-help">{{i18n.t('以前用邮箱记录过？绑定原账户，不会丢失记录。', locale)}}</text>
+        <button class="primary-button" bindtap="chooseExisting" disabled="{{wechatBusy}}">{{i18n.t('绑定已有邮箱账户', locale)}}</button>
+        <button class="secondary-button" bindtap="createWechatAccount" loading="{{wechatBusy}}" disabled="{{wechatBusy || !agreed}}">{{i18n.t('我是新用户', locale)}}</button>
+      </view>
+      <text class="login-divider">{{i18n.t('邮箱验证码登录', locale)}}</text>
+    </block>
+    <view class="field">
+      <text class="field-label">{{i18n.t(binding ? '原账户邮箱地址' : '邮箱地址', locale)}}</text>
+      <input class="input" type="text" value="{{email}}" bindinput="onEmailInput" placeholder="name@example.com" disabled="{{sent || manageMode || sending || verifying || wechatBusy}}" />
+    </view>
+    <button wx:if="{{!sent}}" class="primary-button auth-action {{sending || !agreed ? 'auth-disabled' : ''}}" bindtap="sendCode" loading="{{sending}}" disabled="{{sending || verifying || wechatBusy || !agreed}}">{{i18n.t('发送验证码', locale)}}</button>
 
     <block wx:else>
       <view class="field">
         <text class="field-label">{{i18n.t('6 位验证码', locale)}}</text>
         <input class="input code-input" type="number" maxlength="6" value="{{code}}" bindinput="onCodeInput" placeholder="000000" focus="{{sent}}" />
       </view>
-      <button class="primary-button auth-action {{verifying || !agreed ? 'auth-disabled' : ''}}" bindtap="verifyCode" loading="{{verifying}}" disabled="{{verifying || !agreed}}">{{i18n.t('验证并继续', locale)}}</button>
-      <button class="text-button {{seconds > 0 || sending || !agreed ? 'auth-text-disabled' : ''}}" bindtap="sendCode" disabled="{{seconds > 0 || sending || !agreed}}">{{i18n.t(seconds > 0 ? seconds + ' 秒后重新发送' : '重新发送验证码', locale)}}</button>
+      <button class="primary-button auth-action {{verifying || !agreed ? 'auth-disabled' : ''}}" bindtap="verifyCode" loading="{{verifying}}" disabled="{{verifying || sending || wechatBusy || !agreed}}">{{i18n.t(manageMode === 'unbind' ? '验证并解除绑定' : binding ? '验证并绑定微信' : '验证并继续', locale)}}</button>
+      <button class="text-button {{seconds > 0 || sending || !agreed ? 'auth-text-disabled' : ''}}" bindtap="sendCode" disabled="{{seconds > 0 || sending || verifying || wechatBusy || !agreed}}">{{i18n.t(seconds > 0 ? seconds + ' 秒后重新发送' : '重新发送验证码', locale)}}</button>
       <text class="delivery-note">{{i18n.t('验证码通常几分钟内到达，请同时检查垃圾邮件。', locale)}}</text>
     </block>
     <view wx:if="{{error}}" class="form-error">{{error}}</view>
+    <button wx:if="{{binding && !manageMode}}" class="text-button" bindtap="useEmailOnly" disabled="{{verifying || sending || wechatBusy}}">{{i18n.t('暂不绑定，只用邮箱登录', locale)}}</button>
   </view>
 
   <view class="privacy-note">{{i18n.t('记录按账户隔离，默认仅本人可见。分享需由你主动确认。产品没有供创作者浏览私密记录的管理入口；具体保护范围请阅读隐私政策。', locale)}}</view>
-  <button class="text-button browse-action" bindtap="browseWithoutLogin">{{i18n.t('暂不同意，先浏览', locale)}}</button>
+  <button class="text-button browse-action" bindtap="browseWithoutLogin" disabled="{{verifying || sending || wechatBusy}}">{{i18n.t(manageMode ? '取消，返回个人偏好' : '暂不同意，先浏览', locale)}}</button>
 </view>

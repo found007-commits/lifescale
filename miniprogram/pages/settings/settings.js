@@ -6,6 +6,7 @@ const t = require("../../utils/locale-copy");
 const { targetPolicy, targetError } = require("../../utils/target-policy");
 const { normalizeAge } = require("../../utils/preferences");
 const { targetDateFromAge, localDateString } = require("../../utils/life");
+const { wechatStatus, visibleEmail } = require("../../utils/wechat-auth");
 
 Page({
   data: { loading: true, email: "", profile: null, deleting: false, saving: false, error: "", genders, genderLabels, genderIndex: 7, displayName: "", localeIndex: 0, languages: ["简体中文", "繁體中文", "English"], modes: ["温和模式", "清醒模式"], modeIndex: 0 },
@@ -14,7 +15,8 @@ Page({
     const session = requireSession();
     if (!session) return;
     this.session = session;
-    this.setData({ loading: true, email: session.user.email || "", error: "" });
+    this.setData({ loading: true, email: visibleEmail(session.user.email), loginStatus: null, error: "" });
+    wechatStatus(undefined, true).then(loginStatus => this.setData({ loginStatus })).catch(() => {});
     try {
       const profile = await getProfile(session.user.id);
       this.setData({ profile, displayName: profile?.display_name || "", genderIndex: Math.max(0, genders.indexOf(profile?.gender_identity || "private")), localeIndex: Math.max(0, ["zh", "zh-TW", "en"].indexOf(profile?.locale)), modeIndex: profile?.display_mode === "clear" ? 1 : 0, birthLabel: formatDate(profile?.birth_date, profile?.locale), targetLabel: formatDate(profile?.target_date, profile?.locale) });
@@ -27,6 +29,10 @@ Page({
   },
   openLegal(event) { wx.navigateTo({ url: `/pages/legal/legal?type=${event.currentTarget.dataset.type}` }); },
   setupTimeline() { wx.navigateTo({ url: "/pages/onboarding/onboarding" }); },
+  manageWechat() {
+    if (!this.data.loginStatus?.enabled || !this.data.email) return;
+    wx.navigateTo({ url: `/pages/auth/auth?mode=${this.data.loginStatus.bound ? 'unbind' : 'bind'}` });
+  },
   refreshTargetPolicy() {
     const policy = targetPolicy(this.data.profile);
     const next = policy.nextAt ? new Date(policy.nextAt) : null;

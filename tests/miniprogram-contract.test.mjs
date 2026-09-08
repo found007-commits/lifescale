@@ -21,12 +21,13 @@ test("every declared mini program page has complete native files", async () => {
   }
 });
 
-test("mini program keeps email OTP as its only login method", async () => {
+test("mini program preserves email OTP alongside WeChat", async () => {
   const auth = await source("miniprogram/pages/auth/auth.js");
   const api = await source("miniprogram/utils/supabase.js");
   assert.match(auth, /sendOtp/);
   assert.match(auth, /verifyOtp/);
-  assert.doesNotMatch(`${auth}\n${api}`, /google|facebook|apple|wechat.*login/i);
+  assert.doesNotMatch(`${auth}\n${api}`, /google|facebook|apple/i);
+  assert.match(auth, /loginWithWechat/);
 });
 
 test("the Chinese manifesto headline has intentional two-line copy", async () => {

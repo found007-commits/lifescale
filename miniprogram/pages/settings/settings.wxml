@@ -7,13 +7,13 @@
   <block wx:if="{{!loading}}">
     <view wx:if="{{!profile && !error}}" class="paper-card profile-card">
       <text class="section-title">{{i18n.t('年龄目标，可以慢慢想。', locale)}}</text>
-      <text class="muted">{{email}}</text>
+      <text class="muted">{{email || i18n.t('微信账户（未绑定邮箱）', locale)}}</text>
       <text class="field-help">{{i18n.t('不急着设定年龄。你可以先记录，想好了再开启人生刻度。', locale)}}</text>
       <button class="primary-button" bindtap="setupTimeline">{{i18n.t('设定人生刻度（可稍后）', locale)}}</button>
     </view>
     <view wx:if="{{profile}}" class="paper-card profile-card">
       <text class="profile-name">{{profile.display_name || '余生有刻用户'}}</text>
-      <text class="muted">{{email}}</text>
+      <text class="muted">{{email || i18n.t('微信账户（未绑定邮箱）', locale)}}</text>
       <view class="profile-grid">
         <view><text>{{i18n.t('出生日期', locale)}}</text><text>{{birthLabel}}</text></view>
         <view wx:if="{{profile.target_age}}"><text>{{i18n.t('目标年龄', locale)}}</text><text>{{profile.target_age}} {{i18n.t('岁', locale)}}</text></view>
@@ -37,6 +37,14 @@
       <view class="field"><text class="field-label">{{i18n.t('语言', locale)}}</text><picker range="{{languages}}" value="{{localeIndex}}" bindchange="onLocaleChange"><view class="picker-field">{{languages[localeIndex]}} ›</view></picker></view>
       <view class="field"><text class="field-label">{{i18n.t('显示模式', locale)}}</text><picker range="{{modePickerLabels}}" value="{{modeIndex}}" bindchange="onModeChange"><view class="picker-field">{{i18n.t(modes[modeIndex], locale)}} ›</view></picker></view>
       <button class="primary-button" bindtap="savePreferences" loading="{{saving}}" disabled="{{saving}}">{{i18n.t('保存个人偏好', locale)}}</button>
+    </view>
+    <view class="paper-card profile-card">
+      <text class="section-title">{{i18n.t('登录方式', locale)}}</text>
+      <text class="field-help">{{email ? i18n.t('邮箱登录已保留', locale) : i18n.t('此账户使用微信登录', locale)}}</text>
+      <text wx:if="{{loginStatus && loginStatus.enabled}}" class="field-help">{{i18n.t(loginStatus.bound ? '微信已绑定此账户' : '微信尚未绑定', locale)}}</text>
+      <text wx:else class="field-help">{{i18n.t('微信绑定状态暂不可用，请稍后再试。', locale)}}</text>
+      <button wx:if="{{loginStatus.enabled && email}}" class="secondary-button" bindtap="manageWechat">{{i18n.t(loginStatus.bound ? '解除微信绑定' : '绑定微信，保留原记录', locale)}}</button>
+      <text wx:if="{{!email}}" class="field-help">{{i18n.t('以前有邮箱账户？退出后使用原邮箱登录即可找回原记录。两个账户不会自动合并。', locale)}}</text>
     </view>
     <view class="settings-list paper-card">
       <button bindtap="exportData"><text>{{i18n.t('导出全部数据', locale)}}</text><text>JSON ↓</text></button>

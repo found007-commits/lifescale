@@ -1,5 +1,5 @@
 .auth-page { padding-top: 64rpx; }
-.auth-copy { margin-top: 100rpx; }
+.auth-copy { margin-top: 44rpx; }
 .auth-title { margin-top: 28rpx; font-size: 54rpx; }
 .auth-intro { display: block; margin-top: 26rpx; line-height: 1.75; }
 .auth-card { margin-top: 56rpx; padding: 18rpx 30rpx 34rpx; }
@@ -14,5 +14,9 @@
 .consent-links { display: flex; flex-wrap: wrap; align-items: center; gap: 10rpx; padding-left: 60rpx; }
 .policy-link { text-decoration: underline; text-underline-offset: 5rpx; font-weight: 600; padding: 8rpx 0; }
 .consent-help { display: block; margin-top: 14rpx; font-size: 23rpx; line-height: 1.6; color: #51685d; }
-.auth-card .auth-disabled { background: #e1e6e1; color: #51685d; box-shadow: none; opacity: 1; }
+.auth-card .auth-disabled { background: #e1e6e1 !important; color: #51685d !important; box-shadow: none; opacity: 1; }
 .browse-action { text-decoration: underline; padding: 18rpx; }
+.login-divider { display: block; margin-top: 38rpx; padding-top: 26rpx; border-top: 1rpx solid #cdd8d0; color: #51685d; font-size: 25rpx; }
+.account-choice { margin-top: 30rpx; padding: 24rpx 0; }
+.choice-title { font-size: 32rpx; font-weight: 600; }
+.account-choice button { margin-top: 24rpx; }
