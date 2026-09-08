@@ -3,6 +3,7 @@ const { calculateLifeMetrics } = require("../../utils/life");
 const { getCheckins, getCheckinCount, getEntries, getProfile, updateProfile, requireSession } = require("../../utils/supabase");
 const { journeyMessage, openShare } = require("../../utils/preferences");
 const { formatDate } = require("../../utils/share-card");
+const { confirmDeleteEntry } = require("../../utils/entry-actions");
 
 const moodLabels = { calm: "平静", happy: "开心", grateful: "感恩", tired: "疲惫", sad: "难过", anxious: "焦虑", hopeful: "充满希望" };
 const categoryLabels = { daily: "日常", family: "家人", work: "工作", growth: "成长", health: "健康", travel: "旅行", reflection: "感悟", other: "其他" };
@@ -66,6 +67,7 @@ Page({
   recordToday() { wx.navigateTo({ url: "/pages/record/record" }); },
   setupTimeline() { wx.navigateTo({ url: "/pages/onboarding/onboarding" }); },
   shareEntry(event) { openShare(this.data.recentEntries[Number(event.currentTarget.dataset.index)], this.data.profile?.locale); },
+  removeEntry(event) { return confirmDeleteEntry(this, this.data.recentEntries[Number(event.currentTarget.dataset.index)], "recentEntries"); },
   async setMode(event) {
     const mode = event.currentTarget.dataset.mode;
     if (!this.data.profile || this.data.switching || !["gentle", "clear"].includes(mode)) return;

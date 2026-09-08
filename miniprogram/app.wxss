@@ -65,6 +65,9 @@ button::after { border: 0; }
 .privacy-note navigator { display: inline; color: #365f50; font-weight: 650; }
 
 .entry-share { display: block; margin: 22rpx 0 0 auto; width: fit-content; padding: 0 28rpx; background: #143d2f; color: #fffdf8; font-size: 25rpx; border-radius: 999rpx; }
+.entry-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16rpx; margin-top: 22rpx; }
+.entry-actions .entry-share { margin: 0 0 0 auto; }
+.entry-delete { margin: 0; padding: 0 20rpx; min-height: 72rpx; display: flex; align-items: center; background: #f7eae6; color: #963f36; font-size: 25rpx; border-radius: 999rpx; }
 .mode-options { display: flex; gap: 12rpx; margin-bottom: 28rpx; padding: 8rpx; border-radius: 24rpx; background: rgba(255,255,255,.12); }
 .mode-options button { flex: 1; padding: 0 12rpx; font-size: 28rpx; color: #fffdf8; background: transparent; border-radius: 18rpx; }
 .mode-options .chosen { background: #fffdf8; color: #143d2f; font-weight: 700; }

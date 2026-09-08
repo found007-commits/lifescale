@@ -51,7 +51,10 @@
           <view class="entry-meta"><text>{{item.dateLabel}}</text><text>{{i18n.t('仅自己可见', locale)}}</text></view>
           <text class="entry-content">{{item.content || '今天 +1'}}</text>
           <view class="entry-tags"><text>{{i18n.t(item.moodLabel, locale)}}</text><text>{{i18n.t(item.categoryLabel, locale)}}</text></view>
-          <button class="entry-share" data-index="{{index}}" bindtap="shareEntry">{{i18n.t('分享这一天 ↗', locale)}}</button>
+          <view class="entry-actions">
+            <button class="entry-delete" data-index="{{index}}" catchtap="removeEntry">{{i18n.t('删除', locale)}}</button>
+            <button class="entry-share" data-index="{{index}}" catchtap="shareEntry">{{i18n.t('分享这一天 ↗', locale)}}</button>
+          </view>
         </view>
       </view>
       <view wx:else class="paper-card empty-state">

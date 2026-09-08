@@ -1,5 +1,6 @@
 const Page = require("../../utils/localized-page");
-const { deleteEntry, getEntries, requireSession } = require("../../utils/supabase");
+const { getEntries, requireSession } = require("../../utils/supabase");
+const { confirmDeleteEntry } = require("../../utils/entry-actions");
 const { openShare } = require("../../utils/preferences");
 const { formatDate } = require("../../utils/share-card");
 
@@ -42,28 +43,6 @@ Page({
   addEntry() { wx.navigateTo({ url: "/pages/record/record" }); },
   shareEntry(event) { openShare(this.data.entries[Number(event.currentTarget.dataset.index)], getApp().globalData.profile?.locale || getApp().globalData.locale); },
   removeEntry(event) {
-    const index = Number(event.currentTarget.dataset.index);
-    const entry = this.data.entries[index];
-    if (!entry) return;
-    wx.showModal({
-      title: "删除这条记录？",
-      content: "文字和照片会永久删除，无法恢复。",
-      confirmText: "删除",
-      confirmColor: "#a3463d",
-      success: async (result) => {
-        if (!result.confirm) return;
-        wx.showLoading({ title: "正在删除" });
-        try {
-          await deleteEntry(entry);
-          const entries = this.data.entries.filter((_, itemIndex) => itemIndex !== index);
-          this.setData({ entries });
-          wx.showToast({ title: "已删除", icon: "success" });
-        } catch (error) {
-          wx.showToast({ title: error.message || "删除失败", icon: "none" });
-        } finally {
-          wx.hideLoading();
-        }
-      },
-    });
+    return confirmDeleteEntry(this, this.data.entries[Number(event.currentTarget.dataset.index)], "entries");
   },
 });
