@@ -41,8 +41,8 @@
     </view>
     <view class="paper-card profile-card">
       <text class="section-title">{{i18n.t('登录方式', locale)}}</text>
-      <text class="field-help">{{email ? i18n.t('邮箱登录已保留', locale) : i18n.t('此账户使用微信登录', locale)}}</text>
-      <text wx:if="{{loginStatus && loginStatus.enabled}}" class="field-help">{{i18n.t(loginStatus.bound ? '微信已绑定此账户' : '微信尚未绑定', locale)}}</text>
+      <text class="field-help">{{email ? i18n.t('可使用邮箱登录', locale) : i18n.t('此账户使用微信登录', locale)}}</text>
+      <text wx:if="{{loginStatus && loginStatus.enabled}}" class="field-help">{{i18n.t(loginStatus.bound ? '微信已绑定，可直接登录' : '微信尚未绑定', locale)}}</text>
       <text wx:else class="field-help">{{i18n.t('微信绑定状态暂不可用，请稍后再试。', locale)}}</text>
       <button wx:if="{{loginStatus.enabled && email}}" class="secondary-button" bindtap="manageWechat">{{i18n.t(loginStatus.bound ? '解除微信绑定' : '绑定微信，保留原记录', locale)}}</button>
       <text wx:if="{{!email}}" class="field-help">{{i18n.t('以前有邮箱账户？退出后使用原邮箱登录即可找回原记录。两个账户不会自动合并。', locale)}}</text>

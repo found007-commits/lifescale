@@ -35,6 +35,40 @@ test('existing-account path sends OTP with account creation disabled and binds b
   assert.equal(h.calls.accept,1);assert.deepEqual(h.calls.profile,['original']);
   assert.equal(h.calls.destinations[0],'/pages/dashboard/dashboard');
 });
+test('1.3.7 bound WeChat signs directly into original account without email, OTP, choice or new-account prompt',async()=>{
+  const h=harness({session:{user:{id:'original'}}});h.page.onLoad();
+  h.page.setData({agreed:true,email:'',code:''});await h.page.loginWithWechat();
+  assert.deepEqual(h.calls.wechat.map(args=>args[0]),['login']);
+  assert.equal(h.calls.wechat[0][1].newAccountConfirmed,false);
+  assert.equal(h.calls.send.length,0);assert.equal(h.calls.modals.length,0);
+  assert.equal(h.page.data.accountChoice,false);assert.equal(h.page.data.binding,false);
+  assert.equal(h.calls.accept,1);assert.deepEqual(h.calls.profile,['original']);
+  assert.deepEqual(h.calls.destinations,['/pages/dashboard/dashboard']);
+});
+test('1.3.7 email sign-in works independently even if WeChat is unavailable or unbound',async()=>{
+  for(const unbound of [false,true]) {
+    const h=harness();h.page.onLoad();h.page.setData({agreed:true,wechatEnabled:false});
+    if(unbound)await h.page.loginWithWechat(); // synthetic unknown identity, not a session
+    const before=h.calls.wechat.length;
+    h.page.setData({email:'old@example.invalid',code:'123456'});
+    await h.page.sendCode();await h.page.verifyCode();
+    assert.deepEqual(h.calls.send,[['old@example.invalid',true]]);
+    assert.equal(h.calls.wechat.length,before);assert.equal(h.calls.accept,0);
+    assert.equal(h.calls.modals.length,0);assert.deepEqual(h.calls.profile,['original']);
+    assert.deepEqual(h.calls.destinations,['/pages/dashboard/dashboard']);
+  }
+});
+test('1.3.7 ordinary login offers alternatives without instructing all users to bind',()=>{
+  const wxml=source('pages/auth/auth.wxml');
+  assert.match(wxml,/选择一种方式登录。/);assert.match(wxml,/或用邮箱登录/);
+  assert.doesNotMatch(wxml,/以前记录过？首次使用微信时请绑定原邮箱/);
+  assert.match(wxml,/wx:if="\{\{accountChoice\}\}"/);
+  const t=require('../miniprogram/utils/locale-copy.js');
+  for(const text of ['选择一种方式登录。','或用邮箱登录','可使用邮箱登录','微信已绑定，可直接登录']) {
+    assert.doesNotMatch(t(text,'en'),/[\u4e00-\u9fff]/);
+    assert.ok(t(text,'zh-TW').length>0);
+  }
+});
 test('binding conflict is explained before opening the verified original email account',async()=>{
   const h=harness({session:{user:{id:'original'}},bindingConflict:true});
   h.page.chooseExisting();h.page.setData({agreed:true,email:'old@example.invalid',code:'123456'});
