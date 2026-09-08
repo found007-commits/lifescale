@@ -1,5 +1,6 @@
 .dashboard-page { padding-top: 50rpx; }
 .today-title { margin: 24rpx 0; font-size: 55rpx; }
+.today-title text { white-space: normal; overflow-wrap: break-word; letter-spacing: -1rpx; line-height: 1.25; }
 .today-header .muted { display: block; line-height: 1.7; }
 .life-card { margin-top: 28rpx; padding: 30rpx; border-radius: 38rpx; background: #123f31; color: #f3efe5; }
 .details-toggle { margin: 24rpx auto 0; padding: 8rpx 20rpx; width: fit-content; background: transparent; color: #d5e2da; font-size: 24rpx; }
@@ -26,3 +27,37 @@
 .entry-tags text { padding: 8rpx 16rpx; border-radius: 999rpx; background: #eee9dc; color: #476b5d; font-size: 19rpx; }
 .empty-state .muted { display: block; margin-top: 16rpx; }
 .empty-action { margin-top: 30rpx; }
+
+/* Mode changes affect hierarchy and information, not just the selected button. */
+.life-gentle { background: #e3ece3; color: #234c37; border: 2rpx solid #cbdacc; }
+.life-gentle .mode-options { background: #cbdacc; }
+.life-gentle .mode-options button { color: #345640; }
+.life-gentle .mode-options .chosen { background: #fffdf8; color: #234c37; }
+.mode-message { display: block; margin: 32rpx 0; text-align: center; font-family: "Songti SC", serif; font-size: 31rpx; line-height: 1.6; }
+.life-gentle .dial { width: 350rpx; height: 350rpx; padding: 10rpx; }
+.life-gentle .dial-inner { border: 0; background: #e3ece3; color: #48654e; }
+.life-gentle .dial-number { color: #234c37; font-size: 70rpx; }
+.mode-disclaimer { display: block; margin-top: 32rpx; font-size: 21rpx; line-height: 1.6; text-align: center; }
+.life-gentle .mode-disclaimer { color: #48654e; }
+.life-gentle .details-toggle { color: #345640; }
+.life-gentle .metric-grid, .life-gentle .metric-grid view { border-color: #c1d2c3; }
+.life-gentle .metric-grid view { color: #48654e; }
+.life-gentle .metric-value { color: #234c37; }
+.life-clear { background: #202923; color: #fffaf0; border: 2rpx solid #202923; }
+.life-clear .mode-options { background: #364239; }
+.life-clear .mode-options button { color: #e1e8e0; }
+.life-clear .mode-options .chosen { background: #ffbe8b; color: #202923; }
+.clear-view { padding: 22rpx 4rpx 4rpx; }
+.clear-label { display: block; color: #ffbe8b; font-size: 26rpx; font-weight: 650; }
+.clear-count { display: flex; align-items: baseline; gap: 16rpx; margin: 16rpx 0 24rpx; flex-wrap: wrap; }
+.clear-number { font-family: "DIN Alternate", "Arial", sans-serif; font-size: 112rpx; font-weight: 700; line-height: 1.1; letter-spacing: -4rpx; font-variant-numeric: tabular-nums; }
+.clear-unit { font-size: 28rpx; color: #d4dfd4; }
+.clear-message { display: block; font-size: 29rpx; line-height: 1.6; }
+.clear-progress-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 12rpx; margin-top: 44rpx; font-size: 23rpx; color: #d4dfd4; }
+.clear-percent { color: #ffbe8b; font-size: 38rpx; font-weight: 700; font-variant-numeric: tabular-nums; }
+.clear-progress-track { margin: 16rpx 0 20rpx; height: 16rpx; background: #526054; border-radius: 4rpx; overflow: hidden; }
+.clear-progress-fill { height: 100%; background: #ffbe8b; }
+.clear-facts { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12rpx; color: #d4dfd4; font-size: 22rpx; line-height: 1.6; }
+.life-clear .mode-disclaimer { text-align: left; color: #b9c8bc; }
+.life-clear .details-toggle { color: #e1e8e0; }
+.life-card .mode-options button { min-height: 76rpx; display: flex; align-items: center; justify-content: center; line-height: 1.4; padding: 12rpx; }

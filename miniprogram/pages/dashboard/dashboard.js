@@ -76,12 +76,13 @@ Page({
   removeEntry(event) { return confirmDeleteEntry(this, this.data.recentEntries[Number(event.currentTarget.dataset.index)], "recentEntries"); },
   async setMode(event) {
     const mode = event.currentTarget.dataset.mode;
-    if (!this.data.profile || this.data.switching || !["gentle", "clear"].includes(mode)) return;
-    this.setData({ switching: true });
+    if (!this.data.profile || this.data.switching || !["gentle", "clear"].includes(mode) || this.data.profile.display_mode === mode) return;
+    const previous = this.data.profile;
+    this.setData({ switching: true, profile: { ...previous, display_mode: mode } });
     try {
       const profile = await updateProfile(this.data.profile.id, { display_mode: mode });
       this.setData({ profile });
-    } catch (error) { wx.showToast({ title: error.message || "保存失败", icon: "none" }); }
+    } catch (error) { this.setData({ profile: previous }); wx.showToast({ title: error.message || "保存失败", icon: "none" }); }
     finally { this.setData({ switching: false }); }
   },
   viewHistory() { wx.switchTab({ url: "/pages/history/history" }); },

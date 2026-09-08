@@ -80,7 +80,7 @@ test('picker labels follow locale updates without changing selected values', asy
 
 test('home brings recording forward without hiding modes, deleting metrics or changing routes', () => {
   const wxml = read('pages/dashboard/dashboard.wxml');
-  assert.ok(wxml.indexOf('class="today-button') < wxml.indexOf('class="life-card"'));
+  assert.ok(wxml.indexOf('class="today-button') < wxml.indexOf('class="life-card '));
   assert.match(wxml, /wx:if="\{\{detailsOpen\}\}" class="metric-grid"/);
   for (const key of ['livedDaysText', 'progressText', 'weeksText', 'checkinCount']) assert.ok(wxml.includes(key));
   for (const action of ['setMode', 'recordToday', 'removeEntry', 'shareEntry']) assert.ok(wxml.includes(`"${action}"`));
