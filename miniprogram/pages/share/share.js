@@ -9,7 +9,6 @@ Page({
   data: { layout: "separate", hasPhoto: false, imageUrls: [], backgroundIndex: 0, busy: true, saving: false, cards: [], selected: 0, error: "" },
   onLoad() {
     // Receive one explicitly selected entry in memory; never put private data in a URL/storage.
-    wx.hideShareMenu();
     this.files = new Set();
     this.getOpenerEventChannel().on("entry", ({ entry, locale }) => {
       clearTimeout(this.entryTimer);

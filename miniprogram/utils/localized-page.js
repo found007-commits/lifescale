@@ -1,5 +1,6 @@
 const t = require("./locale-copy");
 const { formatDate } = require("./share-card");
+const withAppShare = require("./app-share");
 
 function currentLocale() {
   return getApp().globalData.profile?.locale || getApp().globalData.locale || "zh";
@@ -25,5 +26,5 @@ module.exports = function localizedPage(definition) {
     ["我的人生刻度", "留下的日子", "回望七天", "个人偏好"].forEach((text, index) => wx.setTabBarItem({ index, text: t(text, currentLocale()), fail() {} }));
     return result;
   };
-  return Page(definition);
+  return Page(withAppShare(definition));
 };

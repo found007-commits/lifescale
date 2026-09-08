@@ -49,7 +49,4 @@ Page({
     if (this.data.preview) wx.setStorageSync("lifescale:miniprogram-draft", { birthDate: this.data.birthDate, targetAge: Number(this.data.targetAge) });
     wx.navigateTo({ url: "/pages/auth/auth" });
   },
-  onShareAppMessage() { return { title: "余生有刻 · 看见余生，认真今天。", path: "/pages/index/index", imageUrl: "/images/lifescale-icon.png" }; },
-  onShareTimeline() { return { title: "余生有刻 · 看见余生，认真今天。", query: "", imageUrl: "/images/lifescale-icon.png" }; },
-  onLoad() { wx.showShareMenu({ menus: ["shareAppMessage", "shareTimeline"] }); },
 });
