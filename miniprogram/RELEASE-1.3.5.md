@@ -1,0 +1,15 @@
+# 1.3.5 — quieter recording, fewer controls at once
+
+- No new product capability. Existing user records, API contracts, login/binding, annual target adjustments, multi-photo storage, image rendering and privacy restrictions are unchanged.
+- Record composer leads with the text box. Optional inspiration is closed initially and can be expanded without changing the draft or inserting text. Seven moods and eight categories remain, now in two compact localized pickers instead of fifteen simultaneously visible pills. Existing calm/daily defaults remain; save/retry locks and selection bounds are checked.
+- Home moves the record action ahead of the time dial. After an existing check-in it says “再记一笔”, reflecting the existing ability to record again that day. The time dial and visible gentle/clear mode controls remain. Four supplementary metrics are under “查看时间详情”; first-day and milestone reminders are preserved.
+- Journal removes the repeated full reflection and deletion tutorial from the top, leaving a brief privacy note. The exact approved reflection and irreversible-deletion warning remain in the confirmation. Visible lower-left deletion is retained. Card sharing becomes an outlined secondary action.
+- Share opens to the preview with one settings entry and fixed send/save actions. Text/photo selection, layouts, background choice and metadata/signature controls are grouped under the initially collapsed Share settings. No feature is removed; editing still hides the old image and action bar, and changes regenerate the exported copy. Signature remains opt-in.
+- Simplified Chinese, Traditional Chinese and English are included. No public feed or audience controls; no production website/database deployment in this release.
+- Validation: 101 automated tests, TypeScript and ESLint passed. Regression coverage includes every mood/category choice, unchanged defaults and save payload, invalid selection rejection, saved-record locks, draft preservation across prompt toggling, translated picker labels, home action/metric preservation, all share controls and deletion confirmation.
+- Native DevTools verified the guest composer, initially hidden inspiration and native mood picker, and a synthetic share preview with collapsed/expanded settings and fixed bottom actions. No real account content was read, written, deleted or sent. Authenticated dashboard/history phone rendering and native send/album behavior remain real-device acceptance items.
+- Upload receipt: WeChat DevTools confirmed **1.3.5 code upload successful on 2026-09-08 at 19:23**, and the code-quality scan reported “小程序表现良好，未发现代码质量问题”. Version and description were verified before submitting; the experience-build replacement prompt was confirmed. The form reported online version 1.2.3. No review submission or official publication was performed; the administrator must submit 1.3.5 for review and publish after approval.
+
+Suggested review description:
+
+精简记录与分享界面：输入框优先，灵感按需展开，心情与分类改为紧凑选择；首页记录入口前移，时间详情可展开。回看页减少重复提示，删除仍需确认。分享排版与署名等统一收进设置，保留预览和发送保存。原有功能与私密记录不变，不新增公开广场。

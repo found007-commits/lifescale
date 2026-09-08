@@ -20,7 +20,7 @@ function decorateEntry(entry) {
 }
 
 Page({
-  data: { loading: true, profile: null, metrics: null, recentEntries: [], checkedToday: false, checkinCount: 0, journeyMessage: "", switching: false, error: "" },
+  data: { loading: true, profile: null, metrics: null, recentEntries: [], checkedToday: false, checkinCount: 0, journeyMessage: "", switching: false, error: "", detailsOpen: false },
 
   onShow() { return this.load(); },
   onPullDownRefresh() { this.load(true); },
@@ -65,6 +65,7 @@ Page({
     if (entry?.imageUrls.length) wx.previewImage({ urls: entry.imageUrls, current: entry.imageUrls[Number(event.currentTarget.dataset.photo)] });
   },
   recordToday() { wx.navigateTo({ url: "/pages/record/record" }); },
+  toggleDetails() { this.setData({ detailsOpen: !this.data.detailsOpen }); },
   setupTimeline() { wx.navigateTo({ url: "/pages/onboarding/onboarding" }); },
   shareEntry(event) { openShare(this.data.recentEntries[Number(event.currentTarget.dataset.index)], this.data.profile?.locale); },
   removeEntry(event) { return confirmDeleteEntry(this, this.data.recentEntries[Number(event.currentTarget.dataset.index)], "recentEntries"); },

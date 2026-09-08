@@ -12,7 +12,7 @@ Page({
     images: [], processing: false, notice: "", progress: "", persisted: false,
     saving: false,
     error: "",
-    guest: true, saved: false, topics, topic: -1, promptIndex: 0, prompt: "",
+    guest: true, saved: false, topics, topic: -1, promptIndex: 0, prompt: "", inspirationOpen: false, moodIndex: 0, categoryIndex: 0,
     moods: [
       { value: "calm", label: "平静" }, { value: "happy", label: "开心" }, { value: "grateful", label: "感恩" },
       { value: "tired", label: "疲惫" }, { value: "sad", label: "难过" }, { value: "anxious", label: "焦虑" }, { value: "hopeful", label: "充满希望" },
@@ -38,14 +38,27 @@ Page({
     const topic = Number(event.currentTarget.dataset.index);
     this.setData({ topic, promptIndex: 0, prompt: questionAt(topic) });
   },
+  toggleInspiration() {
+    if (this.data.saving || this.data.persisted) return;
+    this.setData({ inspirationOpen: !this.data.inspirationOpen });
+  },
+  onMoodChange(event) {
+    const index = Number(event.detail.value);
+    if (this.data.saving || this.data.persisted || !Number.isInteger(index) || !this.data.moods[index]) return;
+    this.setData({ moodIndex: index, mood: this.data.moods[index].value });
+  },
+  onCategoryChange(event) {
+    const index = Number(event.detail.value);
+    if (this.data.saving || this.data.persisted || !Number.isInteger(index) || !this.data.categories[index]) return;
+    this.setData({ categoryIndex: index, category: this.data.categories[index].value });
+  },
   nextPrompt() {
+    if (this.data.saving || this.data.persisted) return;
     const promptIndex = this.data.promptIndex + 1;
     this.setData({ promptIndex, prompt: questionAt(this.data.topic, promptIndex) });
   },
   onUnload() { this.closed = true; this.files.forEach((filePath) => wx.getFileSystemManager().unlink({ filePath, fail() {} })); },
   onContentInput(event) { this.setData({ content: event.detail.value.slice(0, 12000), error: "" }); },
-  chooseMood(event) { if (!this.data.saving && !this.data.persisted) this.setData({ mood: event.currentTarget.dataset.value }); },
-  chooseCategory(event) { if (!this.data.saving && !this.data.persisted) this.setData({ category: event.currentTarget.dataset.value }); },
   async chooseImage() {
     if (this.picking || this.data.saving || this.data.persisted) return;
     this.picking = true; this.setData({ processing: true, error: "" });

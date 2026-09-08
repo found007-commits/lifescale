@@ -11,9 +11,10 @@ const warning = '确认删除后，文字和照片会永久删除，无法恢复
 
 test('both journal surfaces expose a left delete button without requiring long press', () => {
   const history = read('pages/history/history.wxml');
-  assert.ok(history.includes(copy));
-  assert.ok(history.indexOf('history-reflection') < history.indexOf('wx:if="{{loading}}"'));
-  const hint = '记录默认仅自己可见。点击卡片左下角的“删除”，确认后删除。';
+  // The full reflection is reserved for the confirmation, not repeated above every visit.
+  assert.ok(!history.includes(copy));
+  assert.ok(read('utils/entry-actions.js').includes(copy));
+  const hint = '这些记录，仅自己可见。';
   assert.ok(history.includes(hint));
   for (const text of [copy, hint, warning]) {
     assert.equal(translate(text,'zh'),text);

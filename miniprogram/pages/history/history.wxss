@@ -1,4 +1,5 @@
 .history-page { padding-top: 48rpx; }
+.history-note { display: block; margin: 22rpx 0 30rpx; color: #526c60; font-size: 24rpx; line-height: 1.7; }
 .history-head { display: flex; align-items: flex-end; justify-content: space-between; }
 .history-head .section-title { display: block; margin-top: 10rpx; }
 .add-button { width: auto; margin: 0; padding: 0 26rpx; border-radius: 999rpx; background: #123f31; color: #fbfaf6; font-size: 23rpx; }
@@ -16,3 +17,4 @@
 .empty-state { margin-top: 54rpx; }
 .empty-state .muted { display: block; margin-top: 18rpx; }
 .empty-action { margin-top: 30rpx; }
+@media (prefers-color-scheme: dark) { .history-note { color: #b5c9bd; } }

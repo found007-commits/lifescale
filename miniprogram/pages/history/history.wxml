@@ -4,8 +4,7 @@
     <view><text class="eyebrow">PRIVATE JOURNAL</text><text class="section-title">{{i18n.t('留下的日子', locale)}}</text></view>
     <button class="add-button" bindtap="addEntry">{{i18n.t('＋ 记录', locale)}}</button>
   </view>
-  <view class="history-reflection"><text>{{i18n.t('人生的每一步，未必都完美；记录的每一笔，也是如此。偶尔写错，也成了自己的历史。留下或删去，都由自己决定。', locale)}}</text></view>
-  <text class="history-note">{{i18n.t('记录默认仅自己可见。点击卡片左下角的“删除”，确认后删除。', locale)}}</text>
+  <text class="history-note">{{i18n.t('这些记录，仅自己可见。', locale)}}</text>
   <view wx:if="{{loading}}" class="loading-copy">{{i18n.t('正在翻开记录', locale)}}</view>
   <view wx:if="{{error}}" class="form-error">{{error}}</view>
   <view wx:if="{{!loading && entries.length}}" class="timeline">

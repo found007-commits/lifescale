@@ -1,7 +1,12 @@
-.record-page { padding-top: 50rpx; }
+.record-page { padding-top: 32rpx; }
 .record-title { margin-top: 25rpx; font-size: 58rpx; }
 .record-intro { display: block; margin-top: 24rpx; color: #476b5d; line-height: 1.7; }
-.composer { margin-top: 42rpx; padding: 30rpx; }
+.composer { margin-top: 28rpx; padding: 30rpx; }
+.inspiration-toggle { margin: 8rpx 0; padding: 10rpx 0; text-align: left; background: transparent; color: #476b5d; font-size: 24rpx; }
+.inspiration-options { padding-top: 20rpx; }
+.record-metadata { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20rpx; margin-top: 28rpx; }
+.record-metadata .field-label { font-size: 23rpx; }
+.metadata-picker { display: flex; justify-content: space-between; align-items: center; gap: 12rpx; min-height: 78rpx; padding: 12rpx 18rpx; border: 1rpx solid #c7d1ca; border-radius: 16rpx; font-size: 26rpx; line-height: 1.5; }
 .composer .textarea { border: 0; background: transparent; padding: 10rpx 0; }
 .photo-button { margin: 24rpx 0 0; border: 2rpx dashed rgba(18,63,49,.24); background: transparent; color: #365f50; font-size: 24rpx; }
 .image-preview { position: relative; margin-top: 22rpx; }
@@ -20,3 +25,7 @@
 .photo-choice-grid text { display: block; font-size: 22rpx; line-height: 1.6; overflow-wrap: anywhere; }
 .upload-hint { display: block; margin-top: 20rpx; color: #476b5d; font-size: 23rpx; line-height: 1.8; }
 .render-canvas { position: fixed; left: -10000px; top: 0; width: 720px; height: 900px; pointer-events: none; }
+@media (prefers-color-scheme: dark) {
+  .inspiration-toggle { color: #b5c9bd; }
+  .metadata-picker { border-color: #728c7c; }
+}

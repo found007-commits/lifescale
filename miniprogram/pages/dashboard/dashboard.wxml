@@ -18,6 +18,10 @@
         <text class="muted">{{i18n.t('这不是死亡预测，而是你为自己设定的人生时间目标。', locale)}}</text>
       </view>
 
+      <button class="today-button {{checkedToday ? 'done' : ''}}" bindtap="recordToday" hover-class="button-press">
+        <text class="today-plus">{{checkedToday ? '✓' : '+1'}}</text>
+        <view><text class="today-main">{{i18n.t(checkedToday ? '再记一笔' : '记录今天 +1', locale)}}</text><text class="today-note">{{i18n.t('一句话、一张图，也足够', locale)}}</text></view>
+      </button>
       <view class="life-card">
         <view class="mode-options"><button class="{{profile.display_mode === 'gentle' ? 'chosen' : ''}}" data-mode="gentle" bindtap="setMode" disabled="{{switching}}">{{i18n.t('温和模式', locale)}}</button><button class="{{profile.display_mode === 'clear' ? 'chosen' : ''}}" data-mode="clear" bindtap="setMode" disabled="{{switching}}">{{i18n.t('清醒模式', locale)}}</button></view>
         <view class="dial" style="background: conic-gradient(#d99b2f {{metrics.progress}}%, rgba(243,239,229,.13) 0)">
@@ -27,16 +31,13 @@
             <text>{{i18n.t('天', locale)}}</text>
           </view>
         </view>
-        <view class="metric-grid">
+        <button class="details-toggle" bindtap="toggleDetails" aria-expanded="{{detailsOpen}}">{{i18n.t(detailsOpen ? '收起时间详情' : '查看时间详情', locale)}}</button>
+        <view wx:if="{{detailsOpen}}" class="metric-grid">
           <view><text>{{i18n.t('已走过', locale)}}</text><text class="metric-value">{{metrics.livedDaysText}} {{i18n.t('天', locale)}}</text></view>
           <view><text>{{i18n.t('生命进度', locale)}}</text><text class="metric-value">{{metrics.progressText}}%</text></view>
           <view><text>{{i18n.t('剩余周数', locale)}}</text><text class="metric-value">{{metrics.weeksText}} {{i18n.t('周', locale)}}</text></view>
           <view><text>{{i18n.t('留下记录', locale)}}</text><text class="metric-value">{{checkinCount}} {{i18n.t('天', locale)}}</text></view>
         </view>
-        <button class="today-button {{checkedToday ? 'done' : ''}}" bindtap="recordToday" hover-class="button-press">
-          <text class="today-plus">{{checkedToday ? '✓' : '+1'}}</text>
-          <view><text class="today-main">{{i18n.t(checkedToday ? '今天已经留下记录' : '记录今天 +1', locale)}}</text><text class="today-note">{{i18n.t('一句话、一张图，也足够', locale)}}</text></view>
-        </button>
       </view>
 
       <view class="paper-card journey-note"><text>{{i18n.t('第', locale)}} {{checkinCount || 1}} {{i18n.t('天', locale)}}</text><text>{{i18n.t(journeyMessage, locale)}}</text></view>

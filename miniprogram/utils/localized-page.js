@@ -17,6 +17,8 @@ module.exports = function localizedPage(definition) {
     if (this.data.birthDate) localized.birthLabel = formatDate(this.data.birthDate, locale);
     if (this.data.genderLabels) localized.genderPickerLabels = this.data.genderLabels.map((label) => t(label, locale));
     if (this.data.modes) localized.modePickerLabels = this.data.modes.map((label) => t(label, locale));
+    if (this.data.moods) localized.moodPickerLabels = this.data.moods.map((item) => t(item.label, locale));
+    if (this.data.categories) localized.categoryPickerLabels = this.data.categories.map((item) => t(item.label, locale));
     ["entries", "recentEntries"].forEach(key => {
       if (Array.isArray(this.data[key])) this.data[key].forEach((entry, index) => {
         if (!entry.entry_date) return;

@@ -2,16 +2,18 @@
 <view class="page-shell record-page">
   <text class="eyebrow">{{i18n.t('TODAY · 只属于你', locale)}}</text>
   <view class="display-title record-title"><text>{{i18n.t('今天，发生了什么？', locale)}}</text></view>
-  <text class="record-intro">{{i18n.t('无需写得漂亮。一句话、一张图，或者只是此刻的心情。', locale)}}</text>
+  <text class="record-intro">{{i18n.t('一句话或一张照片，留给自己。', locale)}}</text>
 
   <view class="paper-card composer">
-    <text class="field-label">{{i18n.t('想从哪里写起？（可跳过）', locale)}}</text>
+    <textarea class="textarea" disabled="{{saving || persisted}}" value="{{content}}" bindinput="onContentInput" maxlength="12000" placeholder="{{i18n.t('写下你想记住的片刻……', locale)}}" auto-height="false" />
+    <button class="inspiration-toggle" bindtap="toggleInspiration" disabled="{{saving || persisted}}" aria-expanded="{{inspirationOpen}}">{{i18n.t(inspirationOpen ? '收起灵感' : '需要一点灵感？', locale)}}</button>
+    <view wx:if="{{inspirationOpen}}" class="inspiration-options">
     <view class="choice-row inspiration-topics">
       <button class="choice-pill {{topic === -1 ? 'active' : ''}}" data-index="-1" bindtap="chooseTopic">{{i18n.t('自由写', locale)}}</button>
       <button wx:for="{{topics}}" wx:key="label" class="choice-pill {{topic === index ? 'active' : ''}}" data-index="{{index}}" bindtap="chooseTopic">{{i18n.t(item.label, locale)}}</button>
     </view>
     <view wx:if="{{prompt}}" class="inspiration-card"><text>{{i18n.t(prompt, locale)}}</text><button bindtap="nextPrompt">{{i18n.t('换一句', locale)}}</button></view>
-    <textarea class="textarea" disabled="{{saving || persisted}}" value="{{content}}" bindinput="onContentInput" maxlength="12000" placeholder="{{i18n.t('写下你想记住的片刻……', locale)}}" auto-height="false" />
+    </view>
     <view class="photo-choice-grid">
     <view wx:for="{{images}}" wx:key="id" class="image-preview">
       <image wx:if="{{item.tempFilePath}}" src="{{item.tempFilePath}}" mode="aspectFill" />
@@ -20,21 +22,13 @@
     </view>
     </view>
     <button class="photo-button" disabled="{{saving || processing || persisted}}" bindtap="chooseImage">{{i18n.t(processing ? '正在处理照片…' : '＋ 添加照片（可多选）', locale)}}</button>
-    <text class="upload-hint">{{i18n.t('可继续添加。照片自动优化为静态 JPG，动图取单帧，不改变原文件。支持的相册格式由设备决定。', locale)}}</text>
+    <text wx:if="{{images.length}}" class="upload-hint">{{i18n.t('可继续添加。照片自动优化为静态 JPG，动图取单帧，不改变原文件。支持的相册格式由设备决定。', locale)}}</text>
     <text wx:if="{{notice}}" class="upload-hint">{{i18n.t(notice, locale)}}</text>
     <text wx:if="{{progress}}" class="upload-hint">{{i18n.t(processing ? '正在处理照片…' : '正在上传照片…', locale)}} {{progress}}</text>
 
-    <view class="choice-block">
-      <text class="field-label">{{i18n.t('此刻的心情', locale)}}</text>
-      <view class="choice-row">
-        <button wx:for="{{moods}}" wx:key="value" class="choice-pill {{mood === item.value ? 'active' : ''}}" data-value="{{item.value}}" bindtap="chooseMood">{{i18n.t(item.label, locale)}}</button>
-      </view>
-    </view>
-    <view class="choice-block">
-      <text class="field-label">{{i18n.t('这段时间属于', locale)}}</text>
-      <view class="choice-row">
-        <button wx:for="{{categories}}" wx:key="value" class="choice-pill {{category === item.value ? 'active' : ''}}" data-value="{{item.value}}" bindtap="chooseCategory">{{i18n.t(item.label, locale)}}</button>
-      </view>
+    <view class="record-metadata">
+      <view><text class="field-label">{{i18n.t('此刻的心情', locale)}}</text><picker range="{{moodPickerLabels}}" value="{{moodIndex}}" bindchange="onMoodChange" disabled="{{saving || persisted}}"><view class="metadata-picker">{{i18n.t(moods[moodIndex].label, locale)}} <text>⌄</text></view></picker></view>
+      <view><text class="field-label">{{i18n.t('分类', locale)}}</text><picker range="{{categoryPickerLabels}}" value="{{categoryIndex}}" bindchange="onCategoryChange" disabled="{{saving || persisted}}"><view class="metadata-picker">{{i18n.t(categories[categoryIndex].label, locale)}} <text>⌄</text></view></picker></view>
     </view>
     <view wx:if="{{error}}" class="form-error">{{error}}</view>
     <text wx:if="{{guest}}" class="upload-hint">{{i18n.t('此时尚未上传。登录后会继续保存；离开或关闭小程序会丢失未保存内容。', locale)}}</text>

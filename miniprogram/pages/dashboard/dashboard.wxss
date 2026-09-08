@@ -1,7 +1,8 @@
 .dashboard-page { padding-top: 50rpx; }
 .today-title { margin: 24rpx 0; font-size: 55rpx; }
 .today-header .muted { display: block; line-height: 1.7; }
-.life-card { margin-top: 42rpx; padding: 50rpx 30rpx 30rpx; border-radius: 38rpx; background: #123f31; color: #f3efe5; }
+.life-card { margin-top: 28rpx; padding: 30rpx; border-radius: 38rpx; background: #123f31; color: #f3efe5; }
+.details-toggle { margin: 24rpx auto 0; padding: 8rpx 20rpx; width: fit-content; background: transparent; color: #d5e2da; font-size: 24rpx; }
 .dial { width: 390rpx; height: 390rpx; margin: 0 auto; padding: 18rpx; border-radius: 50%; }
 .dial-inner { width: 100%; height: 100%; border: 2rpx dashed rgba(243,239,229,.28); border-radius: 50%; background: #123f31; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #b8c9c0; font-size: 20rpx; letter-spacing: 4rpx; }
 .dial-number { margin: 12rpx 0; color: #f3efe5; font-family: "Songti SC", serif; font-size: 74rpx; font-weight: 600; letter-spacing: -2rpx; line-height: 1; }
