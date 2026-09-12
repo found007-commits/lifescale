@@ -77,7 +77,8 @@ test("image share entrance stays generic and no entry is published on opening sh
   const source = await readFile(new URL("../miniprogram/pages/share/share.js", import.meta.url), "utf8");
   assert.match(source, /showShareImageMenu/);
   assert.match(source, /entrancePath: "pages\/index\/index"/);
-  assert.doesNotMatch(source, /wx\.request|supabase|visibility:\s*["']public/);
+  assert.doesNotMatch(source, /wx\.request|createEntry|updateProfile|visibility:\s*["']public/);
+  assert.match(source, /const \{ signEntryMedia \} = require\("\.\.\/\.\.\/utils\/supabase"\)/);
   assert.match(source, /saveImageToPhotosAlbum/);
 });
 

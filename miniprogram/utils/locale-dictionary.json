@@ -1,4 +1,9 @@
 {
+  "照片地址暂不可用，请重试。": "Photo links are unavailable. Please retry.",
+  "照片下载失败，请检查网络后重试；已选照片不会被省略。": "A photo could not be downloaded. Check your connection and retry. Selected photos will not be omitted.",
+  "照片解码超时，请重试或在分享设置中取消选择这张照片。": "A photo took too long to open. Retry, or deselect it in share settings.",
+  "照片解码失败，请重试或在分享设置中取消选择这张照片。": "A photo could not be opened. Retry, or deselect it in share settings.",
+  "分享卡生成失败，请重试。": "The share card could not be generated. Please retry.",
   "慢慢来，认真过好今天。": "Take your time. Make today your own.",
   "目标之外，生活仍在继续。": "Life continues beyond your goal.",
   "已超过设定目标": "Beyond your chosen goal",

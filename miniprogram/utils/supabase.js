@@ -146,15 +146,32 @@ async function createProfile(profile) {
   return rows[0];
 }
 
+async function signEntryMedia(item) {
+  if (!item?.storage_path) throw new Error("照片地址暂不可用，请重试。");
+  const service = await ensureConfig();
+  const path = item.storage_path.split("/").map(encodeURIComponent).join("/");
+  const signed = await request(`/storage/v1/object/sign/entry-media/${path}`, { method: "POST", data: { expiresIn: 3600 } });
+  const value = signed.signedURL || signed.signedUrl;
+  const base = service.supabaseUrl.replace(/\/$/, "");
+  let url = "";
+  if (typeof value === "string") {
+    if (value.startsWith("/object/sign/entry-media/")) url = `${base}/storage/v1${value}`;
+    else if (value.startsWith("/storage/v1/object/sign/entry-media/")) url = `${base}${value}`;
+    else if (value.startsWith(`${base}/storage/v1/object/sign/entry-media/`)) url = value;
+  }
+  if (!url) throw new Error("照片地址暂不可用，请重试。");
+  return { ...item, signed_url: url };
+}
+
 async function getEntries(userId, limit = 100) {
   const rows = await request(`/rest/v1/life_entries?user_id=eq.${encodeURIComponent(userId)}&select=*,entry_media(*)&order=entry_date.desc&limit=${limit}`);
   return Promise.all(rows.map(async (entry) => {
     const media = await Promise.all((entry.entry_media || []).slice().sort((a, b) => a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id)).map(async (item) => {
       try {
-        const signed = await request(`/storage/v1/object/sign/entry-media/${item.storage_path}`, { method: "POST", data: { expiresIn: 3600 } });
-        return { ...item, signed_url: `${runtimeConfig.supabaseUrl}/storage/v1${signed.signedURL}` };
+        return await signEntryMedia(item);
       } catch {
-        return item;
+        // Keep every attachment so the share screen can refresh it; never drop photos.
+        return { ...item, signed_url: "" };
       }
     }));
     return { ...entry, entry_media: media };
@@ -272,6 +289,7 @@ module.exports = {
   getCheckinCount,
   getCheckins,
   getEntries,
+  signEntryMedia,
   getProfile,
   requireSession,
   restoreSession,

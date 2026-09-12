@@ -10,7 +10,8 @@
     "build": "next build",
     "start": "next start",
     "test": "pnpm run build && tsx --test tests/*.test.ts tests/*.test.mjs",
-    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
+    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next && eslint --config eslint.mini.config.mjs miniprogram",
+    "lint:mini": "eslint --config eslint.mini.config.mjs miniprogram",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

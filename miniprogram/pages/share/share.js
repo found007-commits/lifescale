@@ -2,9 +2,13 @@ const Page = require("../../utils/localized-page");
 const { planCard, drawCard } = require("../../utils/share-card");
 const { buildShareCopy, normalizeNickname } = require("../../utils/share-selection");
 const t = require("../../utils/locale-copy");
+const { signEntryMedia } = require("../../utils/supabase");
 
-function call(name, options) {
-  return new Promise((resolve, reject) => wx[name]({ ...options, success: resolve, fail: reject }));
+function call(name, options, timeout = 0) {
+  return new Promise((resolve, reject) => {
+    const timer = timeout ? setTimeout(() => reject(new Error("照片下载失败，请检查网络后重试；已选照片不会被省略。")), timeout) : null;
+    wx[name]({ ...options, success: result => { clearTimeout(timer); resolve(result); }, fail: error => { clearTimeout(timer); reject(error); } });
+  });
 }
 
 Page({
@@ -18,7 +22,7 @@ Page({
       this.locale = locale || "zh";
       this.setData({ nickname: normalizeNickname(getApp().globalData.profile?.display_name) });
       const imageUrls = entry.entry_media?.length ? entry.entry_media.map((item) => item.signed_url || "") : entry.imageUrls || (entry.imageUrl ? [entry.imageUrl] : []);
-      this.originalPhotos = imageUrls.map((url) => ({ url, selected: true }));
+      this.originalPhotos = imageUrls.map((url, index) => ({ url, selected: true, media: entry.entry_media?.[index] }));
       try { this.selection = buildShareCopy(entry, entry.content, this.originalPhotos); }
       catch (error) { this.setData({ busy: false, error: t(error.message, this.locale) }); return; }
       this.appliedPhotos = this.originalPhotos.map((photo) => ({ ...photo }));
@@ -99,6 +103,7 @@ Page({
     this.generating = true;
     this.data.cards.forEach((card) => { wx.getFileSystemManager().unlink({ filePath: card.path, fail() {} }); this.files.delete(card.path); });
     this.setData({ busy: true, error: "", cards: [], selected: 0 });
+    const generatedFiles = [];
     try {
       const canvas = this.canvas || await new Promise((resolve, reject) => {
         wx.createSelectorQuery().in(this).select("#shareCanvas").fields({ node: true, size: true }).exec((rows) => {
@@ -108,10 +113,25 @@ Page({
       });
       this.canvas = canvas;
       if (!this.photos) {
+        // Re-sign selected attachments on first generation and every failed retry.
+        // Keep stable choices/order; do not restore excluded text or photos.
+        const refreshed = [];
+        for (const choice of this.appliedPhotos) {
+          refreshed.push(choice.selected && choice.media?.storage_path
+            ? { ...choice, url: (await signEntryMedia(choice.media)).signed_url }
+            : { ...choice });
+          if (this.closed) return;
+        }
+        this.appliedPhotos = refreshed;
+        this.selection = buildShareCopy(this.entry, this.selection.entry.content, refreshed, this.shareOptions());
+        this.setData({ imageUrls: this.selection.imageUrls });
         const photos = [];
         for (const url of this.data.imageUrls) {
-        if (!url) throw new Error("有照片无法读取，请刷新记录后重试；不会省略照片。" );
-        const info = await call("getImageInfo", { src: url });
+        if (!url) throw new Error("照片地址暂不可用，请重试。");
+        let info;
+        try { info = await call("getImageInfo", { src: url }, 20000); }
+        catch { throw new Error("照片下载失败，请检查网络后重试；已选照片不会被省略。"); }
+        if (this.closed) return;
         let path = /^(?:https?:|wxfile:|file:|\/)/.test(info.path) ? info.path : `/${info.path}`;
         if (Math.max(info.width, info.height) > 1200) {
           const ratio = 1200 / Math.max(info.width, info.height);
@@ -124,8 +144,9 @@ Page({
         }
         photos.push(await new Promise((resolve, reject) => {
           const photo = canvas.createImage();
-          photo.onload = () => resolve(photo);
-          photo.onerror = () => reject(new Error("照片加载失败，请返回记录列表刷新后重试。"));
+          const timer = setTimeout(() => reject(new Error("照片解码超时，请重试或在分享设置中取消选择这张照片。")), 20000);
+          photo.onload = () => { clearTimeout(timer); resolve(photo); };
+          photo.onerror = () => { clearTimeout(timer); reject(new Error("照片解码失败，请重试或在分享设置中取消选择这张照片。")); };
           // Bundled images can be returned without a leading slash. Canvas resolves
           // those against this page, unlike wx.getImageInfo.
           photo.src = path;
@@ -146,11 +167,13 @@ Page({
         });
         if (this.closed) { wx.getFileSystemManager().unlink({ filePath: result.tempFilePath, fail() {} }); return; }
         this.files.add(result.tempFilePath);
+        generatedFiles.push(result.tempFilePath);
         cards.push({ path: result.tempFilePath });
       }
       if (!this.closed) this.setData({ cards });
     } catch (error) {
-      if (!this.closed) this.setData({ error: error.message || "分享卡生成失败，请返回刷新记录后重试。" });
+      generatedFiles.forEach((filePath) => { wx.getFileSystemManager().unlink({ filePath, fail() {} }); this.files.delete(filePath); });
+      if (!this.closed) this.setData({ error: t(error.message || "分享卡生成失败，请重试。", this.locale) });
     } finally {
       this.generating = false;
       if (!this.closed) this.setData({ busy: false });
