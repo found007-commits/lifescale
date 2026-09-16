@@ -7,7 +7,7 @@ const require = createRequire(import.meta.url);
 const read = file => readFileSync(new URL('../miniprogram/' + file, import.meta.url), 'utf8');
 const translate = require('../miniprogram/utils/locale-copy.js');
 const copy = '人生的每一步，未必都完美；记录的每一笔，也是如此。偶尔写错，也成了自己的历史。留下或删去，都由自己决定。';
-const warning = '确认删除后，文字和照片会永久删除，无法恢复。';
+const warning = '确认删除后，文字、影像和留言会永久删除，无法恢复。';
 
 test('both journal surfaces expose a left delete button without requiring long press', () => {
   const history = read('pages/history/history.wxml');
@@ -29,7 +29,7 @@ test('both journal surfaces expose a left delete button without requiring long p
     assert.match(wxml, /catchtap="shareEntry"/);
     assert.match(read(`pages/${name}/${name}.js`), /confirmDeleteEntry\(this,/);
   }
-  assert.match(history,/catchlongpress="previewPhoto"/);
+  assert.match(history,/catchlongpress="openEntry"/);
 });
 
 function fixture({ locale = 'zh', failure = false, listKey = 'entries' } = {}) {

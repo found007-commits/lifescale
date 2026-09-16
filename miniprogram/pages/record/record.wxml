@@ -16,13 +16,14 @@
     </view>
     <view class="photo-choice-grid">
     <view wx:for="{{images}}" wx:key="id" class="image-preview">
-      <image wx:if="{{item.tempFilePath}}" src="{{item.tempFilePath}}" mode="aspectFill" />
+      <view wx:if="{{item.kind === 'video'}}" class="media-placeholder">▶ {{i18n.t('视频已选好', locale)}}</view>
+      <image wx:elif="{{item.tempFilePath}}" src="{{item.tempFilePath}}" mode="aspectFill" />
       <text wx:else>{{item.error || i18n.t('正在处理照片…', locale)}}</text>
       <button data-index="{{index}}" disabled="{{saving || processing || persisted}}" bindtap="removeImage">{{index + 1}} · {{i18n.t('移除', locale)}}</button>
     </view>
     </view>
-    <button class="photo-button" disabled="{{saving || processing || persisted}}" bindtap="chooseImage">{{i18n.t(processing ? '正在处理照片…' : '＋ 添加照片（可多选）', locale)}}</button>
-    <text wx:if="{{images.length}}" class="upload-hint">{{i18n.t('可继续添加。照片自动优化为静态 JPG，动图取单帧，不改变原文件。支持的相册格式由设备决定。', locale)}}</text>
+    <button class="photo-button" disabled="{{saving || processing || persisted}}" bindtap="chooseImage">{{i18n.t(processing ? '正在处理媒体…' : '＋ 从手机相册添加', locale)}}</button>
+    <text class="upload-hint">{{i18n.t('可选择照片或视频，也可以不写文字。GIF 能否选取取决于手机相册与微信版本；收到 GIF 原文件时保留动画。视频点开再加载，不自动播放。单个文件处理后需在 50 MB 以内。', locale)}}</text>
     <text wx:if="{{notice}}" class="upload-hint">{{i18n.t(notice, locale)}}</text>
     <text wx:if="{{progress}}" class="upload-hint">{{i18n.t(processing ? '正在处理照片…' : '正在上传照片…', locale)}} {{progress}}</text>
 

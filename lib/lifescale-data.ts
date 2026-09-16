@@ -2,7 +2,8 @@
 
 import { z } from "zod";
 import { getSupabaseBrowserClient } from "./supabase/client";
-import type { Checkin, EntryCategory, EntryMedia, LifeEntry, LifeProfile, Locale, Mood, Visibility } from "./types";
+import type { Checkin, EntryCategory, EntryMedia, LifeEntry, LifeProfile, Locale, Mood, Visibility, EntryComment } from "./types";
+import { MAX_MEDIA_BYTES } from "./prepare-media";
 
 export const profileInputSchema = z.object({
   id: z.string().uuid(),
@@ -45,7 +46,7 @@ export async function loadLifeScaleData(userId: string) {
   if (checkinsResult.error) throw new Error(errorMessage(checkinsResult.error, "Could not load check-ins."));
 
   const entries = (entriesResult.data || []) as unknown as LifeEntry[];
-  const paths = entries.flatMap((entry) => (entry.entry_media || []).map((media) => media.storage_path));
+  const paths = entries.flatMap((entry) => (entry.entry_media || []).filter(media => media.media_type !== "image/gif" && !media.media_type.startsWith("video/")).map((media) => media.storage_path));
   let signedUrls = new Map<string, string>();
   if (paths.length > 0) {
     const { data } = await supabase.storage.from("entry-media").createSignedUrls(paths, 3600);
@@ -92,16 +93,19 @@ export async function createEntry(input: { id?: string; userId: string; entryDat
   return { ...(data as LifeEntry), entry_media: [] };
 }
 
-export async function updateEntry(entryId: string, userId: string, input: { content: string; mood: Mood; category: EntryCategory; visibility: Visibility }) {
+export async function updateEntry(entryId: string, userId: string, input: { content: string; mood: Mood; category: EntryCategory; visibility: Visibility }, requestId = crypto.randomUUID()) {
   const parsed = entryInputSchema.pick({ content: true, mood: true, category: true, visibility: true }).parse(input);
-  const { data, error } = await getSupabaseBrowserClient().from("life_entries").update(parsed).eq("id", entryId).eq("user_id", userId).select("*").single();
+  const { data, error } = await getSupabaseBrowserClient().rpc("edit_private_entry_once", {
+    p_entry_id: entryId, p_content: parsed.content.trim(), p_mood: parsed.mood, p_category: parsed.category, p_request_id: requestId,
+  });
   if (error) throw new Error(errorMessage(error, "Could not update this entry."));
-  return data as LifeEntry;
+  if (!data?.[0] || data[0].user_id !== userId) throw new Error("ENTRY_NOT_FOUND");
+  return data[0] as LifeEntry;
 }
 
 export async function uploadEntryImage(userId: string, entryId: string, file: File, mediaId = crypto.randomUUID()) {
-  if (!file.type.startsWith("image/")) throw new Error("Only image files are supported.");
-  if (file.size > 10 * 1024 * 1024) throw new Error("Image must be 10 MB or smaller.");
+  if (!["image/jpeg", "image/png", "image/webp", "image/gif", "video/mp4", "video/quicktime"].includes(file.type)) throw new Error("Unsupported media format.");
+  if (!file.size || file.size > MAX_MEDIA_BYTES) throw new Error("文件需在 50 MB 以内 / File must be within 50 MB.");
   const extension = (file.name.split(".").pop() || "jpg").replace(/[^a-z0-9]/gi, "").toLowerCase();
   const path = `${userId}/${entryId}/${mediaId}.${extension}`;
   const supabase = getSupabaseBrowserClient();
@@ -126,6 +130,26 @@ export async function deleteEntry(entry: LifeEntry) {
   }
   const { error } = await supabase.from("life_entries").delete().eq("id", entry.id).eq("user_id", entry.user_id);
   if (error) throw new Error(errorMessage(error, "Could not delete this entry."));
+}
+
+export async function signMedia(media: EntryMedia) {
+  const { data, error } = await getSupabaseBrowserClient().storage.from("entry-media").createSignedUrl(media.storage_path, 3600);
+  if (error || !data?.signedUrl) throw new Error("媒体暂不可用，请重试 / Media unavailable. Retry.");
+  return data.signedUrl;
+}
+export async function loadComments(entryId: string, offset = 0) {
+  const { data, error } = await getSupabaseBrowserClient().from("entry_comments").select("*").eq("entry_id", entryId).order("created_at").order("id").range(offset, offset + 29);
+  if (error) throw error;
+  return data as EntryComment[];
+}
+export async function addComment(entryId: string, userId: string, content: string, parentId: string | null, id: string) {
+  const text = content.trim();
+  if (!text || text.length > 2000) throw new Error("留言请填写 1–2000 个字 / Enter 1–2000 characters.");
+  const supabase = getSupabaseBrowserClient();
+  let { data, error } = await supabase.from("entry_comments").insert({ id, entry_id: entryId, user_id: userId, content: text, parent_id: parentId }).select("*").single();
+  if (error?.code === "23505") ({ data, error } = await supabase.from("entry_comments").select("*").eq("id", id).eq("entry_id", entryId).eq("user_id", userId).single());
+  if (error) throw error;
+  return data as EntryComment;
 }
 
 export async function saveSevenDayReport(input: { userId: string; start: string; end: string; data: Record<string, unknown>; representativeEntryId: string | null }) {

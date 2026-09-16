@@ -86,3 +86,6 @@ button::after { border: 0; }
   .muted, .field-help, .privacy-note { color: #91a69b; }
   .entry-share { color: #d5e2da; border-color: #728c7c; }
 }
+/* Heavy media is deliberately absent from list src attributes until opened. */
+.media-placeholder { display: flex; align-items: center; justify-content: center; min-height: 200rpx; padding: 24rpx; border-radius: 20rpx; background: #e3ece3; color: #123f31; font-size: 26rpx; }
+.entry-actions { flex-wrap: wrap; gap: 12rpx; }

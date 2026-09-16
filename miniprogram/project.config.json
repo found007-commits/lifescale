@@ -9,8 +9,34 @@
     "postcss": true,
     "minified": true,
     "urlCheck": true,
-    "checkInvalidKey": true
+    "checkInvalidKey": true,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
   },
   "simulatorType": "wechat",
-  "condition": {}
+  "condition": {},
+  "simulatorPluginLibVersion": {},
+  "packOptions": {
+    "ignore": [
+      { "type": "file", "value": "README.md" },
+      { "type": "suffix", "value": ".md" },
+      { "type": "suffix", "value": ".d.ts" }
+    ],
+    "include": []
+  },
+  "editorSetting": {}
 }

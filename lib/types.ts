@@ -36,6 +36,15 @@ export type EntryMedia = {
   signed_url?: string;
 };
 
+export type EntryComment = {
+  id: string;
+  entry_id: string;
+  user_id: string;
+  parent_id: string | null;
+  content: string;
+  created_at: string;
+};
+
 export type LifeEntry = {
   id: string;
   user_id: string;
@@ -47,6 +56,9 @@ export type LifeEntry = {
   created_at: string;
   updated_at: string;
   entry_media?: EntryMedia[];
+  edit_count?: number;
+  edited_at?: string | null;
+  last_edit_request_id?: string | null;
 };
 
 export type Checkin = {

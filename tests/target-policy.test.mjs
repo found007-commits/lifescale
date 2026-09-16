@@ -67,7 +67,7 @@ test('mini settings confirms, sends target only, then locks the returned profile
 test('mini API allows target changes but strips caller-supplied quota and birth date', async()=>{
   const require = createRequire(import.meta.url), requests=[];
   const app={globalData:{}};
-  const sandbox={module:{exports:{}},require(path){return path==='../config'?{apiBase:'https://qa.invalid'}:path==='./runtime-config'?{loadRuntimeConfig:async()=>({supabaseUrl:'https://qa.invalid',publishableKey:'test-only'})}:require('../miniprogram/utils/life.js');},getApp:()=>app,wx:{
+  const sandbox={module:{exports:{}},require(path){return path==='../config'?{apiBase:'https://qa.invalid'}:path==='./runtime-config'?{loadRuntimeConfig:async()=>({supabaseUrl:'https://qa.invalid',publishableKey:'test-only'})}:path==='./data-freshness'?{state:{revision:0}}:require('../miniprogram/utils/life.js');},getApp:()=>app,wx:{
     getStorageSync:()=>({access_token:'test-only',user:{id:'qa-only'}}),
     request(o){requests.push(o);o.success({statusCode:200,data:o.url.endsWith('/config')?{supabaseUrl:'https://qa.invalid',publishableKey:'test-only'}:[{id:'qa-only',...o.data,target_change_count:1}]});}
   }};

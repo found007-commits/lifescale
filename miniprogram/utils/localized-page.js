@@ -2,6 +2,10 @@ const t = require("./locale-copy");
 const { formatDate } = require("./share-card");
 const withAppShare = require("./app-share");
 
+// Navigation bar and tab bar writes cross the JS-native bridge. Remember the last
+// applied (locale, page, document title) so repeated onShow passes can skip them.
+let lastApplied = "";
+
 function currentLocale() {
   return getApp().globalData.profile?.locale || getApp().globalData.locale || "zh";
 }
@@ -26,12 +30,25 @@ module.exports = function localizedPage(definition) {
         if (dateLabel !== entry.dateLabel) localized[`${key}[${index}].dateLabel`] = dateLabel;
       });
     });
-    this.setData(localized);
-    const titles = { index: "余生有刻", auth: "登录余生有刻", onboarding: "第一次设定", dashboard: "我的人生刻度", history: "留下的日子", report: "回望七天", settings: "个人偏好", record: "记录今天", share: "分享这一天", legal: this.data.document?.title || "隐私政策" };
+    // Avoid repeated JS-to-view bridge writes for identical locale labels.
+    Object.keys(localized).forEach(key => {
+      if (key.includes("[")) return;
+      const previous = this.data[key];
+      const next = localized[key];
+      if (previous === next || (Array.isArray(previous) && Array.isArray(next) && previous.length === next.length && previous.every((value, index) => value === next[index]))) delete localized[key];
+    });
+    if (Object.keys(localized).length) this.setData(localized);
     const pages = getCurrentPages();
     const name = (this.route || pages[pages.length - 1]?.route || "pages/index/index").split("/").pop();
-    wx.setNavigationBarTitle({ title: t(titles[name] || "余生有刻", currentLocale()) });
-    ["历史", "今天", "小回顾", "设置"].forEach((text, index) => wx.setTabBarItem({ index, text: t(text, currentLocale()), fail() {} }));
+    // Text only changes with the language or the active page; the document title is part
+    // of the key because the legal page shows two different documents.
+    const stamp = `${locale}|${name}|${this.data.document?.title || ""}`;
+    if (stamp === lastApplied && this.appliedNavigationStamp === stamp) return;
+    lastApplied = stamp;
+    this.appliedNavigationStamp = stamp;
+    const titles = { index: "余生有刻", auth: "登录余生有刻", onboarding: "第一次设定", dashboard: "我的人生刻度", history: "留下的日子", report: "回望七天", settings: "个人偏好", record: "记录今天", entry: "这一天", share: "分享这一天", legal: this.data.document?.title || "隐私政策" };
+    wx.setNavigationBarTitle({ title: t(titles[name] || "余生有刻", locale) });
+    ["历史", "今天", "小回顾", "设置"].forEach((text, index) => wx.setTabBarItem({ index, text: t(text, locale), fail() {} }));
   }
   definition.onShow = async function (...args) {
     const generation = this.localeGeneration = (this.localeGeneration || 0) + 1;

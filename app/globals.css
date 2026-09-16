@@ -696,6 +696,13 @@ input:focus, select:focus, textarea:focus { border-color: var(--gold); box-shado
 .gallery-dialog > img { width: 100%; height: 72vh; object-fit: contain; }
 .gallery-dialog > div { display: flex; justify-content: space-between; align-items: center; color: #143d2f; }
 .gallery-dialog button { color: #143d2f; }
+.media-viewer-dialog { padding-top: 0; max-height: 94dvh; overflow-y: auto; }
+.media-viewer-toolbar { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 16px; min-height: 68px; margin: 0 -16px 16px; padding: 10px 16px; background: #343b38; border-radius: 20px 20px 0 0; }
+.media-viewer-dialog .media-viewer-close { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 88px; min-height: 44px; padding: 8px 16px; border: 1px solid #ffb4ae; border-radius: 24px; background: #b42318; color: #fff; font: 600 15px/1.2 system-ui; cursor: pointer; }
+.media-viewer-close span { font-size: 26px; line-height: 1; }
+.media-viewer-dialog .media-viewer-close:hover { background: #8f1c13; }
+.media-viewer-dialog .media-viewer-close:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.media-viewer-title { color: #f4f0e6; font-size: 14px; }
 .share-card-preview-image > span { padding: 20px; color: #bdccc5; text-align: center; font-size: 11px; }
 .share-platform-grid { margin-top: 22px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
 .share-platform-grid button { min-width: 0; padding: 13px 5px 10px; border: 1px solid var(--line); border-radius: 16px; background: transparent; color: var(--green); cursor: pointer; display: grid; justify-items: center; gap: 7px; }
@@ -774,3 +781,16 @@ input:focus, select:focus, textarea:focus { border-color: var(--gold); box-shado
   .life-dial { width: 250px; height: 250px; min-width: 250px; min-height: 250px; }
   .onboarding-progress span { white-space: normal; text-align: center; }
 }
+.media-placeholder { display: flex; min-height: 140px; padding: 1rem; align-items: center; justify-content: center; background: #e3ece3; color: #123f31; border-radius: 16px; }
+.gallery-dialog video { width: 100%; max-height: 70vh; }
+.entry-photo-grid .video-preview { min-height: 160px; flex-direction: column; gap: 8px; background: #173f35; color: #faf7ed; cursor: pointer; }
+.entry-photo-grid.single .video-preview { min-height: 260px; }
+.video-play-icon { display: grid; place-items: center; width: 58px; height: 58px; padding-left: 3px; border: 1px solid #d9e5d9; border-radius: 50%; font-size: 24px; }
+.video-preview small { color: #c2d3c7; }
+.entry-photo-grid button:focus-visible { outline: 3px solid #ae7b26; outline-offset: 4px; }
+.gallery-dialog video { background: #10251e; min-height: 220px; }
+.entry-comments { margin-top: 1rem; }
+.entry-comments textarea { display: block; width: 100%; min-height: 100px; }
+.entry-comments .comment { border-top: 1px solid #c7d1ca; padding: 1rem 0; }
+.entry-comments p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.entry-comments button { min-height: 44px; margin: .25rem; }

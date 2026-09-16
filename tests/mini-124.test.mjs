@@ -142,7 +142,7 @@ test('share editor hides stale cards, applies a filtered copy, blocks sending wh
 
 test('repeat daily check-in uses ignore-duplicates so saving another entry needs no UPDATE policy', async () => {
   const requests=[], app={globalData:{}};
-  const context={module:{exports:{}},getApp:()=>app,require(path){return path==='../config'?{apiBase:'https://qa.invalid'}:path==='./runtime-config'?{loadRuntimeConfig:async()=>({supabaseUrl:'https://qa.invalid',publishableKey:'test-only'})}:require('../miniprogram/utils/life.js');},wx:{
+  const context={module:{exports:{}},getApp:()=>app,require(path){return path==='../config'?{apiBase:'https://qa.invalid'}:path==='./runtime-config'?{loadRuntimeConfig:async()=>({supabaseUrl:'https://qa.invalid',publishableKey:'test-only'})}:path==='./data-freshness'?{state:{revision:0}}:require('../miniprogram/utils/life.js');},wx:{
     getStorageSync:()=>({access_token:'test-only',user:{id:'qa-only'}}),
     request(o){requests.push(o);o.success({statusCode:200,data:o.url.endsWith('/config')?{supabaseUrl:'https://qa.invalid',publishableKey:'test-only'}:[{id:'qa-entry'}]});}
   }};

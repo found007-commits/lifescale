@@ -10,6 +10,12 @@ function journeyMessage(days) {
 }
 function openShare(entry, locale) {
   if (!entry) return;
+  if ((entry.entry_media || []).some(item => String(item.media_type).startsWith("video/"))) {
+    wx.showModal({ title: "分享视频", content: "图片分享卡不能播放视频。请打开这一天，选择视频下方的分享按钮，发送原视频。", confirmText: "打开记录", success: result => {
+      if (result.confirm) wx.navigateTo({ url: `/pages/entry/entry?id=${encodeURIComponent(entry.id)}` });
+    } });
+    return;
+  }
   wx.navigateTo({ url: "/pages/share/share", success: (result) => result.eventChannel.emit("entry", { entry, locale }) });
 }
 module.exports = { genders, genderLabels, normalizeAge, journeyMessage, openShare };

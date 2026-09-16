@@ -2,7 +2,7 @@ const Page = require("../../utils/localized-page");
 const { createEntry, uploadEntryImage, restoreSession, getProfile } = require("../../utils/supabase");
 const { isWechatOnly, requiresWechatSetup } = require("../../utils/setup-policy");
 const { topics, questionAt } = require("../../utils/record-prompts");
-const { prepareImage } = require("../../utils/prepare-image");
+const { prepareMedia } = require("../../utils/prepare-media");
 const { uuid } = require("../../utils/life");
 
 Page({
@@ -64,8 +64,8 @@ Page({
     if (this.picking || this.data.saving || this.data.persisted) return;
     this.picking = true; this.setData({ processing: true, error: "" });
     try {
-      const result = await new Promise((resolve, reject) => wx.chooseMedia({ count: 9, mediaType: ["image"], sizeType: ["original"], success: resolve, fail: reject }));
-      if (result.tempFiles.some((file) => file.size > 10 * 1024 * 1024)) this.setData({ notice: "照片较大，处理和上传可能较慢，请保持页面打开。" });
+      const result = await new Promise((resolve, reject) => wx.chooseMedia({ count: 9, mediaType: ["image", "video"], sourceType: ["album"], sizeType: ["original"], success: resolve, fail: reject }));
+      if (result.tempFiles.some((file) => file.size > 10 * 1024 * 1024)) this.setData({ notice: "文件较大，处理和上传可能较慢，请保持页面打开。" });
       const canvas = this.canvas || await new Promise((resolve, reject) => wx.createSelectorQuery().in(this).select("#photoCanvas").fields({ node: true }).exec((rows) => rows[0]?.node ? resolve(rows[0].node) : reject(new Error("图片组件尚未准备好，请重试。"))));
       this.canvas = canvas;
       for (let i = 0; i < result.tempFiles.length; i++) {
@@ -73,7 +73,7 @@ Page({
         const id = uuid();
         this.setData({ progress: `${i + 1} / ${result.tempFiles.length}`, images: [...this.data.images, { id, processing: true }] });
         try {
-          const image = await prepareImage(canvas, result.tempFiles[i]);
+          const image = await prepareMedia(canvas, result.tempFiles[i]);
           if (this.closed) { wx.getFileSystemManager().unlink({ filePath: image.tempFilePath, fail() {} }); break; }
           this.files.add(image.tempFilePath);
           this.setData({ images: this.data.images.map((item) => item.id === id ? { id, ...image } : item) });
@@ -93,7 +93,7 @@ Page({
 
   async saveEntry() {
     if (this.data.saving || this.data.saved || this.picking) return;
-    if (!this.data.content.trim() && !this.data.images.length) return this.setData({ error: "写一句话或选择照片后再保存。" });
+    if (!this.data.content.trim() && !this.data.images.length) return this.setData({ error: "写一句话，或添加图片、视频、GIF 后保存。" });
     if (this.data.images.some((image) => image.error || !image.tempFilePath)) return this.setData({ error: "请先移除无法读取的图片，再保存。" });
     this.session = restoreSession();
     if (!this.session?.user?.id) {

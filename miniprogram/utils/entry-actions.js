@@ -10,7 +10,7 @@ async function confirmDeleteEntry(page, entry, listKey) {
   try {
     const answer = await new Promise(resolve => wx.showModal({
       title: t("删除这条记录？", locale),
-      content: t(reflection, locale) + "\n\n" + t("确认删除后，文字和照片会永久删除，无法恢复。", locale),
+      content: t(reflection, locale) + "\n\n" + t("确认删除后，文字、影像和留言会永久删除，无法恢复。", locale),
       confirmText: t("删除", locale), cancelText: t("保留", locale), confirmColor: "#a3463d",
       success: resolve, fail: () => resolve({ confirm: false }),
     }));
@@ -25,7 +25,7 @@ async function confirmDeleteEntry(page, entry, listKey) {
     wx.showToast({ title: t("已删除", locale), icon: "success" });
   } catch (error) {
     if (loading) { wx.hideLoading(); loading = false; }
-    wx.showToast({ title: error.message || t("删除失败，请重试。", locale), icon: "none" });
+    wx.showToast({ title: t(error.message || "删除失败，请重试。", locale), icon: "none" });
   } finally {
     if (loading) wx.hideLoading();
     page.deletingEntry = false;

@@ -1,6 +1,7 @@
 const Page = require("../../utils/localized-page");
 const { localDateString } = require("../../utils/life");
 const { getCheckins, getEntries, requireSession } = require("../../utils/supabase");
+const { stamp, reusable } = require("../../utils/data-freshness");
 
 const moodLabels = { calm: "平静", happy: "开心", grateful: "感恩", tired: "疲惫", sad: "难过", anxious: "焦虑", hopeful: "充满希望" };
 const categoryLabels = { daily: "日常", family: "家人", work: "工作", growth: "成长", health: "健康", travel: "旅行", reflection: "感悟", other: "其他" };
@@ -34,15 +35,23 @@ Page({
   onPullDownRefresh() { this.load(true); },
   async load(fromPull = false) {
     const session = requireSession();
-    if (!session) return;
-    this.setData({ loading: !fromPull, error: "" });
+    if (!session) { this.freshness = null; this.setData({ report: null, loading: false }); return; }
+    if (!fromPull && reusable(this.freshness, session.user.id)) return;
+    const started = stamp(session.user.id);
+    const generation = this.loadGeneration = (this.loadGeneration || 0) + 1;
+    const current = () => this.loadGeneration === generation && requireSession()?.user.id === session.user.id;
+    if (this.ownerId !== session.user.id) this.setData({ report: null });
+    this.ownerId = session.user.id;
+    this.setData({ loading: !fromPull && !this.data.report, error: "" });
     try {
-      const [entries, checkins] = await Promise.all([getEntries(session.user.id, 100), getCheckins(session.user.id, 100)]);
+      const [entries, checkins] = await Promise.all([getEntries(session.user.id, 100, 0, { includeMedia: false }), getCheckins(session.user.id, 100)]);
+      if (!current()) return;
       this.setData({ report: makeReport(entries, checkins) });
+      this.freshness = started;
     } catch (error) {
-      this.setData({ error: error.message || "报告加载失败。" });
+      if (current()) this.setData({ error: error.message || "报告加载失败。" });
     } finally {
-      this.setData({ loading: false });
+      if (this.loadGeneration === generation) this.setData({ loading: false });
       if (fromPull) wx.stopPullDownRefresh();
     }
   },

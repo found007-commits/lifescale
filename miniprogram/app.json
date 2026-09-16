@@ -1,7 +1,7 @@
 {
   "pages": [
-    "pages/auth/auth",
     "pages/index/index",
+    "pages/auth/auth",
     "pages/onboarding/onboarding",
     "pages/dashboard/dashboard",
     "pages/record/record",
@@ -9,7 +9,8 @@
     "pages/report/report",
     "pages/settings/settings",
     "pages/legal/legal",
-    "pages/share/share"
+    "pages/share/share",
+    "pages/entry/entry"
   ],
   "window": {
     "navigationBarBackgroundColor": "#f3efe5",

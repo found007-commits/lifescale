@@ -1,0 +1,45 @@
+<wxs src="../../utils/locale.wxs" module="i18n" />
+<view class="page-shell detail-page">
+  <view wx:if="{{loading}}">{{i18n.t('正在翻开记录', locale)}}</view>
+  <view wx:if="{{error}}" class="form-error">{{error}}<button bindtap="load">{{i18n.t('重试', locale)}}</button></view>
+  <view wx:if="{{entry}}" class="paper-card detail-card">
+    <text class="muted">{{i18n.t('仅自己可见', locale)}}</text>
+    <text class="detail-content">{{entry.content}}</text>
+    <button wx:if="{{editAllowed && !editing}}" bindtap="startEdit">{{i18n.t('编辑记录 · 剩余 1 次', locale)}}</button>
+    <text wx:if="{{!editAllowed}}" class="muted">{{i18n.t('已使用唯一一次修改机会，仍可留言。', locale)}}</text>
+    <view wx:if="{{editing}}" class="edit-panel">
+      <text class="muted">{{i18n.t('可修改正文、心情和分类，已保存的影像保持不变。', locale)}}</text>
+      <textarea class="textarea" value="{{editContent}}" maxlength="12000" disabled="{{editSaving}}" bindinput="onEditContent" />
+      <picker range="{{moodPickerLabels}}" value="{{moodIndex}}" bindchange="onEditMood" disabled="{{editSaving}}"><view class="edit-picker">{{i18n.t('此刻的心情', locale)}} · {{i18n.t(moods[moodIndex].label, locale)}} ⌄</view></picker>
+      <picker range="{{categoryPickerLabels}}" value="{{categoryIndex}}" bindchange="onEditCategory" disabled="{{editSaving}}"><view class="edit-picker">{{i18n.t('分类', locale)}} · {{i18n.t(categories[categoryIndex].label, locale)}} ⌄</view></picker>
+      <view wx:if="{{editError}}" class="form-error">{{editError}}</view>
+      <button class="primary-button" disabled="{{editSaving}}" loading="{{editSaving}}" bindtap="saveEdit">{{i18n.t('保存修改', locale)}}</button>
+      <button disabled="{{editSaving}}" bindtap="cancelEdit">{{i18n.t('取消', locale)}}</button>
+    </view>
+    <view wx:for="{{media}}" wx:key="id" class="detail-media">
+      <view wx:if="{{item.active || item.loading}}" class="media-viewer-toolbar">
+        <button class="media-viewer-close" data-index="{{index}}" bindtap="closeMedia" aria-label="{{i18n.t('关闭影像', locale)}}">× {{i18n.t('关闭', locale)}}</button>
+        <text>{{i18n.t(item.kind === 'video' ? '视频' : '图片', locale)}}</text>
+      </view>
+      <video wx:if="{{item.kind === 'video' && item.active}}" id="video-{{index}}" src="{{item.url}}" autoplay="{{false}}" controls="{{true}}" data-index="{{index}}" binderror="mediaError" />
+      <image wx:elif="{{item.active}}" src="{{item.url}}" mode="widthFix" data-index="{{index}}" binderror="mediaError" />
+      <button wx:else class="media-placeholder" loading="{{item.loading}}" data-index="{{index}}" bindtap="openMedia">{{item.error ? i18n.t(item.error, locale) : i18n.t(item.kind === 'video' ? '▶ 点击加载视频' : item.kind === 'gif' ? 'GIF · 点击播放动图' : '点击查看图片', locale)}}</button>
+      <button data-index="{{index}}" bindtap="shareMedia">{{i18n.t('分享这个文件', locale)}}</button>
+    </view>
+    <button wx:if="{{!hasVideo}}" bindtap="shareEntry">{{i18n.t('生成图片分享卡', locale)}}</button>
+    <text class="muted">{{i18n.t('图片分享卡为静态图片，GIF 动画请通过原文件分享；留言不包含在分享卡里。', locale)}}</text>
+  </view>
+  <view wx:if="{{entry}}" class="paper-card detail-card">
+    <text class="section-title">{{i18n.t('后来的话', locale)}}</text>
+    <text class="muted">{{i18n.t('给这一天留句话，仅自己可见。', locale)}}</text>
+    <view wx:for="{{comments}}" wx:key="id" class="comment">
+      <text wx:if="{{item.parent_id}}" class="muted">{{i18n.t('回复留言', locale)}}</text><text class="comment-content">{{item.content}}</text>
+      <text class="muted">{{item.created_at}}</text><button data-id="{{item.id}}" bindtap="reply">{{i18n.t('回复', locale)}}</button>
+    </view>
+    <button wx:if="{{more}}" bindtap="moreComments" loading="{{commentsLoading}}">{{i18n.t('加载更多', locale)}}</button>
+    <view wx:if="{{replyId}}" class="reply-preview"><text>{{i18n.t('回复', locale)}}：{{replyText}}</text><button bindtap="cancelReply">{{i18n.t('取消回复', locale)}}</button></view>
+    <textarea class="textarea" value="{{text}}" maxlength="2000" disabled="{{sending}}" bindinput="onText" placeholder="{{i18n.t('此刻，再回看这一天……', locale)}}" />
+    <view wx:if="{{commentError}}" class="form-error">{{commentError}}<button bindtap="retryComments">{{i18n.t('刷新留言', locale)}}</button></view>
+    <button class="primary-button" loading="{{sending}}" disabled="{{sending || !text}}" bindtap="sendComment">{{i18n.t('留下这句话', locale)}}</button>
+  </view>
+</view>

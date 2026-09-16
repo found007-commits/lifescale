@@ -5,6 +5,8 @@ const { journeyMessage, openShare } = require("../../utils/preferences");
 const { formatDate } = require("../../utils/share-card");
 const { confirmDeleteEntry } = require("../../utils/entry-actions");
 const { requiresWechatSetup } = require("../../utils/setup-policy");
+const { decorateMedia } = require("../../utils/media-policy");
+const { stamp, reusable } = require("../../utils/data-freshness");
 
 const moodLabels = { calm: "平静", happy: "开心", grateful: "感恩", tired: "疲惫", sad: "难过", anxious: "焦虑", hopeful: "充满希望" };
 const categoryLabels = { daily: "日常", family: "家人", work: "工作", growth: "成长", health: "健康", travel: "旅行", reflection: "感悟", other: "其他" };
@@ -16,7 +18,8 @@ function decorateEntry(entry) {
     moodLabel: moodLabels[entry.mood] || "平静",
     categoryLabel: categoryLabels[entry.category] || "日常",
     imageUrl: entry.entry_media?.[0]?.signed_url || "",
-    imageUrls: (entry.entry_media || []).map((media) => media.signed_url).filter(Boolean),
+    media: decorateMedia(entry.entry_media),
+    imageUrls: (entry.entry_media || []).filter(media => !String(media.media_type).startsWith("video/")).map((media) => media.signed_url).filter(Boolean),
   };
 }
 
@@ -28,10 +31,19 @@ Page({
 
   async load(fromPull = false) {
     const session = requireSession();
-    if (!session) return;
-    this.setData({ loading: !fromPull, error: "" });
+    if (!session) { this.freshness = null; this.setData({ profile: null, metrics: null, recentEntries: [], loading: false }); return; }
+    if (!fromPull && reusable(this.freshness, session.user.id)) return;
+    const started = stamp(session.user.id);
+    const generation = this.loadGeneration = (this.loadGeneration || 0) + 1;
+    const current = () => this.loadGeneration === generation && requireSession()?.user.id === session.user.id;
+    if (this.data.profile?.id !== session.user.id) this.setData({ profile: null, metrics: null, recentEntries: [] });
+    this.setData({ loading: !fromPull && !this.data.profile, error: "" });
     try {
+      // A WeChat account must prove its profile is complete before any entry is read, so the
+      // profile lookup stays ahead of the reads. Email accounts have no such gate, but the
+      // three reads below already run together, so this is one round trip either way.
       const profile = await getProfile(session.user.id);
+      if (!current()) return;
       if (requiresWechatSetup(session, profile)) {
         wx.reLaunch({ url: "/pages/onboarding/onboarding?required=1" });
         return;
@@ -40,10 +52,10 @@ Page({
         this.setData({ profile: null, metrics: null });
         return;
       }
-      const [entries, checkins, checkinCount] = await Promise.all([getEntries(session.user.id, 3), getCheckins(session.user.id, 7), getCheckinCount(session.user.id)]);
       const metrics = calculateLifeMetrics({ birthDate: profile.birth_date, targetAge: profile.target_age, targetDate: profile.target_date });
       this.setData({
         profile,
+        loading: false,
         metrics: {
           ...metrics,
           displayDays: metrics.isBonus ? metrics.bonusDays : metrics.remainingDays,
@@ -52,15 +64,20 @@ Page({
           weeksText: String(metrics.remainingWeeks).replace(/\B(?=(\d{3})+(?!\d))/g, ","),
           progressText: metrics.progress.toFixed(2),
         },
+      });
+      const [entries, checkins, checkinCount] = await Promise.all([getEntries(session.user.id, 3), getCheckins(session.user.id, 7), getCheckinCount(session.user.id)]);
+      if (!current()) return;
+      this.setData({
         recentEntries: entries.map(decorateEntry),
         checkedToday: checkins.some((item) => item.checkin_date === metrics.today),
         checkinCount,
         journeyMessage: journeyMessage(checkinCount),
       });
+      this.freshness = started;
     } catch (error) {
-      this.setData({ error: error.message || "人生刻度加载失败。" });
+      if (current()) this.setData({ error: error.message || "人生刻度加载失败。" });
     } finally {
-      this.setData({ loading: false });
+      if (this.loadGeneration === generation) this.setData({ loading: false });
       if (fromPull) wx.stopPullDownRefresh();
     }
   },
@@ -70,6 +87,10 @@ Page({
     if (entry?.imageUrls.length) wx.previewImage({ urls: entry.imageUrls, current: entry.imageUrls[Number(event.currentTarget.dataset.photo)] });
   },
   recordToday() { wx.navigateTo({ url: "/pages/record/record" }); },
+  openEntry(event) {
+    const entry = this.data.recentEntries[Number(event.currentTarget.dataset.index)];
+    if (entry) wx.navigateTo({ url: `/pages/entry/entry?id=${encodeURIComponent(entry.id)}` });
+  },
   toggleDetails() { this.setData({ detailsOpen: !this.data.detailsOpen }); },
   setupTimeline() { wx.navigateTo({ url: "/pages/onboarding/onboarding" }); },
   shareEntry(event) { openShare(this.data.recentEntries[Number(event.currentTarget.dataset.index)], this.data.profile?.locale); },

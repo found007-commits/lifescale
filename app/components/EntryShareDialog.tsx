@@ -4,6 +4,8 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { planCard, drawCard } from "../../miniprogram/utils/share-card";
 import type { LifeEntry, Locale } from "../../lib/types";
+import { signMedia } from "../../lib/lifescale-data";
+import { MediaViewer } from "./MediaViewer";
 
 type ShareTarget = "wechat" | "moments" | "facebook" | "instagram" | "more";
 type ShareLayout = "separate" | "overlay";
@@ -43,8 +45,8 @@ async function createShareCards(entry: LifeEntry, locale: Locale, layout: ShareL
   try {
     for (const media of entry.entry_media || []) {
       if (cancelled()) return [];
-      if (!media.signed_url) throw new Error(en ? "A photo is unavailable. Refresh your journal and retry; no photo will be silently omitted." : "有照片暂时无法读取，请刷新记录重试；不会省略照片生成分享卡。");
-      photos.push(await loadSharePhoto(media.signed_url));
+      const url = await signMedia(media);
+      photos.push(await loadSharePhoto(url));
     }
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error(en ? "Image generation is unavailable." : "当前设备无法生成图片。");
@@ -69,6 +71,16 @@ function downloadBlob(blob: Blob, name: string) {
 }
 
 export function EntryShareDialog({ entry, locale, onClose }: { entry: LifeEntry; locale: Locale; onClose: () => void }) {
+  const en = locale === "en";
+  if ((entry.entry_media || []).some(item => item.media_type.startsWith("video/"))) return <div className="modal-backdrop"><section className="composer" role="dialog" aria-modal="true" aria-label={en ? "Share media" : "分享影像"}>
+    <button className="modal-close" onClick={onClose} aria-label={en ? "Close" : "关闭"}>×</button>
+    <h2>{en ? "Share the original" : "分享原影像"}</h2><p>{en ? "An image card cannot play video. Open a file below to save it and send it with your device. Notes remain private." : "图片分享卡不能播放视频。请点开下方文件，保存原影像后通过设备发送；留言仍仅自己可见。"}</p>
+    <MediaViewer media={entry.entry_media || []} en={en} />
+  </section></div>;
+  return <ImageShareDialog entry={entry} locale={locale} onClose={onClose} />;
+}
+
+function ImageShareDialog({ entry, locale, onClose }: { entry: LifeEntry; locale: Locale; onClose: () => void }) {
   const en = locale === "en";
   const [cards, setCards] = useState<ShareCard[]>([]);
   const [selected, setSelected] = useState(0);
@@ -153,6 +165,7 @@ export function EntryShareDialog({ entry, locale, onClose }: { entry: LifeEntry;
       <button className="outline-button share-save-button" type="button" disabled={!card} onClick={saveCard}>{inWeChat ? (en ? "Press and hold the card to save" : "长按上方分享卡保存") : (en ? "Save this share card" : "保存这张分享卡")}</button>
       {status ? <p className="share-status" role="status">{status}</p> : null}
       <p className="share-platform-note">{en ? "Your device determines which apps are available. You always confirm the recipient and publication." : "可直接调用的平台由设备决定。最终发送对象和发布始终由你确认。"}</p>
+      <p>{en ? "Image cards are static. To keep GIF animation, share the original file. Notes are not included." : "图片分享卡为静态图片，GIF 动画请通过原文件分享；留言不包含在分享卡里。"}</p>
     </section>
   </div>;
 }

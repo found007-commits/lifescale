@@ -1,0 +1,12 @@
+.detail-card { padding: 30rpx; margin-bottom: 30rpx; }
+.detail-content,.comment-content { display: block; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; margin: 22rpx 0; }
+.detail-media { margin: 26rpx 0; }
+.detail-media video,.detail-media image { width: 100%; }
+.comment { border-top: 1rpx solid #c7d1ca; margin-top: 24rpx; padding-top: 20rpx; }
+.comment button { margin-left: 0; width: auto; font-size: 24rpx; }
+.reply-preview { padding: 20rpx; background: #e3ece3; overflow-wrap: anywhere; }
+.detail-card .muted { display: block; font-size: 24rpx; }
+.edit-panel { margin: 24rpx 0; padding: 24rpx 0; border-top: 1rpx solid #c7d1ca; }
+.edit-picker { padding: 24rpx 0; }
+.media-viewer-toolbar { display: flex; align-items: center; gap: 24rpx; padding: 16rpx; background: #343b38; color: #f4f0e6; border-radius: 20rpx 20rpx 0 0; font-size: 26rpx; }
+.media-viewer-toolbar .media-viewer-close { display: flex; align-items: center; justify-content: center; min-width: 176rpx; min-height: 88rpx; margin: 0; padding: 12rpx 28rpx; border: 2rpx solid #ffb4ae; border-radius: 48rpx; background: #b42318; color: #fff; font-size: 30rpx; font-weight: 600; line-height: 1.2; }

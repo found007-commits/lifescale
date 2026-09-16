@@ -39,3 +39,13 @@ yarn-error.log*
 /.wrangler/
 /outputs/
 /work/
+
+# supabase CLI scratch state
+/supabase/.temp/
+
+# local-only verification artefacts (also excluded from deploys)
+/mobile-age-field*.png
+
+# WeChat DevTools keeps personal IDE state here; the shared settings live in
+# project.config.json, which stays tracked.
+/miniprogram/project.private.config.json

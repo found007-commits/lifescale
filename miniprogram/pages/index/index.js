@@ -13,11 +13,14 @@ Page({
     preview: null,
   },
 
-  onLoad(options = {}) { this.browsing = options.browse === "1"; },
   onShow() {
     const session = restoreSession();
-    if (session?.user?.id) wx.switchTab({ url: "/pages/dashboard/dashboard" });
-    else if (!this.browsing) wx.redirectTo({ url: "/pages/auth/auth" });
+    // Guests (including old shared links) stay on the usable public homepage.
+    // Only an existing usable session takes the shortcut to private records.
+    if (session?.access_token && session.user?.id &&
+      (session.refresh_token || !session.expires_at || session.expires_at * 1000 > Date.now())) {
+      wx.switchTab({ url: "/pages/dashboard/dashboard" });
+    }
   },
 
   onBirthChange(event) {

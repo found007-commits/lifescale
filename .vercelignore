@@ -1,0 +1,8 @@
+# Local-only artifacts and credentials are not deployment inputs.
+.env*
+outputs/
+work/
+mobile-age-field*.png
+miniprogram/project.private.config.json
+miniprogram/RELEASE-*.md
+supabase/.temp/

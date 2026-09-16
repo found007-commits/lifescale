@@ -12,13 +12,15 @@ function apiFixture() {
   const requests=[];let rejectSign=false,variant='relative',signs=0;
   const entry={id:'entry',content:'Synthetic private words',entry_date:'2026-09-09',mood:'calm',category:'daily',entry_media:[attachment('a'),attachment('b')]};
   const moduleStub={exports:{}};
-  vm.runInNewContext(read('utils/supabase.js'),{module:moduleStub,getApp:()=>({globalData:{}}),require:path=>path.endsWith('runtime-config')?{loadRuntimeConfig:async()=>({supabaseUrl:base,publishableKey:'synthetic'})}:path.endsWith('/life')?require('../miniprogram/utils/life.js'):{apiBase:'https://test.invalid'},wx:{
+  vm.runInNewContext(read('utils/supabase.js'),{module:moduleStub,getApp:()=>({globalData:{}}),require:path=>path.endsWith('runtime-config')?{loadRuntimeConfig:async()=>({supabaseUrl:base,publishableKey:'synthetic'})}:path.endsWith('media-policy')?require('../miniprogram/utils/media-policy.js'):path.endsWith('/life')?require('../miniprogram/utils/life.js'):{apiBase:'https://test.invalid'},wx:{
     getStorageSync:()=>({access_token:'synthetic',user:{id:'owner'}}),
     request(o){requests.push(o);if(o.url.includes('/object/sign/')){
       signs++;if(rejectSign)return o.success({statusCode:503,data:{message:'sign unavailable'}});
-      const path='/object/sign/entry-media/'+o.url.split('/entry-media/')[1]+'?token=synthetic-'+signs;
-      const signedURL=variant==='absolute'?base+'/storage/v1'+path:variant==='storage'?'/storage/v1'+path:variant==='invalid'?'https://wrong.invalid/photo':path;
-      return o.success({statusCode:200,data:{signedURL}});
+      const sign = name => {
+        const path='/object/sign/entry-media/'+name+'?token=synthetic-'+signs;
+        return variant==='absolute'?base+'/storage/v1'+path:variant==='storage'?'/storage/v1'+path:variant==='invalid'?'https://wrong.invalid/photo':path;
+      };
+      return o.success({statusCode:200,data:o.data?.paths ? o.data.paths.map(path=>({path,signedURL:sign(path)})) : {signedURL:sign(o.url.split('/entry-media/')[1])}});
     }o.success({statusCode:200,data:[entry]});},
   }});
   return{api:moduleStub.exports,requests,entry,setReject:value=>{rejectSign=value;},setVariant:value=>{variant=value;}};
