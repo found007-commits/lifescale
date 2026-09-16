@@ -5,6 +5,16 @@ const { topics, questionAt } = require("../../utils/record-prompts");
 const { prepareMedia } = require("../../utils/prepare-media");
 const { uuid } = require("../../utils/life");
 
+// errno 112 means the privacy guideline does not declare the album scope, while 103 and 104
+// mean the user declined the popup. All three need the same user action, so they share one
+// message that deliberately does not tell the user to retry.
+const PRIVACY_BLOCKED = "需要同意隐私保护指引后才能选择照片或视频。";
+function privacyBlockMessage(error) {
+  const errno = error?.errno;
+  if (errno === 103 || errno === 104 || errno === 112) return PRIVACY_BLOCKED;
+  return /privacy/i.test(error?.errMsg || "") ? PRIVACY_BLOCKED : "";
+}
+
 Page({
   data: {
     content: "",
@@ -13,6 +23,7 @@ Page({
     images: [], processing: false, notice: "", progress: "", persisted: false,
     saving: false,
     error: "",
+    privacyOpen: false,
     guest: true, saved: false, topics, topic: -1, promptIndex: 0, prompt: "", inspirationOpen: false, moodIndex: 0, categoryIndex: 0,
     moods: [
       { value: "calm", label: "平静" }, { value: "happy", label: "开心" }, { value: "grateful", label: "感恩" },
@@ -25,7 +36,14 @@ Page({
     ],
   },
 
-  onLoad() { this.entryId = uuid(); this.uploaded = new Set(); this.files = new Set(); },
+  onLoad() {
+    this.entryId = uuid(); this.uploaded = new Set(); this.files = new Set();
+    // WeChat raises this when an interface protected by the privacy guideline runs before the
+    // user has agreed to it. The agreement can only be given from a button inside the popup,
+    // so the platform's pending resolve waits here until the user answers.
+    this.onPrivacyNeeded = (resolve) => { this.privacyResolve = resolve; this.setData({ privacyOpen: true }); };
+    if (wx.onNeedPrivacyAuthorization) wx.onNeedPrivacyAuthorization(this.onPrivacyNeeded);
+  },
   onShow() {
     this.session = restoreSession();
     this.setData({ guest: !this.session?.user?.id });
@@ -58,12 +76,43 @@ Page({
     const promptIndex = this.data.promptIndex + 1;
     this.setData({ promptIndex, prompt: questionAt(this.data.topic, promptIndex) });
   },
-  onUnload() { this.closed = true; this.files.forEach((filePath) => wx.getFileSystemManager().unlink({ filePath, fail() {} })); },
+  onUnload() {
+    this.closed = true;
+    if (wx.offNeedPrivacyAuthorization && this.onPrivacyNeeded) wx.offNeedPrivacyAuthorization(this.onPrivacyNeeded);
+    // Answer the platform before leaving, so a blocked interface fails instead of hanging.
+    this.settlePrivacy(false);
+    this.files.forEach((filePath) => wx.getFileSystemManager().unlink({ filePath, fail() {} }));
+  },
+  settlePrivacy(agreed) {
+    const resolve = this.privacyResolve;
+    this.privacyResolve = null;
+    if (!resolve) return;
+    if (!this.closed) this.setData({ privacyOpen: false });
+    resolve(agreed ? { buttonId: "privacy-agree", event: "agree" } : { event: "disagree" });
+  },
+  onPrivacyAgree() { this.settlePrivacy(true); },
+  onPrivacyDecline() { this.settlePrivacy(false); },
+  onPrivacyContract() {
+    const openLocalPolicy = () => wx.navigateTo({ url: "/pages/legal/legal?type=privacy" });
+    if (wx.openPrivacyContract) wx.openPrivacyContract({ fail: openLocalPolicy });
+    else openLocalPolicy();
+  },
+  // Ask before the album picker runs, so the popup explains itself instead of an errno 104.
+  ensurePrivacyAuthorized() {
+    if (!wx.requirePrivacyAuthorize) return Promise.resolve(true);
+    return new Promise((resolve) => {
+      wx.requirePrivacyAuthorize({ success: () => resolve(true), fail: () => resolve(false) });
+    });
+  },
   onContentInput(event) { this.setData({ content: event.detail.value.slice(0, 12000), error: "" }); },
   async chooseImage() {
     if (this.picking || this.data.saving || this.data.persisted) return;
     this.picking = true; this.setData({ processing: true, error: "" });
     try {
+      if (!(await this.ensurePrivacyAuthorized())) {
+        this.setData({ error: PRIVACY_BLOCKED });
+        return;
+      }
       const result = await new Promise((resolve, reject) => wx.chooseMedia({ count: 9, mediaType: ["image", "video"], sourceType: ["album"], sizeType: ["original"], success: resolve, fail: reject }));
       if (result.tempFiles.some((file) => file.size > 10 * 1024 * 1024)) this.setData({ notice: "文件较大，处理和上传可能较慢，请保持页面打开。" });
       const canvas = this.canvas || await new Promise((resolve, reject) => wx.createSelectorQuery().in(this).select("#photoCanvas").fields({ node: true }).exec((rows) => rows[0]?.node ? resolve(rows[0].node) : reject(new Error("图片组件尚未准备好，请重试。"))));
@@ -81,7 +130,7 @@ Page({
           this.setData({ images: this.data.images.map((item) => item.id === id ? { id, error: error.message || "图片无法读取，请转存为 JPG 或 PNG。" } : item) });
         }
       }
-    } catch (error) { if (!/cancel/i.test(error.errMsg || "")) this.setData({ error: error.message || "选择图片失败，请重试。" }); }
+    } catch (error) { if (!/cancel/i.test(error.errMsg || "")) this.setData({ error: privacyBlockMessage(error) || error.message || "选择图片失败，请重试。" }); }
     finally { this.picking = false; if (!this.closed) this.setData({ processing: false, progress: "" }); }
   },
   removeImage(event) {

@@ -20,3 +20,10 @@
 .account-choice { margin-top: 30rpx; padding: 24rpx 0; }
 .choice-title { font-size: 32rpx; font-weight: 600; }
 .account-choice button { margin-top: 24rpx; }
+
+/* The page background already turns dark, so consent and account chrome has to follow. */
+@media (prefers-color-scheme: dark) {
+  .text-button, .consent-row { color: #d5e2da; }
+  .consent-help { color: #91a69b; }
+  .login-divider { border-top-color: rgba(237, 243, 239, .14); color: #91a69b; }
+}

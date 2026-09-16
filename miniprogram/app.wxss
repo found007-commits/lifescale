@@ -85,6 +85,18 @@ button::after { border: 0; }
   .secondary-button { border-color: rgba(237, 243, 239, .22); }
   .muted, .field-help, .privacy-note { color: #91a69b; }
   .entry-share { color: #d5e2da; border-color: #728c7c; }
+  .privacy-note navigator { color: #9fd0b6; }
+  /* The media query above already turns the page dark, so these surfaces used to
+     keep their light values and sit at roughly 1.5:1 against the background. */
+  .primary-button { background: #3f7359; box-shadow: 0 20rpx 42rpx rgba(0, 0, 0, .35); }
+  .primary-button[disabled] { background: #2b3f37; color: #7f9188; box-shadow: none; }
+  .danger-button { border-color: rgba(217, 139, 130, .42); color: #d98b82; }
+  .form-error { border-left-color: #d98b82; background: rgba(217, 139, 130, .12); color: #f0c3bc; }
+  .form-success { color: #9fd0b6; }
+  .brand-note, .loading-copy { color: #91a69b; }
+  .entry-delete { background: rgba(217, 139, 130, .14); color: #e8ada4; }
+  .media-placeholder { background: #192a22; color: #91a69b; }
+  .journey-note text:first-child { color: #d99b2f; }
 }
 /* Heavy media is deliberately absent from list src attributes until opened. */
 .media-placeholder { display: flex; align-items: center; justify-content: center; min-height: 200rpx; padding: 24rpx; border-radius: 20rpx; background: #e3ece3; color: #123f31; font-size: 26rpx; }

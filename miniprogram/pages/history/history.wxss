@@ -17,4 +17,9 @@
 .empty-state { margin-top: 54rpx; }
 .empty-state .muted { display: block; margin-top: 18rpx; }
 .empty-action { margin-top: 30rpx; }
-@media (prefers-color-scheme: dark) { .history-note { color: #b5c9bd; } }
+@media (prefers-color-scheme: dark) {
+  .history-note { color: #b5c9bd; }
+  .history-content { color: #edf3ef; }
+  .timeline-date { color: #91a69b; }
+  .timeline-row { border-left-color: rgba(237, 243, 239, .14); }
+}

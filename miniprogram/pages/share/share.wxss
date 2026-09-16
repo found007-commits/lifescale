@@ -35,3 +35,12 @@
 .selection-photos button { width: 100%; padding: 6rpx; margin: 0; border: 3rpx solid #c6cec8; background: #e8e7df; color: #476b5d; font-size: 22rpx; line-height: 1.8; }
 .selection-photos button.selected { border-color: #123f31; background: #123f31; color: #fffdf8; }
 .selection-photos image { display: block; width: 100%; height: 138rpx; border-radius: 8rpx; }
+
+/* The page background already turns dark. The fixed action bar is chrome rather than
+   content, so it follows the theme; the option grids keep their light surfaces. */
+@media (prefers-color-scheme: dark) {
+  .share-note, .settings-note, .share-action-note { color: #91a69b; }
+  .settings-toggle { color: #9fd0b6; }
+  .share-actions { background: #192a22; border-top-color: rgba(237, 243, 239, .12); box-shadow: 0 -8rpx 28rpx rgba(0, 0, 0, .4); }
+  .setting-row { border-bottom-color: rgba(237, 243, 239, .12); }
+}

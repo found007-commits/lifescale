@@ -104,7 +104,7 @@
 - `pnpm lint`、`pnpm typecheck` 通过。
 - 微信开发者工具模拟器：两种布局、完整长中文、超过万字节的英文分页、原生分享调用参数通过；全部使用虚构内容，没有读写真实用户数据，也未实际发送图片。
 - 2026-09-07 CLI 上传 1.1.0 成功，代码包 249420 字节。
-- 配置接口已部署到 `https://app.lifescale.space/api/miniprogram/config`。
+- 配置接口：小程序使用 `https://app.lifescale.space/api/miniprogram/service-config`（构建期静态生成，`revalidate` 3600 秒，仅返回公开连接配置）。`https://app.lifescale.space/api/miniprogram/config` 保留给按 IP 判语言的旧版客户端，其响应带 `private, no-store`，不参与公共缓存。
 
 ### 上线状态与待办
 

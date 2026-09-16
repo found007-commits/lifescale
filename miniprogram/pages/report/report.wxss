@@ -14,3 +14,9 @@
 .top-category { display: block; margin: 26rpx 0 10rpx; color: #d99b2f; font-family: "Songti SC", serif; font-size: 66rpx; }
 .empty-copy { display: block; margin-top: 26rpx; line-height: 1.65; }
 .report-action { margin-top: 30rpx; }
+
+/* The page background already turns dark; .report-numbers keeps its own surface. */
+@media (prefers-color-scheme: dark) {
+  .report-intro { color: #b5c9bd; }
+  .mood-row { color: #91a69b; }
+}

@@ -15,3 +15,9 @@
 .manifesto-title { margin: 26rpx 0 60rpx; font-size: 60rpx; }
 .manifesto-line { padding: 30rpx 0; border-top: 2rpx solid rgba(243, 239, 229, .13); display: grid; grid-template-columns: 170rpx 1fr; gap: 20rpx; color: #b8c9c0; line-height: 1.6; }
 .manifesto-line text:first-child { color: #f3efe5; font-weight: 650; }
+
+/* The page background already turns dark, so the landing chrome has to follow. */
+@media (prefers-color-scheme: dark) {
+  .mini-login { border-color: rgba(237, 243, 239, .22); color: #d5e2da; }
+  .hero-copy { color: #b5c9bd; }
+}

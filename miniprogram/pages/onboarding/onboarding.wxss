@@ -6,3 +6,10 @@
 .onboarding-form { margin-top: 34rpx; padding: 12rpx 30rpx 34rpx; }
 .confirm-row { margin-top: 34rpx; display: grid; grid-template-columns: 46rpx 1fr; gap: 16rpx; color: #476b5d; font-size: 23rpx; line-height: 1.65; }
 .save-profile { margin-top: 34rpx; }
+
+/* The page background already turns dark; .warning-card keeps its accent surface. */
+@media (prefers-color-scheme: dark) {
+  .onboarding-intro, .confirm-row { color: #b5c9bd; }
+  .warning-card { color: #d5e2da; }
+  .warning-label { color: #d99b2f; }
+}

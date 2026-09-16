@@ -30,7 +30,7 @@ test('public runtime configuration is single-flight, whitelisted, and retryable 
   requests[2].success({statusCode:503,data:{}});await assert.rejects(retry);
 });
 
-test('startup uses cached locale immediately then updates from IP without identity requests', async () => {
+test('startup keeps the saved locale and the config request never overrides it', async () => {
   let app, resolve, requested=0;
   const stored=[];
   const pending=new Promise(r=>{resolve=r;});
@@ -38,8 +38,24 @@ test('startup uses cached locale immediately then updates from IP without identi
     getAppBaseInfo:()=>({language:'en'}),getStorageSync:()=> 'zh-TW',setStorageSync:(...args)=>stored.push(args),
   }});
   app.onLaunch(); assert.equal(app.globalData.locale,'zh-TW');assert.equal(requested,1);
-  resolve({locale:'zh'});await app.localeReady;
-  assert.equal(app.globalData.locale,'zh');assert.deepEqual(stored,[['lifescale:startup-locale','zh']]);
+  // The service-config payload carries no language, so resolving it must leave the saved
+  // preference untouched instead of silently switching the user's language.
+  resolve({supabaseUrl:'https://db.invalid',publishableKey:'public'});await app.localeReady;
+  assert.equal(app.globalData.locale,'zh-TW');
+  assert.deepEqual(stored,[],'the config step must not write a language');
+  assert.doesNotMatch(read('app.js'), /result\.locale|loadRuntimeConfig\(language\)/);
+});
+
+test('a failing config request still releases the pages waiting on it', async () => {
+  let app, reject;
+  const pending=new Promise((_,r)=>{reject=r;});
+  vm.runInNewContext(read('app.js'), {App:d=>{app=d;},require:p=>p.endsWith('supabase')?{restoreSession:()=>null}:{loadRuntimeConfig:()=>pending},wx:{
+    getAppBaseInfo:()=>({language:'zh-CN'}),getStorageSync:()=>null,setStorageSync(){},
+  }});
+  app.onLaunch();
+  reject(new Error('offline'));
+  await app.localeReady;
+  assert.equal(app.globalData.locale,'zh');
 });
 
 function auth(session) {

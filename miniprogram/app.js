@@ -16,11 +16,9 @@ App({
       const cached = wx.getStorageSync("lifescale:startup-locale");
       if (["zh", "zh-TW", "en"].includes(cached)) this.globalData.locale = cached;
     } catch {}
-    this.localeReady = loadRuntimeConfig(language).then(result => {
-      if (["zh", "zh-TW", "en"].includes(result.locale)) {
-        this.globalData.locale = result.locale;
-        try { wx.setStorageSync("lifescale:startup-locale", result.locale); } catch {}
-      }
-    }).catch(() => {});
+    // The service-config payload carries no language, so the device, the saved preference and
+    // the signed-in profile decide it. This request only warms the connection cache; pages
+    // await it so their first paint is not gated by it.
+    this.localeReady = loadRuntimeConfig().catch(() => {});
   },
 });

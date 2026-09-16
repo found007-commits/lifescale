@@ -14,3 +14,12 @@
 .signout-button { margin-top: 34rpx; }
 .delete-button { margin-top: 18rpx; }
 .account-note { display: block; margin-top: 16rpx; color: #8b716c; font-size: 20rpx; line-height: 1.6; text-align: center; }
+
+/* The page background already turns dark; .lock-note keeps its accent surface. */
+@media (prefers-color-scheme: dark) {
+  .profile-grid view text:last-child, .settings-list button { color: #edf3ef; }
+  .settings-list button { border-bottom-color: rgba(237, 243, 239, .1); }
+  .lock-note { color: #d5e2da; }
+  .lock-note text:first-child { color: #d99b2f; }
+  .account-note { color: #91a69b; }
+}

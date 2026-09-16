@@ -12,18 +12,20 @@
     "pages/share/share",
     "pages/entry/entry"
   ],
+  "darkmode": true,
+  "themeLocation": "theme.json",
   "window": {
-    "navigationBarBackgroundColor": "#f3efe5",
-    "navigationBarTextStyle": "black",
+    "navigationBarBackgroundColor": "@navBgColor",
+    "navigationBarTextStyle": "@navTxtStyle",
     "navigationBarTitleText": "余生有刻",
-    "backgroundColor": "#f3efe5",
-    "backgroundTextStyle": "dark"
+    "backgroundColor": "@bgColor",
+    "backgroundTextStyle": "@bgTxtStyle"
   },
   "tabBar": {
-    "color": "#7c8f84",
-    "selectedColor": "#123f31",
-    "backgroundColor": "#fbfaf6",
-    "borderStyle": "white",
+    "color": "@tabFontColor",
+    "selectedColor": "@tabSelectedColor",
+    "backgroundColor": "@tabBgColor",
+    "borderStyle": "@tabBorderStyle",
     "list": [
       { "pagePath": "pages/history/history", "text": "历史" },
       { "pagePath": "pages/dashboard/dashboard", "text": "今天" },

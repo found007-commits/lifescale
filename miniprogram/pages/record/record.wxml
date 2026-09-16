@@ -31,9 +31,19 @@
       <view><text class="field-label">{{i18n.t('此刻的心情', locale)}}</text><picker range="{{moodPickerLabels}}" value="{{moodIndex}}" bindchange="onMoodChange" disabled="{{saving || persisted}}"><view class="metadata-picker">{{i18n.t(moods[moodIndex].label, locale)}} <text>⌄</text></view></picker></view>
       <view><text class="field-label">{{i18n.t('分类', locale)}}</text><picker range="{{categoryPickerLabels}}" value="{{categoryIndex}}" bindchange="onCategoryChange" disabled="{{saving || persisted}}"><view class="metadata-picker">{{i18n.t(categories[categoryIndex].label, locale)}} <text>⌄</text></view></picker></view>
     </view>
-    <view wx:if="{{error}}" class="form-error">{{error}}</view>
+    <view wx:if="{{error}}" class="form-error">{{i18n.t(error, locale)}}</view>
     <text wx:if="{{guest}}" class="upload-hint">{{i18n.t('此时尚未上传。登录后会继续保存；离开或关闭小程序会丢失未保存内容。', locale)}}</text>
     <button class="primary-button save-entry" bindtap="saveEntry" loading="{{saving}}" disabled="{{saving || processing || saved}}">{{i18n.t(saved ? '今天已留下' : (guest ? '登录并私密保存' : (persisted ? '重试剩余上传' : '仅自己可见，保存今天')), locale)}}</button>
   </view>
   <canvas type="2d" id="photoCanvas" class="render-canvas" />
+  <view wx:if="{{privacyOpen}}" class="privacy-mask">
+    <view class="privacy-dialog">
+      <text class="privacy-title">{{i18n.t('从相册选择照片或视频前，需要你先同意《小程序用户隐私保护指引》。', locale)}}</text>
+      <button class="privacy-contract" bindtap="onPrivacyContract">{{i18n.t('隐私政策', locale)}}</button>
+      <view class="privacy-actions">
+        <button class="privacy-decline" bindtap="onPrivacyDecline">{{i18n.t('暂不', locale)}}</button>
+        <button id="privacy-agree" class="primary-button" open-type="agreePrivacyAuthorization" bindagreeprivacyauthorization="onPrivacyAgree">{{i18n.t('同意并继续', locale)}}</button>
+      </view>
+    </view>
+  </view>
 </view>

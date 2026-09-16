@@ -441,5 +441,15 @@
   "未选择照片，生成纯文字分享卡。": "No photos selected. Your share card will contain text only.",
   "正在准备微信登录…": "Preparing WeChat sign-in…",
   "登录，记录今天": "Sign in to record today",
-  "微信或邮箱登录后即可记录，年龄目标可以以后再设。": "Sign in with WeChat or email to record today. You can set your age target later."
+  "微信或邮箱登录后即可记录，年龄目标可以以后再设。": "Sign in with WeChat or email to record today. You can set your age target later.",
+  "图片组件尚未准备好，请重试。": "The image component is not ready yet. Please retry.",
+  "图片无法读取，请转存为 JPG 或 PNG。": "This image could not be read. Save it as JPG or PNG and try again.",
+  "选择图片失败，请重试。": "Choosing a photo failed. Please retry.",
+  "请先移除无法读取的图片，再保存。": "Remove the unreadable photos before saving.",
+  "记录保存失败。": "The entry could not be saved.",
+  " 记录和已上传照片已保留，重试只继续剩余上传。": " Your entry and uploaded photos are kept; retrying only uploads what is left.",
+  "从相册选择照片或视频前，需要你先同意《小程序用户隐私保护指引》。": "Before choosing photos or videos from your album, agree to the WeChat privacy protection guidelines.",
+  "同意并继续": "Agree and continue",
+  "暂不": "Not now",
+  "需要同意隐私保护指引后才能选择照片或视频。": "Agree to the privacy protection guidelines before choosing photos or videos."
 }

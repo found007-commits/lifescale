@@ -61,3 +61,10 @@
 .life-clear .mode-disclaimer { text-align: left; color: #b9c8bc; }
 .life-clear .details-toggle { color: #e1e8e0; }
 .life-card .mode-options button { min-height: 76rpx; display: flex; align-items: center; justify-content: center; line-height: 1.4; padding: 12rpx; }
+
+/* The page background already turns dark. .life-card, .life-gentle, .life-clear and
+   .today-button carry their own background, so they are left as designed. */
+@media (prefers-color-scheme: dark) {
+  .view-all { color: #9fd0b6; }
+  .entry-content { color: #edf3ef; }
+}

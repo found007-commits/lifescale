@@ -5,3 +5,7 @@
 .legal-section { padding: 34rpx 0; border-top: 2rpx solid rgba(18,63,49,.12); }
 .legal-section .section-title { display: block; margin-bottom: 18rpx; font-size: 34rpx; }
 .legal-section > text:last-child { color: #476b5d; line-height: 1.85; }
+
+@media (prefers-color-scheme: dark) {
+  .legal-section > text:last-child { color: #b5c9bd; }
+}
