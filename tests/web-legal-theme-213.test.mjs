@@ -82,7 +82,7 @@ test('2.0.13 keeps the nine binding contracts frozen', {skip: !release}, () => {
 
 // The bug was that nothing set the attribute on these routes. The fix is one script that runs
 // before paint, so the assertion is that it exists, runs in the head, and writes the attribute.
-test('the layout applies the stored theme before the first paint', {skip: !release}, () => {
+test('the layout applies the stored theme before the first paint', () => {
   const layout = read('app/layout.tsx');
   const head = layout.indexOf('<head>');
   const body = layout.indexOf('<body');
@@ -98,7 +98,7 @@ test('the layout applies the stored theme before the first paint', {skip: !relea
 
 // Drift between the two readers of this key is exactly the failure that would bring the bug back
 // for the routes that still rely on the hook.
-test('the init script and useTheme read the same storage key', {skip: !release}, () => {
+test('the init script and useTheme read the same storage key', () => {
   const layout = read('app/layout.tsx');
   const hook = read('lib/use-theme.ts');
   const key = /"lifescale:theme"/;
@@ -110,7 +110,7 @@ test('the init script and useTheme read the same storage key', {skip: !release},
   }
 });
 
-test('2.0.13 gives the legal pages a theme control that matches the home page one', {skip: !release}, () => {
+test('the legal pages carry a theme control that matches the home page one', () => {
   const page = read('app/components/LegalPage.tsx');
   const button = read('app/components/ThemeButton.tsx');
   assert.match(page, /<ThemeButton label=/, 'LegalPage must render the control');
@@ -125,7 +125,7 @@ test('2.0.13 gives the legal pages a theme control that matches the home page on
   assert.match(button, /label \}: \{ label: string \}/);
 });
 
-test('2.0.13 leaves the legal header layout to the shared rule', {skip: !release}, () => {
+test('the legal header layout stays with the shared rule', () => {
   const css = read('app/globals.css');
   // The back link moved inside the wrapper, so the wrapper needs the rule the header used to
   // give a direct child - and it has to cover both headers rather than only the guide one.
@@ -135,7 +135,7 @@ test('2.0.13 leaves the legal header layout to the shared rule', {skip: !release
   assert.match(css, /\.header-actions \.theme-button \{ display: none; \}/);
 });
 
-test('2.0.13 darkens the legal body text with a token, not a second literal', {skip: !release}, () => {
+test('the legal body text is darkened with a token, not a second literal', () => {
   const css = read('app/globals.css');
   // The literal stays for light, where it measures 5.53:1.
   assert.match(css, /\.legal-content p, \.legal-content li \{ color: #51685d;/);
@@ -151,7 +151,7 @@ test('2.0.13 darkens the legal body text with a token, not a second literal', {s
 
 // Green is lighter or darker than the surface it sits on, so a token that reads well on one
 // theme can be invisible on the other. Checked arithmetically rather than by eye.
-test('the colours 2.0.13 relies on clear the WCAG body text threshold', () => {
+test('the legal page colours clear the WCAG body text threshold', () => {
   const lin = (c) => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
   const L = (hex) => {
     const n = parseInt(hex.slice(1), 16);

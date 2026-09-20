@@ -44,6 +44,24 @@ function blocks(css) {
 const classCount = (selector) => (selector.match(/\.[\w-]+/g) || []).length;
 const isDark = (selector) => selector.startsWith('@media') && /prefers-color-scheme:\s*dark/.test(selector);
 
+// Which properties a block declares, folded into families. Selector alone is not enough: app.wxss
+// has a `page` rule inside a dark query that sets background and colour, and a later `page` rule
+// that sets custom properties. Sharing a selector is fine; sharing a property is not.
+function families(body) {
+  const out = new Set();
+  for (const declaration of body.split(';')) {
+    const colon = declaration.indexOf(':');
+    if (colon < 1) continue;
+    const property = declaration.slice(0, colon).trim().toLowerCase();
+    if (!property || /\s|\(/.test(property)) continue;
+    if (property === 'background' || property.startsWith('background-')) out.add('background');
+    else if (property === 'border' || /^border-(top|right|bottom|left)/.test(property)) out.add('border');
+    else out.add(property);
+  }
+  return out;
+}
+const shares = (a, b) => [...a].filter((p) => b.has(p));
+
 const wxssFiles = readdirSync(new URL('../miniprogram', import.meta.url), {recursive: true})
   .map(String)
   .filter((name) => name.endsWith('.wxss') && !name.includes('node_modules'))
@@ -71,12 +89,15 @@ test('no dark override is cancelled by a later rule of the same weight', () => {
       assert.ok(inside.length > 0, file + ' has a dark media query with no rules in it');
       for (const child of inside) {
         checked++;
+        const wanted = families(css.slice(child.open + 1, child.close));
         for (const late of all) {
           if (late.depth !== 1) continue;
           if (late.open <= media.close) continue;
           if (late.selector !== child.selector) continue;
           if (classCount(late.selector) > classCount(child.selector)) continue;
-          problems.push(`${file}: "${child.selector}" is overridden inside the dark query at offset ${media.open}, ` +
+          const clashing = [...shares(wanted, families(css.slice(late.open + 1, late.close)))];
+          if (!clashing.length) continue;
+          problems.push(`${file}: "${child.selector}" sets ${clashing.join(', ')} inside the dark query at offset ${media.open}, ` +
             `but an equally weighted rule for it appears afterwards at offset ${late.open}`);
         }
       }

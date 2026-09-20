@@ -91,7 +91,7 @@ const RETRACTED = [
   /(?<!日常)记录与图片仅本人可见，不提供公开选项/,
 ];
 
-test('2.0.12 removes the promise the sanctuary contradicts, from every surface', {skip: !release}, () => {
+test('the retracted promise stays retracted, on every surface', () => {
   const surfaces = ['app/privacy/page.tsx', 'app/terms/page.tsx', 'miniprogram/pages/legal/legal.js'];
   for (const path of surfaces) {
     const source = read(path);
@@ -109,7 +109,7 @@ test('2.0.12 removes the promise the sanctuary contradicts, from every surface',
   assert.deepEqual(stale, [], 'the dictionary still carries the retracted promise: ' + stale.length);
 });
 
-test('2.0.12 states the sanctuary on both policy surfaces, in the same terms', {skip: !release}, () => {
+test('both policy surfaces state the sanctuary in the same terms', () => {
   for (const path of ['app/privacy/page.tsx', 'app/terms/page.tsx', 'miniprogram/pages/legal/legal.js']) {
     const source = read(path);
     assert.match(source, /精神圣所/, path + ' must name the sanctuary');
@@ -127,14 +127,14 @@ test('2.0.12 states the sanctuary on both policy surfaces, in the same terms', {
 // The share exception is the one place a link carries an account identifier, so the release
 // that documents the sanctuary has to document it too - otherwise the exception stays a
 // repository-only fact.
-test('2.0.12 publishes the share exception on both surfaces', {skip: !release}, () => {
+test('both policy surfaces publish the share exception', () => {
   assert.match(read('app/privacy/page.tsx'), /唯一例外是当你本人查看自己已公开的精神圣所时，分享链接会带上你自己的标识/);
   assert.match(read('miniprogram/pages/legal/legal.js'), /唯一例外是：当你本人查看自己已公开的精神圣所时，分享链接会带上你自己的标识/);
 });
 
 // A policy sentence that overstates the implementation is worse than no sentence. The two
 // numbers the sanctuary copy commits to are both enforcement, not aspiration.
-test('2.0.12 claims nothing the database does not enforce', {skip: !release}, () => {
+test('the policy claims nothing the database does not enforce', () => {
   const raw = read('supabase/migrations/20260920120000_sanctuary_and_chapters.sql');
   // Comments have to go first: this migration's own header explains that it "grants nothing to
   // anon", and a naive search would read that sentence as the opposite of what it says.
@@ -177,7 +177,7 @@ test('2.0.12 claims nothing the database does not enforce', {skip: !release}, ()
 
 // ---- the generated files have to agree with the dictionary they come from ----
 
-test('the regenerated locale files actually carry the new copy', {skip: !release}, () => {
+test('the regenerated locale files agree with the dictionary they come from', () => {
   const wxs = read('miniprogram/utils/locale.wxs');
   const copy = read('miniprogram/utils/locale-copy.js');
   const added = Object.entries(dict).filter(([zh]) => zh.includes('精神圣所') || zh.includes('公开内容'));
@@ -194,7 +194,7 @@ test('the regenerated locale files actually carry the new copy', {skip: !release
 
 // The English page must not fall back to Chinese: that is what a mistyped dictionary key
 // looks like, and it would ship a bilingual policy.
-test('2.0.12 leaves no untranslated Chinese in the legal page', {skip: !release}, () => {
+test('the legal page carries no untranslated Chinese', () => {
   const source = read('miniprogram/pages/legal/legal.js');
   const strings = [...new Set([...source.matchAll(/"([^"\\]*[\u4e00-\u9fff][^"\\]*)"/g)].map((m) => m[1]))];
   assert.ok(strings.length >= 40, 'expected the legal copy to be extracted, found ' + strings.length);
