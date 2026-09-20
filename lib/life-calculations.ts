@@ -2,6 +2,7 @@ export type LifeMetrics = {
   today: string;
   targetDate: string;
   livedDays: number;
+  totalDays: number;
   remainingDays: number;
   remainingWeeks: number;
   remainingYears: number;
@@ -11,6 +12,18 @@ export type LifeMetrics = {
   progressPercent: number;
   bonusDays: number;
   isBonusChapter: boolean;
+};
+
+// A life chapter is 1000 days, matching miniprogram/utils/life.js so the website and the
+// mini program can never disagree about which chapter today belongs to.
+export const CHAPTER_DAYS = 1000;
+
+export type ChapterMetrics = {
+  currentChapter: number;
+  chapterDayIndex: number;
+  chapterDaysRemaining: number;
+  isBonusLife: boolean;
+  bonusDayCount: number;
 };
 
 const DAY_MS = 86_400_000;
@@ -114,6 +127,7 @@ export function calculateLifeMetrics(input: {
     today,
     targetDate,
     livedDays,
+    totalDays,
     remainingDays,
     remainingWeeks: Math.floor(remainingDays / 7),
     remainingYears: calendar.years,
@@ -123,6 +137,24 @@ export function calculateLifeMetrics(input: {
     progressPercent: Math.min(100, Math.max(0, (livedDays / totalDays) * 100)),
     bonusDays: Math.max(0, -rawRemaining),
     isBonusChapter: rawRemaining < 0,
+  };
+}
+
+// Mirrors miniprogram/utils/life.js calculateChapterMetrics line for line. Keep the two
+// copies in step: the bonus boundary is `lived > target` in both, so a day is never a
+// bonus day in one place and not the other, and an unset target is never a bonus.
+export function calculateChapterMetrics(daysLived: number, totalTargetDays: number): ChapterMetrics {
+  const lived = Math.max(0, Math.floor(Number(daysLived) || 0));
+  const target = Math.max(0, Math.floor(Number(totalTargetDays) || 0));
+  const chapterDayIndex = (lived % CHAPTER_DAYS) + 1;
+  const isBonusLife = target > 0 && lived > target;
+
+  return {
+    currentChapter: Math.floor(lived / CHAPTER_DAYS) + 1,
+    chapterDayIndex,
+    chapterDaysRemaining: CHAPTER_DAYS - chapterDayIndex,
+    isBonusLife,
+    bonusDayCount: isBonusLife ? lived - target : 0,
   };
 }
 

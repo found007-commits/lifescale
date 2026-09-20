@@ -912,8 +912,67 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 1; }
 .time-ribbon > span { color: var(--gold); }
 /* Keep the existing brand mark recognizable while reskinning the product. */
 .brand-mark::before { background: #143d2f; box-shadow: inset 0 0 0 5px #2d5d4b; }
+
+/* 2.0.9 website: the 1000-day chapter model and the sanctuary, on the marketing page and
+   on two guide pages. Every colour is an existing token, so both themes stay above AA
+   without adding a palette. No figure is printed unless it was actually computed - the
+   chapter line only renders when a visitor has entered a birth date and target age. */
+.chapter-section {
+  padding: 120px max(36px, calc((100vw - 1180px)/2));
+  display: grid; grid-template-columns: 1fr 1fr; gap: 100px; align-items: start;
+}
+.chapter-section h2 { max-width: 610px; margin: 0; font: 500 clamp(44px, 4vw, 62px)/1.08 var(--serif); letter-spacing: -.04em; text-wrap: balance; }
+.chapter-section h2 span { display: block; }
+.chapter-lead { max-width: 46ch; margin: 26px 0 0; color: var(--green-2); line-height: 1.85; }
+.chapter-cards { display: grid; gap: 20px; }
+.chapter-card { padding: 36px; border: 1px solid var(--line); border-radius: 24px; background: var(--paper); }
+.chapter-card h3 { margin: 0 0 14px; font: 600 25px/1.25 var(--serif); }
+.chapter-card > p { margin: 0; color: var(--green-2); line-height: 1.8; }
+.chapter-card ul { margin: 20px 0 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+.chapter-card li { display: grid; grid-template-columns: 20px 1fr; gap: 10px; color: var(--green-2); line-height: 1.75; }
+.chapter-card li::before { content: "—"; color: var(--gold); }
+.chapter-eyebrow { display: block; margin-bottom: 16px; color: var(--gold); letter-spacing: .22em; font-size: 10px; font-weight: 800; }
+.chapter-live { margin-top: 22px; padding: 22px; border-radius: 18px; background: var(--surface-soft); }
+.chapter-live strong { display: block; font: 600 34px/1.15 var(--serif); }
+.chapter-live small { display: block; margin-top: 10px; color: var(--green-2); font-size: 11px; line-height: 1.7; }
+.chapter-links { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 12px; }
+
+.guide-shell { min-height: 100vh; background: var(--paper); }
+.guide-content { width: min(760px, calc(100% - 48px)); margin: 0 auto; padding: 90px 0 110px; }
+.guide-content h1 { margin: 0; font: 500 clamp(46px, 6.2vw, 78px)/1.04 var(--serif); letter-spacing: -.045em; text-wrap: balance; }
+.guide-updated { margin: 22px 0 0; color: var(--muted); font-size: 12px; }
+.guide-lead { margin: 34px 0 0; color: var(--green-2); font: 500 24px/1.6 var(--serif); }
+.guide-content h2 { margin: 52px 0 14px; font: 600 27px/1.3 var(--serif); }
+.guide-content p, .guide-content li { color: var(--green-2); line-height: 1.85; }
+.guide-content section ul { margin: 14px 0 0; padding-left: 20px; display: grid; gap: 8px; }
+.guide-facts { margin: 34px 0 0; padding: 0; list-style: none; }
+.guide-facts li { padding: 22px 0; border-top: 1px solid var(--line); }
+.guide-facts li:last-child { border-bottom: 1px solid var(--line); }
+.guide-facts b { display: block; margin-bottom: 8px; font: 600 17px/1.45 var(--serif); }
+.guide-facts span { display: block; color: var(--green-2); line-height: 1.8; }
+.guide-figure { margin: 36px 0 0; padding: 30px; border-radius: 22px; background: var(--surface-soft); }
+.guide-figure strong { display: block; font: 500 40px/1.1 var(--serif); }
+.guide-figure span { display: block; margin-top: 12px; color: var(--green-2); font-size: 12px; line-height: 1.75; }
+.guide-note { margin: 40px 0 0; padding: 24px; border-radius: 18px; background: var(--surface-soft); color: var(--green-2); line-height: 1.8; }
+.guide-actions { margin-top: 46px; display: flex; flex-wrap: wrap; gap: 12px; }
+.guide-footer { min-height: 110px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 30px; }
+.guide-footer a { color: var(--muted); font-size: 12px; text-decoration: none; }
+
+@media (max-width: 1100px) {
+  .chapter-section { grid-template-columns: 1fr; gap: 60px; padding-top: 90px; padding-bottom: 90px; }
+}
 @media (max-width: 760px) {
   .life-focus { padding: 24px 16px; gap: 28px; }
+  .chapter-section { padding: 72px 22px; gap: 44px; }
+  .chapter-section h2 { font-size: clamp(30px, 10.2vw, 44px); letter-spacing: -.045em; }
+  .chapter-card { padding: 26px; }
+  .chapter-live strong { font-size: 28px; }
+  .guide-content { width: calc(100% - 34px); padding: 64px 0 80px; }
+  .guide-content h1 { font-size: clamp(38px, 12vw, 58px); }
+  .guide-lead { font-size: 20px; }
+  .guide-figure { padding: 24px; }
+  .guide-figure strong { font-size: 32px; }
+  .guide-footer { gap: 18px; padding: 24px 0; }
   .life-dial { box-shadow: none; }
   .clear-mode .life-dial { min-height: 160px; }
   .clear-mode .life-dial-inner strong { font-size: clamp(56px, 15vw, 80px); }
