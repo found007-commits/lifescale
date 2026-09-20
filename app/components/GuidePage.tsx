@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { isLocale } from "../../lib/i18n";
 import type { Locale } from "../../lib/types";
+import { useTheme } from "../../lib/use-theme";
 import { useTraditionalChinese } from "../../lib/use-traditional-chinese";
 import { Brand } from "./Brand";
 import { LocaleSelect } from "./LocaleSelect";
@@ -22,18 +23,20 @@ export type GuideCopy = {
   back: string;
   privacy: string;
   language: string;
+  theme: string;
   footer: readonly { label: string; href: string }[];
 };
 
 // A guide page is a static document, but it has to follow the visitor's language the same
 // way the landing page does: the server picks a starting locale from the request, the
 // choice the visitor already made on the home page wins once the page is hydrated, and the
-// header offers the same control the landing page does so the visitor does not have to go
-// back there to read this document in another language. Traditional Chinese is produced by
-// the shared OpenCC pass, so only zh and en copy exist.
+// header offers the same controls the landing page does so the visitor does not have to go
+// back there to read this document in another language or on a dark background. Traditional
+// Chinese is produced by the shared OpenCC pass, so only zh and en copy exist.
 export function GuidePage({ initialLocale, copy }: { initialLocale: Locale; copy: { zh: GuideCopy; en: GuideCopy } }) {
   const [locale, setLocale] = useState<Locale>(initialLocale);
   const surfaceRef = useRef<HTMLElement>(null);
+  const { theme, setTheme } = useTheme();
   useTraditionalChinese(surfaceRef, locale);
   const t = copy[locale === "zh-TW" ? "zh" : locale];
 
@@ -56,6 +59,7 @@ export function GuidePage({ initialLocale, copy }: { initialLocale: Locale; copy
       <header className="legal-header guide-header">
         <Brand />
         <div className="header-actions">
+          <button className="theme-button" onClick={() => setTheme(theme === "light" ? "dark" : "light")} aria-label={t.theme}>{theme === "light" ? "◐" : "☼"}</button>
           <LocaleSelect locale={locale} label={t.language} onChange={changeLocale} />
           <Link href="/">{t.back}</Link>
         </div>

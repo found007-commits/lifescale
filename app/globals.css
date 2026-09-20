@@ -351,7 +351,11 @@ input:focus, select:focus, textarea:focus { border-color: var(--gold); box-shado
 /* Legal pages */
 .legal-shell { min-height: 100vh; background: var(--paper); }
 .legal-header { grid-template-columns: 1fr auto; }
-.legal-header > a { justify-self: end; }
+/* 2.0.11 website: the brand is an <a> too, so the rule written to push the back link to the
+   far edge was also pushing the brand there, leaving the whole left half of the header
+   empty and the wordmark touching the link beside it. The brand belongs at the start of the
+   first column, the same place .site-header puts it. */
+.legal-header > a:not(.brand) { justify-self: end; }
 .legal-content { width: min(760px, calc(100% - 48px)); margin: 0 auto; padding: 90px 0 110px; }
 .legal-content h1 { margin: 0; font: 500 clamp(56px, 7vw, 88px)/1 var(--serif); letter-spacing: -.045em; }
 .legal-updated { margin: 22px 0 55px; color: var(--muted); font-size: 12px; }

@@ -48,6 +48,7 @@ const copy: { zh: GuideCopy; en: GuideCopy } = {
     back: "返回余生有刻",
     privacy: "隐私说明",
     language: "界面语言",
+    theme: "切换明暗模式",
     footer: [
       { label: "双轨 1000 天", href: "/chapters" },
       { label: "精神圣所", href: "/sanctuary" },
@@ -96,6 +97,7 @@ const copy: { zh: GuideCopy; en: GuideCopy } = {
     back: "Back to LifeScale",
     privacy: "Privacy",
     language: "Interface language",
+    theme: "Toggle color theme",
     footer: [
       { label: "1,000-day chapters", href: "/chapters" },
       { label: "The sanctuary", href: "/sanctuary" },
