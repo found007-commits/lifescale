@@ -39,6 +39,13 @@ export const metadata: Metadata = {
   },
 };
 
+// Applied before the first paint, so a reader who chose dark never sees a white flash. Until
+// 2.0.13 the only thing that set data-theme was useTheme(), which runs in an effect - so routes
+// that never call it (the four legal pages: /privacy, /terms, /third-parties,
+// /account-deletion) had no theme at all and stayed light whatever the reader had chosen.
+// Reading the same key here means those pages now follow the choice instead of ignoring it.
+const THEME_INIT = `(function(){try{var k="lifescale:theme";var s=window.localStorage.getItem(k);var t=(s==="light"||s==="dark")?s:(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.dataset.theme=t;}catch(e){}})();`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -46,6 +53,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
+      </head>
       <body
         className={`${geistSans.variable} antialiased`}
       >

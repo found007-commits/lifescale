@@ -362,6 +362,12 @@ input:focus, select:focus, textarea:focus { border-color: var(--gold); box-shado
 .legal-lead { color: var(--green-2); font: 500 27px/1.5 var(--serif); }
 .legal-content h2 { margin: 45px 0 12px; font: 600 27px/1.3 var(--serif); }
 .legal-content p, .legal-content li { color: #51685d; line-height: 1.85; }
+/* 2.0.13 website: that literal is the only hard-coded colour among the legal rules, and once
+   these pages finally take part in the theme it becomes the one thing that breaks. Measured on
+   the dark surface it is 3.03:1 - under the 4.5:1 body text needs - while the dark theme's own
+   secondary tone reads 8.47:1. Light is left exactly as it was, where the literal reads 5.53:1. */
+:root[data-theme="dark"] .legal-content p,
+:root[data-theme="dark"] .legal-content li { color: var(--green-2); }
 .legal-content a { color: var(--green); }
 .third-party-list section { border-top: 1px solid var(--line); display: grid; grid-template-columns: 220px 1fr; gap: 20px; }
 .third-party-list h2, .third-party-list p { margin: 24px 0; }
@@ -986,8 +992,11 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 1; }
    already has, so a visitor reading /chapters or /sanctuary can switch language where they
    are instead of walking back to the home page first. The wrapper is the landing page's own
    action row, reused so both headers lay out identically; the link keeps the colour the
-   header gave it as a direct child, which the wrapper would otherwise take away. */
-.guide-header .header-actions > a { color: var(--green-2); font-size: 12px; text-decoration: none; }
+   header gave it as a direct child, which the wrapper would otherwise take away.
+   2.0.13 website: widened from .guide-header to .legal-header, because the four legal pages
+   moved their back link into the same wrapper to gain the theme control. Both headers are
+   .legal-header, so one rule keeps them identical rather than two that can drift apart. */
+.legal-header .header-actions > a { color: var(--green-2); font-size: 12px; text-decoration: none; }
 
 @media (max-width: 760px) {
   /* The same concession the landing header already makes: at this width the wordmark has to
