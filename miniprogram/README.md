@@ -18,13 +18,20 @@
 - 产品介绍：`余生有刻是 LifeScale 旗下的生命时间记录产品，帮助用户看见人生进度、记录每个值得留下的今天，并逐步建立属于自己的人生档案。`
 - 品牌口号：`看见余生，认真今天。`
 
+## 2.0.10 网站指南页可就地切换语言（2026-09-20）
+
+- 这一版同样只改网站：小程序 56 个受保护文件、9 个模板绑定契约与 12 个数据库文件逐字节未动，由 `tests/web-guide-locale-210.test.mjs` 断言。详见 [RELEASE-2.0.10.md](./RELEASE-2.0.10.md)。
+- 新增 `app/components/LocaleSelect.tsx`：`/chapters` 与 `/sanctuary` 的页头现在有首页同款语言控件，写入同一个 `lifescale:locale` 键，两页与首页对「访客要哪种语言」的回答保持一致。
+- 拆出独立控件是为了保住 2.0.9 的一条硬性性质——`GuidePage.tsx` 里不能出现任何中文字符。三种语言的名称属于专有名词，集中放在控件里；无障碍名称由调用方传入。
+- 选择器提供的语言与 `lib/types.ts` 的 `Locale` 联合类型由测试断言必须完全相等，不能只靠类型断言蒙混。
+
 ## 2.0.9 网站侧 1000 天篇章与精神圣所（2026-09-20）
 
 - 这一版只改网站：小程序 56 个受保护文件、9 个模板绑定契约与 12 个数据库文件逐字节未动，由 `tests/web-chapters-209.test.mjs` 断言。详见 [RELEASE-2.0.9.md](./RELEASE-2.0.9.md)。
 - `lib/life-calculations.ts` 新增 `CHAPTER_DAYS` 与 `calculateChapterMetrics`，与 `utils/life.js` 同名同参同语义；`calculateLifeMetrics` 增加 `totalDays`。两份实现由 `tests/chapters-parity.test.ts` 逐值对拍。
 - 网站新增 `/chapters` 与 `/sanctuary` 两个指南页（共用 `app/components/GuidePage.tsx`），首页新增 `#chapters` 区段与导航/页脚入口。首页的章号复用免费预览已算出的指标，且只在用户真的填了出生日期与目标年龄后才显示。
 - **对 1.2.3 分享规则的例外已在网站公开说明**：`/sanctuary` 中英各一段写明「分享默认不带账号标识，唯一例外是本人查看且已公开时链接带自己的 uid」，与下方 2.0.8 条款口径一致。撤回方式见 2.0.8 一节。
-- 未部署：上线通道 `.github/workflows/deploy-overseas.yml` 因仓库 secret `VERCEL_TOKEN` 失效而 8/8 次失败，需先换 token 再 push。
+- **已于 2026-09-20 上线**：生产部署 `dpl_DUde3oSqagQLMfYFbFb2xT6iEVEr`，五个路由全部 200。上线通道改由本机脚本 `scripts/release-web.sh` 承担（跑与 CI 相同的门禁后 `vercel deploy --prod`），GitHub Actions 的 `deploy-overseas.yml` 已置为 `disabled_manually`；恢复 push-to-deploy 的方法见仓库根 `README.md`。
 
 ## 2.0.8 精神圣所与 1000 天篇章（2026-09-20）
 
