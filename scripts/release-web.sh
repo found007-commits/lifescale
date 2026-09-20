@@ -110,7 +110,18 @@ done
 #   .guide-header      2.0.10
 #   a:not(.brand)      2.0.11 - the minified form of ".legal-header > a:not(.brand)",
 #                      which is the one rule this release adds and no earlier one has.
-MARKERS=(.chapter-section .guide-header 'a:not(.brand)')
+#   .legal-header .header-actions   2.0.13 - widened from ".guide-header .header-actions", and
+#                      new here: it is what gives the legal pages' the same action row the guide
+#                      pages got in 2.0.10.
+#   [data-theme=dark] .legal-content li{color:var(--green-2)}   2.0.13 - the dark override for the
+#                      one hard-coded colour on these pages. Minifiers drop the quotes around the
+#                      attribute value, so this is the form to look for.
+#
+# Matching is literal (-F): these are selectors, and the dot in ".legal-header" is a dot. A
+# bracket expression is worse than that - "[data-theme=dark]" read as a regular expression is a
+# character class that matches almost anything, so the check would pass on a page with no dark
+# rule at all.
+MARKERS=(.chapter-section .guide-header 'a:not(.brand)' '.legal-header .header-actions' '[data-theme=dark] .legal-content li{color:var(--green-2)}')
 css=$(curl -s --max-time 20 https://app.lifescale.space/ | grep -o '/_next/static/chunks/[^"]*\.css' | head -1)
 if [ -z "$css" ]; then
   echo "  could not locate a stylesheet to inspect" >&2
@@ -118,7 +129,7 @@ if [ -z "$css" ]; then
 else
   body=$(curl -s --max-time 20 "https://app.lifescale.space$css")
   for marker in "${MARKERS[@]}"; do
-    hits=$(printf '%s' "$body" | grep -c -- "$marker" || true)
+    hits=$(printf '%s' "$body" | grep -F -c -- "$marker" || true)
     printf '  %-12s %-16s in %s: %s\n' "/ (css)" "$marker" "$css" "$hits"
     [ "$hits" -gt 0 ] || failed=1
   done
@@ -128,13 +139,26 @@ fi
 # checked here, or a 200 on the route would be mistaken for the change having shipped.
 # Two releases have put a control in this header, so both are named: 2.0.10 added the
 # language control, 2.0.11 the theme control beside it.
-for route in /chapters /sanctuary; do
+# 2.0.13 extends the theme control to the four legal pages, which is the whole point of that
+# release - they carried no theme at all before it. The control is server rendered there too,
+# so its presence in the response is evidence the page changed, where a 200 is not.
+SSR_CONTROLS=(
+  '/chapters:class="language-select"'
+  '/chapters:class="theme-button"'
+  '/sanctuary:class="language-select"'
+  '/sanctuary:class="theme-button"'
+  '/privacy:class="theme-button"'
+  '/terms:class="theme-button"'
+  '/third-parties:class="theme-button"'
+  '/account-deletion:class="theme-button"'
+)
+for pair in "${SSR_CONTROLS[@]}"; do
+  route=${pair%%:*}
+  marker=${pair#*:}
   body=$(curl -s --max-time 20 "https://app.lifescale.space$route")
-  for marker in 'class="language-select"' 'class="theme-button"'; do
-    hits=$(printf '%s' "$body" | grep -c -- "$marker" || true)
-    printf '  %-12s %-24s %s\n' "$route" "$marker" "$hits"
-    [ "$hits" -gt 0 ] || failed=1
-  done
+  hits=$(printf '%s' "$body" | grep -F -c -- "$marker" || true)
+  printf '  %-14s %-26s %s\n' "$route" "$marker" "$hits"
+  [ "$hits" -gt 0 ] || failed=1
 done
 # The two policy pages are server rendered as well, and 2.0.12's entire point is a change to
 # what they say - so a 200 is no evidence at all here. Each release that adds a heading to a
