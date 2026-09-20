@@ -1,0 +1,44 @@
+.space-page { padding-top: 40rpx; }
+.space-title { margin: 20rpx 0 0; }
+.space-title text { white-space: normal; overflow-wrap: break-word; }
+.space-note { display: block; margin: 22rpx 0 36rpx; color: var(--text-secondary); font-size: 25rpx; line-height: 1.75; }
+.sanctuary-empty { padding: 40rpx 32rpx; }
+.sanctuary-empty .section-title { display: block; margin-bottom: 18rpx; }
+.sanctuary-empty .field-help { display: block; }
+.empty-action { margin-top: 30rpx; }
+
+.epitaph-card, .creed-card, .chapter-card, .tribute-card { padding: 32rpx 30rpx; margin-bottom: 26rpx; }
+.epitaph-card .field-label, .creed-card .field-label, .chapter-card .field-label, .tribute-card .field-label { display: block; margin-bottom: 20rpx; }
+/* The epitaph is the one long piece of prose on the page, so it keeps the reading
+   rhythm of a quotation rather than the weight of a heading. */
+.epitaph { display: block; font-size: 38rpx; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.creed-row { display: flex; align-items: flex-start; gap: 18rpx; padding: 18rpx 0; border-top: 1rpx solid var(--border-subtle); }
+.creed-row:first-of-type { border-top: 0; padding-top: 0; }
+.creed-index { flex-shrink: 0; width: 40rpx; color: var(--accent-gold); font: 650 26rpx var(--font-mono); line-height: 1.7; }
+.creed-text { flex: 1; min-width: 0; font-size: 29rpx; line-height: 1.7; overflow-wrap: anywhere; }
+
+.chapter-value { display: block; color: var(--text-primary); font: 650 56rpx var(--font-mono); letter-spacing: -1rpx; margin-bottom: 26rpx; }
+.chapter-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22rpx; padding-top: 22rpx; border-top: 1rpx solid var(--border-subtle); }
+.chapter-grid view { min-width: 0; color: var(--text-secondary); font-size: 24rpx; line-height: 1.6; }
+.chapter-cell { display: block; margin-top: 10rpx; color: var(--text-primary); font-size: 28rpx; font-variant-numeric: tabular-nums; }
+
+.tribute-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 12rpx; }
+.tribute-head .field-label { margin-bottom: 20rpx; }
+.tribute-list { display: grid; gap: 4rpx; }
+.tribute-row { padding: 22rpx 0; border-top: 1rpx solid var(--border-subtle); }
+.tribute-row:first-child { border-top: 0; padding-top: 4rpx; }
+.tribute-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 14rpx; }
+.tribute-name { font-size: 27rpx; font-weight: 650; overflow-wrap: anywhere; }
+.tribute-kind { padding: 4rpx 14rpx; border-radius: var(--radius-full); background: var(--accent-gold-glow); color: var(--accent-gold); font-size: 21rpx; }
+.tribute-date { color: var(--text-tertiary); font-size: 22rpx; }
+.tribute-message { display: block; margin: 14rpx 0 0; font-size: 28rpx; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ui-207 .tribute-remove { display: block; width: fit-content; min-height: 64rpx; margin: 16rpx 0 0 auto; padding: 8rpx 24rpx; background: var(--bg-danger); color: var(--text-danger); font-size: 23rpx; }
+.tribute-empty { display: block; padding: 18rpx 0 4rpx; line-height: 1.7; }
+.tribute-action { margin-top: 28rpx; }
+.edit-action { margin-top: 8rpx; }
+.space-page .privacy-note { display: block; margin-top: 26rpx; }
+@media (max-width: 360px) {
+  .epitaph { font-size: 34rpx; }
+  .chapter-value { font-size: 48rpx; }
+}

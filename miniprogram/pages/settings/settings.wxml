@@ -48,6 +48,7 @@
       <text wx:if="{{!email}}" class="field-help">{{i18n.t('以前有邮箱账户？退出后使用原邮箱登录即可找回原记录。两个账户不会自动合并。', locale)}}</text>
     </view>
     <view class="settings-list paper-card">
+      <button bindtap="openSanctuary"><text>{{i18n.t('我的精神圣所', locale)}}</text><text>›</text></button>
       <button bindtap="exportData"><text>{{i18n.t('导出全部数据', locale)}}</text><text>JSON ↓</text></button>
       <button data-type="privacy" bindtap="openLegal"><text>{{i18n.t('隐私政策', locale)}}</text><text>›</text></button>
       <button data-type="terms" bindtap="openLegal"><text>{{i18n.t('服务条款', locale)}}</text><text>›</text></button>

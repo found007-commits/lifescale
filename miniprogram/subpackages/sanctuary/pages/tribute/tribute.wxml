@@ -1,0 +1,25 @@
+<wxs src="../../../../utils/locale.wxs" module="i18n" />
+<view class="page-shell ui-207 safe-page tribute-page">
+  <text class="eyebrow">A NOTE FOR YOU</text>
+  <view class="display-title tribute-title"><text>{{i18n.t('留下一段致意。', locale)}}</text></view>
+  <text class="tribute-note">{{i18n.t('字不必长。对方会看到这一段，还有你在余生有刻的显示名称。', locale)}}</text>
+
+  <view wx:if="{{loading}}" class="loading-copy">{{i18n.t('正在准备', locale)}}</view>
+  <view wx:if="{{error}}" class="form-error">{{error}}</view>
+
+  <block wx:if="{{!loading && ready}}">
+    <view class="paper-card tribute-card">
+      <text class="field-label">{{i18n.t('选择一种致意', locale)}}</text>
+      <view class="kind-options">
+        <button wx:for="{{kinds}}" wx:key="key" class="kind-button {{kind === item.key ? 'chosen' : ''}}" data-kind="{{item.key}}" bindtap="chooseKind">{{i18n.t(item.label, locale)}}</button>
+      </view>
+      <view class="field">
+        <text class="field-label">{{i18n.t('想说点什么（可以不写）', locale)}}</text>
+        <textarea class="textarea message-input" maxlength="200" value="{{message}}" bindinput="onMessageInput" placeholder="{{i18n.t('写一句就好。', locale)}}" />
+        <text class="field-help">{{i18n.t('最多 200 个字，可以不写。', locale)}}</text>
+      </view>
+      <button class="primary-button send-button" bindtap="send" loading="{{sending}}" disabled="{{sending}}">{{i18n.t('送达', locale)}}</button>
+    </view>
+    <text class="privacy-note">{{i18n.t('对方会看到这一段。如果对方公开了致意墙，其他登录用户也会看到。', locale)}}</text>
+  </block>
+</view>

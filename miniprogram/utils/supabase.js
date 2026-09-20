@@ -372,20 +372,106 @@ function requireSession() {
   return session;
 }
 
+async function getSanctuaryProfile(userId) {
+  const rows = await request(`/rest/v1/sanctuary_profiles?user_id=eq.${encodeURIComponent(userId)}&select=*`);
+  return rows[0] || null;
+}
+
+// PATCH first, INSERT only when the row does not exist yet. Do not collapse this into
+// PostgREST's `on_conflict=user_id, resolution=merge-duplicates`: that upsert also emits
+// `user_id = excluded.user_id` inside DO UPDATE SET, and the migration deliberately grants
+// no UPDATE on user_id, so the whole statement is refused with "permission denied".
+// A PATCH that matches nothing answers 200 with an empty array, so it is a safe probe.
+async function saveSanctuaryProfile(userId, values) {
+  const session = restoreSession();
+  if (!session?.user?.id || session.user.id !== userId) throw new Error("请登录原账号后重试。");
+  // Exactly the authored columns the database grants. tribute_count is absent on purpose
+  // and the server would refuse the write if a caller smuggled it in.
+  const data = {};
+  ["epitaph", "creed_1", "creed_2", "creed_3", "is_public"].forEach((key) => {
+    if (Object.prototype.hasOwnProperty.call(values, key)) data[key] = values[key];
+  });
+  if (!Object.keys(data).length) throw new Error("没有需要保存的内容。");
+  const filter = `user_id=eq.${encodeURIComponent(userId)}`;
+  const patched = await request(`/rest/v1/sanctuary_profiles?${filter}`, {
+    method: "PATCH",
+    header: { Prefer: "return=representation" },
+    data,
+  });
+  if (patched[0]) return patched[0];
+  try {
+    const created = await request("/rest/v1/sanctuary_profiles", {
+      method: "POST",
+      header: { Prefer: "return=representation" },
+      data: { user_id: userId, ...data },
+    });
+    if (!created[0]) throw new Error("圣所保存失败，请重试。");
+    return created[0];
+  } catch (error) {
+    // Two first saves racing on one device: the loser sees the unique violation, and the
+    // row now exists, so the update path is the correct answer.
+    if (error.status !== 409) throw error;
+    const rows = await request(`/rest/v1/sanctuary_profiles?${filter}`, {
+      method: "PATCH",
+      header: { Prefer: "return=representation" },
+      data,
+    });
+    if (!rows[0]) throw new Error("圣所保存失败，请重试。");
+    return rows[0];
+  }
+}
+
+async function listSanctuaryTributes(userId, limit = 20) {
+  return request(`/rest/v1/sanctuary_tributes?target_user_id=eq.${encodeURIComponent(userId)}&select=*&order=created_at.desc,id.desc&limit=${limit}`);
+}
+
+// The displayed signature is decided by the database from the guest's own profile, so
+// only the kind and the note travel. The id is client generated so a retry collapses
+// into the existing tribute instead of counting twice against the hourly budget.
+async function addSanctuaryTribute(targetUserId, kind, message, id = uuid()) {
+  const session = restoreSession();
+  if (!session?.user?.id) throw new Error("请先登录。");
+  const text = String(message || "").trim();
+  if (text.length > 200) throw new Error("寄语请控制在 200 个字以内。");
+  try {
+    return await request("/rest/v1/sanctuary_tributes", {
+      method: "POST",
+      header: { Prefer: "return=representation" },
+      data: { id, target_user_id: targetUserId, guest_user_id: session.user.id, tribute_kind: kind, message: text },
+    });
+  } catch (error) {
+    if (error.status !== 409) throw error;
+    const rows = await request(`/rest/v1/sanctuary_tributes?id=eq.${encodeURIComponent(id)}&select=*`);
+    if (!rows[0]) throw error;
+    return rows;
+  }
+}
+
+async function deleteSanctuaryTribute(tributeId) {
+  const session = restoreSession();
+  if (!session?.user?.id) throw new Error("请先登录。");
+  await request(`/rest/v1/sanctuary_tributes?id=eq.${encodeURIComponent(tributeId)}`, { method: "DELETE" });
+}
+
 module.exports = {
   clearSession,
   createEntry,
   createProfile,
   deleteAccount,
   deleteEntry,
+  deleteSanctuaryTribute,
   exportAccount,
   getCheckinCount,
   getCheckins,
   getEntries,
   getEntry,
+  getSanctuaryProfile,
   editEntryOnce,
   getComments,
   addComment,
+  addSanctuaryTribute,
+  listSanctuaryTributes,
+  saveSanctuaryProfile,
   signEntryMedia,
   getProfile,
   requireSession,

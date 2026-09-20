@@ -1,0 +1,50 @@
+<wxs src="../../../../utils/locale.wxs" module="i18n" />
+<view class="page-shell ui-207 safe-page editor-page">
+  <text class="eyebrow">MY SANCTUARY</text>
+  <view class="display-title editor-title"><text>{{i18n.t('我为自己写下的字。', locale)}}</text></view>
+  <text class="editor-note">{{i18n.t('圣所默认私密。保存之后，只有你能看见。', locale)}}</text>
+
+  <view wx:if="{{loading}}" class="loading-copy">{{i18n.t('正在读取', locale)}}</view>
+  <view wx:if="{{error}}" class="form-error">{{error}}</view>
+
+  <block wx:if="{{!loading}}">
+    <view class="paper-card editor-card">
+      <view class="field">
+        <text class="field-label">{{i18n.t('如果只能留下一句话', locale)}}</text>
+        <textarea class="textarea epitaph-input" maxlength="200" value="{{epitaph}}" bindinput="onEpitaphInput" placeholder="{{i18n.t('例如：步履不停，终归星河。', locale)}}" />
+        <text class="field-help">{{i18n.t('这段话会出现在圣所的最上方，最多 200 个字。', locale)}}</text>
+      </view>
+    </view>
+
+    <view class="paper-card editor-card">
+      <text class="section-title creed-heading">{{i18n.t('我打算这样活', locale)}}</text>
+      <text class="field-help creed-help">{{i18n.t('三条都可以留空。写下来的，会按顺序排在墓志铭下面。', locale)}}</text>
+      <view class="field">
+        <text class="field-label">{{i18n.t('信条', locale)}} 1</text>
+        <input class="input" maxlength="200" value="{{creeds[0]}}" data-index="0" bindinput="onCreedInput" placeholder="{{i18n.t('写下一句你愿意反复读的话', locale)}}" />
+      </view>
+      <view class="field">
+        <text class="field-label">{{i18n.t('信条', locale)}} 2</text>
+        <input class="input" maxlength="200" value="{{creeds[1]}}" data-index="1" bindinput="onCreedInput" placeholder="{{i18n.t('写下一句你愿意反复读的话', locale)}}" />
+      </view>
+      <view class="field">
+        <text class="field-label">{{i18n.t('信条', locale)}} 3</text>
+        <input class="input" maxlength="200" value="{{creeds[2]}}" data-index="2" bindinput="onCreedInput" placeholder="{{i18n.t('写下一句你愿意反复读的话', locale)}}" />
+      </view>
+    </view>
+
+    <view class="paper-card editor-card">
+      <view class="setting-row">
+        <text class="setting-title">{{i18n.t('公开我的圣所', locale)}}</text>
+        <switch checked="{{isPublic}}" bindchange="onPublicChange" />
+      </view>
+      <text class="field-help">{{i18n.t('打开后，任何登录用户都能读到墓志铭、信条和致意墙。默认关闭。', locale)}}</text>
+      <text wx:if="{{hasRow}}" class="field-help">{{i18n.t('这面墙已经有', locale)}} {{tributeCountLabel}}</text>
+      <text wx:if="{{isPublic}}" class="field-help public-on">{{i18n.t('现在别人可以读到这一页。关掉公开之后，别人再也读不到这里的任何一行字。', locale)}}</text>
+      <text wx:else class="field-help">{{i18n.t('现在是私密的。只有打开上面这一项，别人才能读到。', locale)}}</text>
+    </view>
+
+    <button class="primary-button save-button" bindtap="save" loading="{{saving}}" disabled="{{saving}}">{{i18n.t('保存', locale)}}</button>
+    <text class="privacy-note">{{i18n.t('公开是随时可以收回的。你的记录本身从不公开。', locale)}}</text>
+  </block>
+</view>

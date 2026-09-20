@@ -1,0 +1,19 @@
+.editor-page { padding-top: 40rpx; }
+.editor-title { margin: 20rpx 0 0; }
+.editor-title text { white-space: normal; overflow-wrap: break-word; }
+.editor-note { display: block; margin: 22rpx 0 36rpx; color: var(--text-secondary); font-size: 25rpx; line-height: 1.75; }
+.editor-card { padding: 32rpx 30rpx; margin-bottom: 26rpx; }
+/* The card already supplies the outer gap, so single-field cards sit flush and only
+   sibling fields keep the shared 30rpx rhythm. */
+.editor-card .field { margin-top: 0; }
+.editor-card .field + .field { margin-top: 30rpx; }
+.epitaph-input { min-height: 220rpx; }
+.creed-heading { display: block; }
+.creed-help { display: block; margin: 14rpx 0 30rpx; }
+.setting-row { display: flex; align-items: center; justify-content: space-between; gap: 20rpx; margin-bottom: 18rpx; }
+.setting-title { flex: 1; min-width: 0; color: var(--text-primary); font-size: 30rpx; font-weight: 650; overflow-wrap: break-word; }
+.setting-row switch { flex-shrink: 0; }
+.editor-card .field-help { display: block; margin-top: 12rpx; }
+.public-on { color: var(--accent-gold); }
+.save-button { margin-top: 8rpx; }
+.editor-page .privacy-note { display: block; margin-top: 26rpx; }

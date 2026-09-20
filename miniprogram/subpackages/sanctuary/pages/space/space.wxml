@@ -1,0 +1,70 @@
+<wxs src="../../../../utils/locale.wxs" module="i18n" />
+<view class="page-shell ui-207 safe-page space-page">
+  <text class="eyebrow">MY SANCTUARY</text>
+  <view class="display-title space-title"><text>{{i18n.t('我把想留下的字，放在这里。', locale)}}</text></view>
+  <text wx:if="{{isOwner}}" class="space-note">{{i18n.t('圣所默认私密，只有你能看见。你亲手打开公开之后，别人才读得到墓志铭、信条和致意墙。', locale)}}</text>
+  <text wx:else class="space-note">{{i18n.t('这里是对方亲手公开的部分，所以你才看得到。', locale)}}</text>
+
+  <view wx:if="{{loading}}" class="loading-copy">{{i18n.t('正在读取圣所', locale)}}</view>
+  <view wx:if="{{error}}" class="form-error">{{error}}</view>
+
+  <block wx:if="{{!loading && !sanctuary && !error}}">
+    <view class="paper-card sanctuary-empty">
+      <text wx:if="{{isOwner}}" class="section-title">{{i18n.t('你还没有为自己写下什么。', locale)}}</text>
+      <text wx:else class="section-title">{{i18n.t('对方还没有公开圣所。', locale)}}</text>
+      <text wx:if="{{isOwner}}" class="field-help">{{i18n.t('写下墓志铭与信条之后，这里会成为你随时可以回来的地方。', locale)}}</text>
+      <text wx:else class="field-help">{{i18n.t('这里的内容需要本人亲手公开，才会显示。', locale)}}</text>
+      <button wx:if="{{isOwner}}" class="primary-button empty-action" bindtap="editSanctuary">{{i18n.t('开启我的圣所', locale)}}</button>
+    </view>
+  </block>
+
+  <block wx:if="{{!loading && sanctuary}}">
+    <view class="paper-card epitaph-card">
+      <text class="field-label">{{i18n.t('如果只能留下一句话', locale)}}</text>
+      <text class="epitaph">{{sanctuary.epitaph}}</text>
+    </view>
+
+    <view class="paper-card creed-card">
+      <text class="field-label">{{i18n.t('我打算这样活', locale)}}</text>
+      <view wx:if="{{sanctuary.creed_1}}" class="creed-row"><text class="creed-index">1</text><text class="creed-text">{{sanctuary.creed_1}}</text></view>
+      <view wx:if="{{sanctuary.creed_2}}" class="creed-row"><text class="creed-index">2</text><text class="creed-text">{{sanctuary.creed_2}}</text></view>
+      <view wx:if="{{sanctuary.creed_3}}" class="creed-row"><text class="creed-index">3</text><text class="creed-text">{{sanctuary.creed_3}}</text></view>
+      <text wx:if="{{!sanctuary.creed_1 && !sanctuary.creed_2 && !sanctuary.creed_3}}" class="muted">{{i18n.t('还没有写下信条。', locale)}}</text>
+    </view>
+
+    <view wx:if="{{chapter}}" class="paper-card chapter-card">
+      <text class="field-label">{{i18n.t('当前篇章', locale)}}</text>
+      <text class="chapter-value">{{chapterLabels.chapterValue}}</text>
+      <view class="chapter-grid">
+        <view><text>{{i18n.t('本章第几天', locale)}}</text><text class="chapter-cell">{{chapterLabels.dayValue}}</text></view>
+        <view><text>{{i18n.t('本章还剩', locale)}}</text><text class="chapter-cell">{{chapterLabels.leftValue}}</text></view>
+        <view wx:if="{{chapterLabels.bonusValue}}"><text>{{i18n.t('额外时光', locale)}}</text><text class="chapter-cell gold">{{chapterLabels.bonusValue}}</text></view>
+      </view>
+    </view>
+
+    <view class="paper-card tribute-card">
+      <view class="tribute-head">
+        <text class="field-label">{{i18n.t('致意墙', locale)}}</text>
+        <text class="muted">{{tributeCountLabel}}</text>
+      </view>
+      <view wx:if="{{tributes.length}}" class="tribute-list">
+        <view wx:for="{{tributes}}" wx:key="id" class="tribute-row">
+          <view class="tribute-meta">
+            <text class="tribute-name">{{item.name}}</text>
+            <text class="tribute-kind">{{i18n.t(item.kindLabel, locale)}}</text>
+            <text class="tribute-date">{{item.dateLabel}}</text>
+          </view>
+          <text wx:if="{{item.message}}" class="tribute-message">{{item.message}}</text>
+          <button wx:if="{{item.removable}}" class="tribute-remove" data-id="{{item.id}}" bindtap="removeTribute" disabled="{{removing}}">{{i18n.t('删除', locale)}}</button>
+        </view>
+      </view>
+      <text wx:else class="muted tribute-empty">{{i18n.t('还没有人留下致意。', locale)}}</text>
+      <text wx:if="{{sanctuary.tribute_count > tributes.length}}" class="field-help">{{i18n.t('这里只显示最近的致意。', locale)}}</text>
+      <button wx:if="{{!isOwner}}" class="primary-button tribute-action" bindtap="leaveTribute">{{i18n.t('留下一段致意', locale)}}</button>
+    </view>
+
+    <button wx:if="{{isOwner}}" class="secondary-button edit-action" bindtap="editSanctuary">{{i18n.t('编辑圣所', locale)}}</button>
+    <text wx:if="{{isOwner}}" class="privacy-note">{{i18n.t('关掉公开之后，别人再也读不到这里的任何一行字。', locale)}}</text>
+    <text wx:else class="privacy-note">{{i18n.t('致意会带上你在余生有刻的显示名称，以及送达的时间。', locale)}}</text>
+  </block>
+</view>

@@ -12,6 +12,16 @@
     "pages/share/share",
     "pages/entry/entry"
   ],
+  "subPackages": [
+    {
+      "root": "subpackages/sanctuary",
+      "pages": [
+        "pages/space/space",
+        "pages/editor/editor",
+        "pages/tribute/tribute"
+      ]
+    }
+  ],
   "darkmode": true,
   "themeLocation": "theme.json",
   "window": {

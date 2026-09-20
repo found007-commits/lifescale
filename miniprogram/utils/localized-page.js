@@ -46,7 +46,7 @@ module.exports = function localizedPage(definition) {
     if (stamp === lastApplied && this.appliedNavigationStamp === stamp) return;
     lastApplied = stamp;
     this.appliedNavigationStamp = stamp;
-    const titles = { index: "余生有刻", auth: "登录余生有刻", onboarding: "第一次设定", dashboard: "我的人生刻度", history: "留下的日子", report: "回望七天", settings: "个人偏好", record: "记录今天", entry: "这一天", share: "分享这一天", legal: this.data.document?.title || "隐私政策" };
+    const titles = { index: "余生有刻", auth: "登录余生有刻", onboarding: "第一次设定", dashboard: "我的人生刻度", history: "留下的日子", report: "回望七天", settings: "个人偏好", record: "记录今天", entry: "这一天", share: "分享这一天", legal: this.data.document?.title || "隐私政策", space: "我的精神圣所", editor: "编辑圣所", tribute: "留下一段致意" };
     wx.setNavigationBarTitle({ title: t(titles[name] || "余生有刻", locale) });
     ["历史", "今天", "小回顾", "设置"].forEach((text, index) => wx.setTabBarItem({ index, text: t(text, locale), fail() {} }));
   }

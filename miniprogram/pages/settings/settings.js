@@ -28,6 +28,7 @@ Page({
     }
   },
   openLegal(event) { wx.navigateTo({ url: `/pages/legal/legal?type=${event.currentTarget.dataset.type}` }); },
+  openSanctuary() { wx.navigateTo({ url: "/subpackages/sanctuary/pages/space/space" }); },
   setupTimeline() { wx.navigateTo({ url: "/pages/onboarding/onboarding" }); },
   manageWechat() {
     if (!this.data.loginStatus?.enabled || !this.data.email) return;

@@ -1,0 +1,13 @@
+.tribute-page { padding-top: 40rpx; }
+.tribute-title { margin: 20rpx 0 0; }
+.tribute-title text { white-space: normal; overflow-wrap: break-word; }
+.tribute-note { display: block; margin: 22rpx 0 36rpx; color: var(--text-secondary); font-size: 25rpx; line-height: 1.75; }
+.tribute-card { padding: 32rpx 30rpx; }
+.tribute-card .field-label { display: block; margin-bottom: 20rpx; }
+.kind-options { display: flex; gap: 12rpx; padding: 8rpx; margin-bottom: 12rpx; background: var(--bg-card-hover); border-radius: var(--radius-sm); }
+.kind-options .kind-button { flex: 1; width: 0; min-width: 0; margin: 0; min-height: 84rpx; display: flex; align-items: center; justify-content: center; padding: 14rpx 8rpx; background: transparent; color: var(--text-secondary); border-radius: 12rpx; font-size: 27rpx; }
+.kind-options .kind-button.chosen { background: var(--bg-card); color: var(--text-primary); font-weight: 700; }
+.message-input { min-height: 240rpx; }
+.tribute-card .field-help { display: block; margin-top: 12rpx; }
+.send-button { margin-top: 30rpx; }
+.tribute-page .privacy-note { display: block; margin-top: 26rpx; }

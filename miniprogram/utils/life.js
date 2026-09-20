@@ -48,11 +48,34 @@ function calculateLifeMetrics({ birthDate, targetAge, targetDate }) {
     today,
     goalDate,
     livedDays,
+    totalDays,
     remainingDays,
     remainingWeeks: Math.floor(remainingDays / 7),
     progress,
     bonusDays: Math.max(0, -rawRemaining),
     isBonus: rawRemaining < 0,
+  };
+}
+
+// A life is read in chapters as well as in one long countdown. The chapter index is
+// 1 based: days 0 through 999 belong to chapter 1, day 1000 opens chapter 2.
+const CHAPTER_DAYS = 1000;
+
+function calculateChapterMetrics(daysLived, totalTargetDays) {
+  const lived = Math.max(0, Math.floor(Number(daysLived) || 0));
+  const target = Math.max(0, Math.floor(Number(totalTargetDays) || 0));
+  const chapterDayIndex = (lived % CHAPTER_DAYS) + 1;
+  // isBonusLife uses the same boundary as calculateLifeMetrics.isBonus
+  // (livedDays > totalDays), so the two functions can never disagree about whether
+  // today counts as a bonus day. An unset target is never a bonus.
+  const isBonusLife = target > 0 && lived > target;
+
+  return {
+    currentChapter: Math.floor(lived / CHAPTER_DAYS) + 1,
+    chapterDayIndex,
+    chapterDaysRemaining: CHAPTER_DAYS - chapterDayIndex,
+    isBonusLife,
+    bonusDayCount: isBonusLife ? lived - target : 0,
   };
 }
 
@@ -66,7 +89,9 @@ function uuid() {
 }
 
 module.exports = {
+  CHAPTER_DAYS,
   ageOnDate,
+  calculateChapterMetrics,
   calculateLifeMetrics,
   localDateString,
   targetDateFromAge,
