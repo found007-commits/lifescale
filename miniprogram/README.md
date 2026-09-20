@@ -18,6 +18,14 @@
 - 产品介绍：`余生有刻是 LifeScale 旗下的生命时间记录产品，帮助用户看见人生进度、记录每个值得留下的今天，并逐步建立属于自己的人生档案。`
 - 品牌口号：`看见余生，认真今天。`
 
+## 2.0.9 网站侧 1000 天篇章与精神圣所（2026-09-20）
+
+- 这一版只改网站：小程序 56 个受保护文件、9 个模板绑定契约与 12 个数据库文件逐字节未动，由 `tests/web-chapters-209.test.mjs` 断言。详见 [RELEASE-2.0.9.md](./RELEASE-2.0.9.md)。
+- `lib/life-calculations.ts` 新增 `CHAPTER_DAYS` 与 `calculateChapterMetrics`，与 `utils/life.js` 同名同参同语义；`calculateLifeMetrics` 增加 `totalDays`。两份实现由 `tests/chapters-parity.test.ts` 逐值对拍。
+- 网站新增 `/chapters` 与 `/sanctuary` 两个指南页（共用 `app/components/GuidePage.tsx`），首页新增 `#chapters` 区段与导航/页脚入口。首页的章号复用免费预览已算出的指标，且只在用户真的填了出生日期与目标年龄后才显示。
+- **对 1.2.3 分享规则的例外已在网站公开说明**：`/sanctuary` 中英各一段写明「分享默认不带账号标识，唯一例外是本人查看且已公开时链接带自己的 uid」，与下方 2.0.8 条款口径一致。撤回方式见 2.0.8 一节。
+- 未部署：上线通道 `.github/workflows/deploy-overseas.yml` 因仓库 secret `VERCEL_TOKEN` 失效而 8/8 次失败，需先换 token 再 push。
+
 ## 2.0.8 精神圣所与 1000 天篇章（2026-09-20）
 
 - 新增分包 `subpackages/sanctuary`（`space` / `editor` / `tribute` 三页）与「1000 天篇章」运算。入口在「我的」→「我的精神圣所」。详见 [RELEASE-2.0.8.md](./RELEASE-2.0.8.md)。
