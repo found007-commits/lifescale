@@ -46,7 +46,13 @@ and checks the live routes:
 ```bash
 scripts/release-web.sh                 # refuses to run on a dirty working tree
 scripts/release-web.sh --allow-dirty   # deliberate hotfix only
+scripts/release-web.sh --verify-only   # re-run the live checks, deploy nothing
 ```
+
+The live checks are more than a status code sweep, because a 200 only proves the route
+answers — not that the change shipped. Each release adds one selector to `MARKERS` in the
+script and, where a page is server rendered, a marker read straight out of its markup: those
+are the strings that would still pass every route check while the release itself was missing.
 
 It uses the Vercel CLI login already on the machine — on macOS that lives in
 `~/Library/Application Support/com.vercel.cli/auth.json`, and `npx vercel whoami` must print

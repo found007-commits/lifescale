@@ -13,6 +13,7 @@
 # Usage:
 #   scripts/release-web.sh                 # refuses to run on a dirty working tree
 #   scripts/release-web.sh --allow-dirty   # for a deliberate hotfix
+#   scripts/release-web.sh --verify-only   # re-run the live checks, deploy nothing
 #
 # The Vercel login lives at "~/Library/Application Support/com.vercel.cli/auth.json" on
 # macOS (not ~/.vercel). `npx vercel whoami` has to print an account name before this runs.
@@ -24,14 +25,21 @@ VERCEL_VERSION=59.1.4
 ROUTES=(/ /chapters /sanctuary /privacy /terms)
 
 ALLOW_DIRTY=0
+VERIFY_ONLY=0
 for arg in "$@"; do
   case "$arg" in
     --allow-dirty) ALLOW_DIRTY=1 ;;
+    --verify-only) VERIFY_ONLY=1 ;;
     *) echo "unknown option: $arg" >&2; exit 2 ;;
   esac
 done
 
 step() { printf '\n\033[1m== %s\033[0m\n' "$1"; }
+
+# Everything up to the verification is the gate that stands in front of a deployment. With
+# --verify-only the gate is skipped and only the live checks run, which is how the checks can
+# be re-run later against a site nobody in this session deployed.
+if [ "$VERIFY_ONLY" -eq 0 ]; then
 
 step "0/6  what is about to ship"
 git --no-pager log --oneline -1
@@ -83,6 +91,11 @@ npx --yes "vercel@$VERCEL_VERSION" deploy --prod --yes
 
 step "verify the live site"
 sleep 3
+
+else
+step "verify the live site (--verify-only: nothing was deployed)"
+fi
+
 failed=0
 for route in "${ROUTES[@]}"; do
   code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "https://app.lifescale.space$route" || echo 000)
@@ -90,13 +103,30 @@ for route in "${ROUTES[@]}"; do
   [ "$code" = "200" ] || failed=1
 done
 # The landing page is client rendered, so its content cannot be read out of the HTML. Its
-# stylesheet and its JavaScript both can, and that is enough to prove the build shipped.
+# stylesheet can, and that is enough to prove the build shipped. One selector per release is
+# listed here: checking only the newest one would let a later release pass while an earlier
+# release's rules quietly disappeared from the bundle.
+MARKERS=(.chapter-section .guide-header)
 css=$(curl -s --max-time 20 https://app.lifescale.space/ | grep -o '/_next/static/chunks/[^"]*\.css' | head -1)
-if [ -n "$css" ]; then
-  hits=$(curl -s --max-time 20 "https://app.lifescale.space$css" | grep -c -- '.chapter-section' || true)
-  printf '  %-12s chapter styles in %s: %s\n' "/ (css)" "$css" "$hits"
-  [ "$hits" -gt 0 ] || failed=1
+if [ -z "$css" ]; then
+  echo "  could not locate a stylesheet to inspect" >&2
+  failed=1
+else
+  body=$(curl -s --max-time 20 "https://app.lifescale.space$css")
+  for marker in "${MARKERS[@]}"; do
+    hits=$(printf '%s' "$body" | grep -c -- "$marker" || true)
+    printf '  %-12s %-16s in %s: %s\n' "/ (css)" "$marker" "$css" "$hits"
+    [ "$hits" -gt 0 ] || failed=1
+  done
 fi
+# The guide pages are server rendered, so unlike the landing page their markup can be read
+# straight out of the response. A release that changes what these pages contain has to be
+# checked here, or a 200 on the route would be mistaken for the change having shipped.
+for route in /chapters /sanctuary; do
+  hits=$(curl -s --max-time 20 "https://app.lifescale.space$route" | grep -c 'class="language-select"' || true)
+  printf '  %-12s %-16s %s\n' "$route" "language control" "$hits"
+  [ "$hits" -gt 0 ] || failed=1
+done
 
 if [ "$failed" -ne 0 ]; then
   echo
@@ -105,4 +135,4 @@ if [ "$failed" -ne 0 ]; then
   exit 1
 fi
 
-printf '\n✓ deployed and verified\n'
+printf '\n✓ %s\n' "$([ "$VERIFY_ONLY" -eq 1 ] && echo 'live site matches the release' || echo 'deployed and verified')"
