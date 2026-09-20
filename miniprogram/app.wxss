@@ -77,6 +77,12 @@ button::after { border: 0; }
 .entry-photo-grid image:only-child { grid-column: 1 / -1; height: 380rpx; }
 .journey-note text { display: block; }
 .journey-note text:first-child { color: #a4731c; font-weight: 700; margin-bottom: 10rpx; }
+/* Both rules for this selector carry the same specificity, so the later one wins. This one
+   used to sit *after* the dark media query below, which silently cancelled the dark
+   override written inside it and left a #e3ece3 plate glowing on the dark page.
+   Keep it above the media query. */
+/* Heavy media is deliberately absent from list src attributes until opened. */
+.media-placeholder { display: flex; align-items: center; justify-content: center; min-height: 200rpx; padding: 24rpx; border-radius: 20rpx; background: #e3ece3; color: #123f31; font-size: 26rpx; }
 @media (prefers-color-scheme: dark) {
   page { background: #0f1c17; color: #edf3ef; }
   .page-shell { background: #0f1c17; }
@@ -99,7 +105,6 @@ button::after { border: 0; }
   .journey-note text:first-child { color: #d99b2f; }
 }
 /* Heavy media is deliberately absent from list src attributes until opened. */
-.media-placeholder { display: flex; align-items: center; justify-content: center; min-height: 200rpx; padding: 24rpx; border-radius: 20rpx; background: #e3ece3; color: #123f31; font-size: 26rpx; }
 .entry-actions { flex-wrap: wrap; gap: 12rpx; }
 
 /* 2.0.7: shared design tokens. Legacy selectors above deliberately remain for

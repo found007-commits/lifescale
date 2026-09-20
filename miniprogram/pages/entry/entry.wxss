@@ -10,3 +10,16 @@
 .edit-picker { padding: 24rpx 0; }
 .media-viewer-toolbar { display: flex; align-items: center; gap: 24rpx; padding: 16rpx; background: #343b38; color: #f4f0e6; border-radius: 20rpx 20rpx 0 0; font-size: 26rpx; }
 .media-viewer-toolbar .media-viewer-close { display: flex; align-items: center; justify-content: center; min-width: 176rpx; min-height: 88rpx; margin: 0; padding: 12rpx 28rpx; border: 2rpx solid #ffb4ae; border-radius: 48rpx; background: #b42318; color: #fff; font-size: 30rpx; font-weight: 600; line-height: 1.2; }
+
+/* The page background already turns dark, so these three surfaces have to follow.
+   The reply preview kept its light mint background while the text inside it inherited the
+   dark page colour, which measured 1.07:1 - the quoted text was invisible. It now reuses the
+   dark page colour as a recessed chip (15.57:1, and 1.16:1 away from the card it sits on,
+   against 1.22:1 for the same pairing on light paper). The two hairlines went the other way:
+   the same #c7d1ca that reads as a deliberate whisper at 1.36:1 on light paper becomes an
+   11.18:1 bright line on dark paper; the replacement sits at 1.42:1. */
+@media (prefers-color-scheme: dark) {
+  .reply-preview { background: #0f1c17; color: #edf3ef; }
+  .comment { border-top-color: rgba(237, 243, 239, .12); }
+  .edit-panel { border-top-color: rgba(237, 243, 239, .12); }
+}
