@@ -136,6 +136,43 @@ for route in /chapters /sanctuary; do
     [ "$hits" -gt 0 ] || failed=1
   done
 done
+# The two policy pages are server rendered as well, and 2.0.12's entire point is a change to
+# what they say - so a 200 is no evidence at all here. Each release that adds a heading to a
+# policy page names it, newest last.
+#   2.0.12  the sanctuary section, one per policy page
+for pair in "/privacy:精神圣所（可选公开）" "/terms:精神圣所与公开内容"; do
+  route=${pair%%:*}
+  marker=${pair#*:}
+  body=$(curl -s --max-time 20 "https://app.lifescale.space$route")
+  hits=$(printf '%s' "$body" | grep -c -- "$marker" || true)
+  printf '  %-12s %-24s %s\n' "$route" "$marker" "$hits"
+  [ "$hits" -gt 0 ] || failed=1
+done
+# ...and the sentences 2.0.12 withdrew have to be gone. A build that adds the new section while
+# leaving the old promise standing has fixed nothing, yet would pass every check above.
+#
+# The [^常] guard is load-bearing and must not be "simplified" away. The fix for these two
+# sentences was to qualify them, not delete them: the live text now reads "日常记录和图片不提供
+# 公开选项", which still *contains* the withdrawn sentence character for character. Matching the
+# bare string would therefore fail on a perfectly correct page. Requiring that the character
+# before 记 is not 常 is what distinguishes the qualified, true sentence from the unqualified,
+# withdrawn one.
+#   "不允许其他用户留言"          withdrawn by 2.0.12 - the sanctuary has a tribute wall
+#   "[^常]记录和图片不提供公开选项"      withdrawn by 2.0.12 - "日常记录…" is the correct form
+#   "[^常]记录与图片仅本人可见，不提供公开选项"  same, on the terms page
+WITHDRAWN=(
+  "/privacy:不允许其他用户留言"
+  "/privacy:[^常]记录和图片不提供公开选项"
+  "/terms:[^常]记录与图片仅本人可见，不提供公开选项"
+)
+for pair in "${WITHDRAWN[@]}"; do
+  route=${pair%%:*}
+  marker=${pair#*:}
+  body=$(curl -s --max-time 20 "https://app.lifescale.space$route")
+  hits=$(printf '%s' "$body" | grep -c -E -- "$marker" || true)
+  printf '  %-12s %-30s %s (want 0)\n' "$route" "$marker" "$hits"
+  [ "$hits" -eq 0 ] || failed=1
+done
 
 if [ "$failed" -ne 0 ]; then
   echo
