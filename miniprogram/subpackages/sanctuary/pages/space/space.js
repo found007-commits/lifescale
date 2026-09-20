@@ -52,15 +52,16 @@ Page({
   },
 
   onShow() { return this.load(); },
-  onPullDownRefresh() { return this.load().then(() => wx.stopPullDownRefresh(), () => wx.stopPullDownRefresh()); },
+  onPullDownRefresh() { return this.load(true).then(() => wx.stopPullDownRefresh(), () => wx.stopPullDownRefresh()); },
 
-  async load() {
+  async load(fromPull = false) {
     const session = requireSession();
     if (!session) return;
     const me = session.user.id;
     const target = this.targetUserId || me;
     const isOwner = target === me;
-    this.setData({ loading: true, error: "" });
+    // A pull to refresh keeps the page on screen; only a fresh entry shows the loading line.
+    this.setData(fromPull ? { error: "" } : { loading: true, error: "" });
     try {
       const sanctuary = await getSanctuaryProfile(target);
       // An unpublished row and a row that was never written both read as null, because
@@ -102,7 +103,9 @@ Page({
   async removeTribute(event) {
     const id = event.currentTarget.dataset.id;
     const tribute = this.data.tributes.find((item) => item.id === id);
-    if (!tribute || this.data.removing) return;
+    // The same rule the button is rendered with, so a stray tap cannot reach the network.
+    // The database policies are still the real gate.
+    if (!tribute?.removable || this.data.removing) return;
     this.setData({ removing: true });
     try {
       const answer = await new Promise((resolve) => wx.showModal({

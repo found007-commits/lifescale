@@ -66,7 +66,7 @@ PostgREST 的 `Prefer: resolution=merge-duplicates` 在 `DO UPDATE SET` 里同�
   - `tests/mini-ui-208.test.mjs`（13 项，2.0.8 交付基线）：117 个受保护文件的 SHA-256；「本次只动小程序」——`app/`、`lib/`、既有 API 与既有迁移与 2.0.7 逐字节一致；9 个模板的绑定契约冻结；无模拟数据/远程资源；18 组实际用到的配色对比度均 ≥ 4.5。
 - 与 2.0.7 基线交叉比对：`protectedFiles` 由 109 增至 117（新增 8 个），其中 99 个字节相同；发生变化的 10 个文件恰为本次有意修改的 9 个 `miniprogram/` 文件，加上 `app/globals.css`（其 2.0.7 记录值早于已授权的网站同步）。**六个 2.0.7 页面的绑定契约 6/6 逐字未变。**
 - 全量 ESLint、小程序 ESLint、`tsc --noEmit`、`next build`、`git diff --check` 全部通过。
-- 受保护基线重建为 `tests/fixtures/ui-208-baseline.json`（`ref` 指向 `fdec932`，117 个文件 + 9 个绑定契约），供本次之后的交付核验使用。
+- 受保护基线重建为 `tests/fixtures/ui-208-baseline.json`（117 个文件 + 9 个绑定契约；`ref` 记录 2.0.8 功能提交 `fdec932`，文件哈希在随后的收尾提交中冻结）。重建工具为 `scripts/build-release-baseline.mjs <版本> <提交> [新增文件…]`，新增受保护文件必须在命令行显式列出，不由脚本自行猜测。
 
 ## 尚未验证
 

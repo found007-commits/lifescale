@@ -79,7 +79,7 @@
     "miniprogram/sitemap.json": "73e1a90d9067432bd1b62fed26d02b418eaefd98070e30a55df9b37423b708de",
     "miniprogram/subpackages/sanctuary/pages/editor/editor.js": "2d1c5c136f146a2fc4ea9f01f9ef469ee184dfc130aec77162819f45877797a3",
     "miniprogram/subpackages/sanctuary/pages/editor/editor.json": "683136a98095ac6ada6f5ff7d928e9dfc2aa6e59327c0cec668ccf2c2dfe4d6c",
-    "miniprogram/subpackages/sanctuary/pages/space/space.js": "89889e4fbd33ee1bc6f7fc64c75ef8dffa284211280b3c705ef8147d9f876448",
+    "miniprogram/subpackages/sanctuary/pages/space/space.js": "0febe6ab8b742ca3df07824654190c26e907e1cf55cb191a54afe502a30bde3e",
     "miniprogram/subpackages/sanctuary/pages/space/space.json": "47ccb0fb6aa008f2639e2e8eb6382d8a2ca9bf08c922020a9551c67cbf1696c9",
     "miniprogram/subpackages/sanctuary/pages/tribute/tribute.js": "b51f8a0552d2b375cf3a4f8d9729da41ca3c88357b71c07cfaa6a69840f71346",
     "miniprogram/subpackages/sanctuary/pages/tribute/tribute.json": "696644e19fb7c79323d76aece46381e78de0ba4e2f9bf7a56946b7dea797cdbd",
@@ -120,14 +120,14 @@
     "supabase/migrations/20260920120000_sanctuary_and_chapters.sql": "aff2467c8f1ac3a18dc8d48f88fa5f59168b15b2027c5080f2b9fe8d96244991"
   },
   "markup": {
-    "miniprogram/pages/onboarding/onboarding.wxml": "d608864ce7023c6a12fd7e0224b0dcfb5b9da16959c8f5ce15517386e4f4194f",
     "miniprogram/pages/dashboard/dashboard.wxml": "02823c144c5b5041b43123031ffd7bbd3e8d3a47cd65e262b646db923ca2b30a",
-    "miniprogram/pages/record/record.wxml": "ad35f907ff9b4f689cfbdf12f84e4ba081356bd23a343b3db698bfc2aa5e07ac",
     "miniprogram/pages/history/history.wxml": "9eef0b2b086e0a8b008f87411d34e3ed29163b40ddd3c340b83dc203ae7ea7f9",
+    "miniprogram/pages/onboarding/onboarding.wxml": "d608864ce7023c6a12fd7e0224b0dcfb5b9da16959c8f5ce15517386e4f4194f",
+    "miniprogram/pages/record/record.wxml": "ad35f907ff9b4f689cfbdf12f84e4ba081356bd23a343b3db698bfc2aa5e07ac",
     "miniprogram/pages/report/report.wxml": "9af5d22be8033e1e5b89a4e4bb1ac00e5184c9f646054c6d8cce4dd5c3886a61",
     "miniprogram/pages/share/share.wxml": "6e34b037aea6b5bf042e4bba8007b6e4a2cc4d990570c6077981cc5af48a7bb7",
-    "miniprogram/subpackages/sanctuary/pages/space/space.wxml": "4242323962333d3c73a9f733aa17c68f77162edb62a5ac9bc4b13cbb64ebcd8d",
     "miniprogram/subpackages/sanctuary/pages/editor/editor.wxml": "77bd032e0d3e39763adf233a55616cb37c081b39add372ab419845c36494e613",
+    "miniprogram/subpackages/sanctuary/pages/space/space.wxml": "4242323962333d3c73a9f733aa17c68f77162edb62a5ac9bc4b13cbb64ebcd8d",
     "miniprogram/subpackages/sanctuary/pages/tribute/tribute.wxml": "d4c2071adb67d4dcf39aabed86164c16ba6bd7448878a54c69c1538918f47c39"
   }
 }
