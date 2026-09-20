@@ -104,9 +104,13 @@ for route in "${ROUTES[@]}"; do
 done
 # The landing page is client rendered, so its content cannot be read out of the HTML. Its
 # stylesheet can, and that is enough to prove the build shipped. One selector per release is
-# listed here: checking only the newest one would let a later release pass while an earlier
-# release's rules quietly disappeared from the bundle.
-MARKERS=(.chapter-section .guide-header)
+# listed here, appended to rather than replaced: checking only the newest one would let a
+# later release pass while an earlier release's rules quietly disappeared from the bundle.
+#   .chapter-section   2.0.9
+#   .guide-header      2.0.10
+#   a:not(.brand)      2.0.11 - the minified form of ".legal-header > a:not(.brand)",
+#                      which is the one rule this release adds and no earlier one has.
+MARKERS=(.chapter-section .guide-header 'a:not(.brand)')
 css=$(curl -s --max-time 20 https://app.lifescale.space/ | grep -o '/_next/static/chunks/[^"]*\.css' | head -1)
 if [ -z "$css" ]; then
   echo "  could not locate a stylesheet to inspect" >&2
@@ -122,10 +126,15 @@ fi
 # The guide pages are server rendered, so unlike the landing page their markup can be read
 # straight out of the response. A release that changes what these pages contain has to be
 # checked here, or a 200 on the route would be mistaken for the change having shipped.
+# Two releases have put a control in this header, so both are named: 2.0.10 added the
+# language control, 2.0.11 the theme control beside it.
 for route in /chapters /sanctuary; do
-  hits=$(curl -s --max-time 20 "https://app.lifescale.space$route" | grep -c 'class="language-select"' || true)
-  printf '  %-12s %-16s %s\n' "$route" "language control" "$hits"
-  [ "$hits" -gt 0 ] || failed=1
+  body=$(curl -s --max-time 20 "https://app.lifescale.space$route")
+  for marker in 'class="language-select"' 'class="theme-button"'; do
+    hits=$(printf '%s' "$body" | grep -c -- "$marker" || true)
+    printf '  %-12s %-24s %s\n' "$route" "$marker" "$hits"
+    [ "$hits" -gt 0 ] || failed=1
+  done
 done
 
 if [ "$failed" -ne 0 ]; then
