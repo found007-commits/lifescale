@@ -1,13 +1,15 @@
 <wxs src="../../utils/locale.wxs" module="i18n" />
-<view class="page-shell safe-page report-page">
+<view class="page-shell safe-page ui-207 report-page">
+  <view class="report-header">
   <text class="eyebrow">THE LAST 7 DAYS</text>
   <view class="display-title report-title"><text>{{i18n.t('回望，不是为了评判。', locale)}}</text></view>
   <text class="report-intro">{{i18n.t('只是看看，这一周的时间去了哪里，哪些感受值得被听见。', locale)}}</text>
+  </view>
   <view wx:if="{{loading}}" class="loading-copy">{{i18n.t('正在整理这一周', locale)}}</view>
   <view wx:if="{{error}}" class="form-error">{{error}}</view>
   <block wx:if="{{!loading && report}}">
     <view class="report-period">{{report.start}} {{i18n.t('至', locale)}} {{report.end}}</view>
-    <view class="report-numbers">
+    <view class="report-numbers stat-grid">
       <view><text class="report-number">{{report.recordedDays}}</text><text>{{i18n.t('有记录的日子', locale)}}</text></view>
       <view><text class="report-number">{{report.entryCount}}</text><text>{{i18n.t('留下的片刻', locale)}}</text></view>
     </view>

@@ -1,8 +1,10 @@
 <wxs src="../../utils/locale.wxs" module="i18n" />
-<view class="page-shell share-page">
+<view class="page-shell ui-207 share-page">
+  <view class="share-header">
   <text class="eyebrow">SHARE A DAY</text>
   <text class="section-title">{{i18n.t('分享这一天', locale)}}</text>
   <text class="share-note">{{i18n.t('只分享你选中的内容，原记录仍仅自己可见。', locale)}}</text>
+  </view>
   <view wx:if="{{editing}}" class="selection-panel paper-card">
     <text class="field-label">{{i18n.t('分享副本里的文字', locale)}}</text>
     <text class="share-note">{{i18n.t('可以删减或改写。只修改分享副本，不影响原记录。', locale)}}</text>
@@ -31,9 +33,9 @@
       <button wx:for="{{imageUrls}}" wx:key="index" class="{{backgroundIndex === index ? 'selected' : ''}}" disabled="{{busy || saving || sharing}}" data-index="{{index}}" bindtap="chooseBackground"><image src="{{item}}" mode="aspectFill" /><text>{{index + 1}}</text></button>
     </view>
     <text class="share-note">{{i18n.t(hasPhoto ? (layout === 'overlay' ? '深色底板与米白文字，已选照片保留在文字后面。' : '已选照片按顺序完整排列，文字自动排成长图。') : '未选择照片，生成纯文字分享卡。', locale)}}</text>
-    <label class="setting-row"><text>{{i18n.t('显示日期', locale)}}</text><switch checked="{{showDate}}" data-option="showDate" bindchange="changeShareOption" disabled="{{busy || saving || sharing}}" color="#143d2f" /></label>
-    <label class="setting-row"><text>{{i18n.t('显示心情与分类', locale)}}</text><switch checked="{{showMood}}" data-option="showMood" bindchange="changeShareOption" disabled="{{busy || saving || sharing}}" color="#143d2f" /></label>
-    <label class="setting-row"><text>{{i18n.t('显示昵称署名', locale)}}</text><switch checked="{{showSignature}}" data-option="showSignature" bindchange="changeShareOption" disabled="{{busy || saving || sharing || !nickname}}" color="#143d2f" /></label>
+    <label class="setting-row"><text>{{i18n.t('显示日期', locale)}}</text><switch checked="{{showDate}}" data-option="showDate" bindchange="changeShareOption" disabled="{{busy || saving || sharing}}" color="#997720" /></label>
+    <label class="setting-row"><text>{{i18n.t('显示心情与分类', locale)}}</text><switch checked="{{showMood}}" data-option="showMood" bindchange="changeShareOption" disabled="{{busy || saving || sharing}}" color="#997720" /></label>
+    <label class="setting-row"><text>{{i18n.t('显示昵称署名', locale)}}</text><switch checked="{{showSignature}}" data-option="showSignature" bindchange="changeShareOption" disabled="{{busy || saving || sharing || !nickname}}" color="#997720" /></label>
     <text class="settings-note">{{i18n.t(nickname ? '开启后将显示此昵称：' : '尚未设置昵称。可在个人偏好中设置，也可以不署名。', locale)}}{{nickname}}</text>
     <text class="settings-note">{{i18n.t('仅影响本次分享；更改后会重新生成预览。', locale)}}</text>
   </view>

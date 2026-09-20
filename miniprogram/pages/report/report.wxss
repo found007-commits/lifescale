@@ -1,22 +1,19 @@
-.report-page { padding-top: 50rpx; }
-.report-title { margin-top: 26rpx; font-size: 54rpx; }
-.report-intro { display: block; margin-top: 24rpx; color: #476b5d; line-height: 1.75; }
-.report-period { margin-top: 46rpx; color: #7f9188; font-size: 22rpx; }
-.report-numbers { margin-top: 22rpx; display: grid; grid-template-columns: 1fr 1fr; gap: 20rpx; }
-.report-numbers view { padding: 32rpx 24rpx; border-radius: 26rpx; background: #123f31; color: #b8c9c0; text-align: center; font-size: 21rpx; }
-.report-number { display: block; margin-bottom: 8rpx; color: #d99b2f; font-family: "Songti SC", serif; font-size: 62rpx; line-height: 1; }
-.report-card { margin-top: 24rpx; padding: 32rpx; }
-.report-card .section-title { display: block; font-size: 37rpx; }
-.mood-bars { margin-top: 30rpx; display: grid; gap: 22rpx; }
-.mood-row { display: grid; grid-template-columns: 100rpx 1fr 36rpx; gap: 16rpx; align-items: center; color: #476b5d; font-size: 22rpx; }
-.mood-track { height: 14rpx; border-radius: 999rpx; background: #e5dfd2; overflow: hidden; }
-.mood-track view { height: 100%; border-radius: inherit; background: #d99b2f; }
-.top-category { display: block; margin: 26rpx 0 10rpx; color: #d99b2f; font-family: "Songti SC", serif; font-size: 66rpx; }
-.empty-copy { display: block; margin-top: 26rpx; line-height: 1.65; }
-.report-action { margin-top: 30rpx; }
-
-/* The page background already turns dark; .report-numbers keeps its own surface. */
-@media (prefers-color-scheme: dark) {
-  .report-intro { color: #b5c9bd; }
-  .mood-row { color: #91a69b; }
-}
+.report-page { padding-top: 48rpx; }
+.report-header { margin-bottom: 36rpx; }
+.report-title { margin: 20rpx 0; }
+.report-intro { display: block; color: var(--text-secondary); font-size: 27rpx; line-height: 1.75; }
+.report-period { margin-top: 32rpx; color: var(--text-secondary); font-family: var(--font-mono); font-size: 24rpx; line-height: 1.7; }
+.report-numbers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18rpx; margin: 20rpx 0 28rpx; }
+.report-numbers > view { padding: 32rpx 20rpx; border: 1rpx solid var(--border-subtle); border-radius: var(--radius-md); background: var(--bg-card); color: var(--text-secondary); text-align: center; font-size: 24rpx; line-height: 1.6; }
+.report-number { display: block; margin-bottom: 10rpx; color: var(--text-primary); font-family: var(--font-mono); font-size: 64rpx; font-weight: 650; line-height: 1.2; }
+.report-card { padding: 30rpx; margin-top: 24rpx; }
+.report-card .section-title { display: block; font-size: 32rpx; }
+.mood-bars { display: grid; gap: 26rpx; margin-top: 32rpx; }
+.mood-row { display: grid; grid-template-columns: minmax(100rpx, 1fr) 2fr 44rpx; gap: 16rpx; align-items: center; color: var(--text-secondary); font-size: 25rpx; line-height: 1.6; }
+.mood-row > text:last-child { text-align: right; font-family: var(--font-mono); color: var(--text-primary); }
+.mood-track { height: 10rpx; border-radius: 999rpx; background: var(--bg-card-hover); overflow: hidden; }
+.mood-track view { height: 100%; border-radius: inherit; background: var(--accent-gold); }
+.top-category { display: block; margin: 28rpx 0 14rpx; color: var(--accent-gold); font-size: 50rpx; font-weight: 650; line-height: 1.3; overflow-wrap: break-word; }
+.report-card .muted { font-size: 25rpx; line-height: 1.75; }
+.empty-copy { display: block; margin-top: 24rpx; }
+.report-action { margin-top: 32rpx; }

@@ -1,5 +1,5 @@
 <wxs src="../../utils/locale.wxs" module="i18n" />
-<view class="page-shell safe-page dashboard-page">
+<view class="page-shell safe-page ui-207 dashboard-page">
   <view wx:if="{{loading}}" class="loading-copy">{{i18n.t('正在打开今天', locale)}}</view>
   <block wx:else>
     <view wx:if="{{error}}" class="form-error">{{error}}</view>
@@ -26,7 +26,7 @@
         <view class="mode-options"><button class="{{profile.display_mode === 'gentle' ? 'chosen' : ''}}" data-mode="gentle" bindtap="setMode" disabled="{{switching}}">{{i18n.t('温和模式', locale)}}</button><button class="{{profile.display_mode === 'clear' ? 'chosen' : ''}}" data-mode="clear" bindtap="setMode" disabled="{{switching}}">{{i18n.t('清醒模式', locale)}}</button></view>
         <view wx:if="{{profile.display_mode !== 'clear'}}" class="gentle-view">
         <text class="mode-message">{{i18n.t(metrics.isBonus ? '目标之外，生活仍在继续。' : '慢慢来，认真过好今天。', locale)}}</text>
-        <view class="dial" style="background: conic-gradient(#487359 {{metrics.progress}}%, #cbdacc 0)">
+        <view class="dial" style="background: conic-gradient(var(--accent-gold) {{metrics.progress}}%, var(--border-subtle) 0)">
           <view class="dial-inner">
             <text>{{i18n.t(metrics.isBonus ? '生命加时' : '仍可书写', locale)}}</text>
             <text class="dial-number">{{metrics.displayDaysText}}</text>
@@ -66,7 +66,7 @@
           <view class="entry-tags"><text>{{i18n.t(item.moodLabel, locale)}}</text><text>{{i18n.t(item.categoryLabel, locale)}}</text></view>
           <view class="entry-actions">
             <button class="entry-delete" data-index="{{index}}" catchtap="removeEntry">{{i18n.t('删除', locale)}}</button>
-            <button data-index="{{index}}" catchtap="openEntry">{{i18n.t('打开 · 留言', locale)}}</button>
+            <button class="entry-open" data-index="{{index}}" catchtap="openEntry">{{i18n.t('打开 · 留言', locale)}}</button>
             <button class="entry-share" data-index="{{index}}" catchtap="shareEntry">{{i18n.t('分享这一天 ↗', locale)}}</button>
           </view>
         </view>

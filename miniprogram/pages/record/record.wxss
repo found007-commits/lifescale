@@ -1,46 +1,33 @@
-.record-page { padding-top: 32rpx; }
-.record-title { margin-top: 25rpx; font-size: 58rpx; }
-.record-intro { display: block; margin-top: 24rpx; color: #476b5d; line-height: 1.7; }
-.composer { margin-top: 28rpx; padding: 30rpx; }
-.inspiration-toggle { margin: 8rpx 0; padding: 10rpx 0; text-align: left; background: transparent; color: #476b5d; font-size: 24rpx; }
-.inspiration-options { padding-top: 20rpx; }
-.record-metadata { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20rpx; margin-top: 28rpx; }
-.record-metadata .field-label { font-size: 23rpx; }
-.metadata-picker { display: flex; justify-content: space-between; align-items: center; gap: 12rpx; min-height: 78rpx; padding: 12rpx 18rpx; border: 1rpx solid #c7d1ca; border-radius: 16rpx; font-size: 26rpx; line-height: 1.5; }
-.composer .textarea { border: 0; background: transparent; padding: 10rpx 0; }
-.photo-button { margin: 24rpx 0 0; border: 2rpx dashed rgba(18,63,49,.24); background: transparent; color: #365f50; font-size: 24rpx; }
-.image-preview { position: relative; margin-top: 22rpx; }
-.image-preview image { width: 100%; height: 390rpx; border-radius: 22rpx; }
-.image-preview button { position: absolute; top: 16rpx; right: 16rpx; min-width: 90rpx; background: rgba(15,28,23,.8); color: white; font-size: 20rpx; }
-.choice-block { margin-top: 38rpx; }
-.choice-row { display: flex; flex-wrap: wrap; gap: 14rpx; }
-.choice-pill { width: auto; min-height: 64rpx; margin: 0; padding: 0 24rpx; border-radius: 999rpx; background: #eee9dc; color: #476b5d; font-size: 22rpx; line-height: 64rpx; }
-.choice-pill.active { background: #123f31; color: #fbfaf6; }
-.save-entry { margin-top: 38rpx; }
+.record-header { margin: 12rpx 0 32rpx; }
+.record-title { margin: 20rpx 0; }
+.record-intro { display: block; color: var(--text-secondary); font-size: 27rpx; line-height: 1.7; }
+.composer { padding: 28rpx; }
+.composer .textarea { min-height: 420rpx; height: 420rpx; border: 0; background: transparent; padding: 4rpx 0; font-size: 32rpx; line-height: 1.75; }
+.ui-207 .inspiration-toggle { width: 100%; margin: 12rpx 0; padding: 16rpx 0; text-align: left; background: transparent; color: var(--text-secondary); font-size: 24rpx; }
+.inspiration-options { padding-top: 12rpx; }
+.choice-row { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.ui-207 .choice-pill { width: auto; margin: 0; padding: 16rpx 22rpx; border: 1rpx solid var(--border-subtle); background: var(--bg-card-hover); color: var(--text-secondary); font-size: 24rpx; }
+.ui-207 .choice-pill.active { border-color: var(--accent-gold); background: var(--accent-gold-glow); color: var(--accent-gold); }
 .inspiration-topics { margin-bottom: 24rpx; }
-.inspiration-card { padding: 24rpx; margin-bottom: 24rpx; border-left: 4rpx solid #a87316; background: #f1eadb; color: #123f31; line-height: 1.8; font-size: 28rpx; }
-.inspiration-card button { margin: 12rpx 0 0; width: auto; display: inline-block; background: transparent; color: #78520f; font-size: 24rpx; }
+.inspiration-card { padding: 24rpx; margin-bottom: 24rpx; border-left: 3rpx solid var(--accent-gold); background: var(--accent-gold-glow); color: var(--text-primary); font-size: 27rpx; line-height: 1.75; }
+.inspiration-card button { margin: 12rpx 0 0; padding: 16rpx 0; background: transparent; color: var(--accent-gold); text-align: left; font-size: 24rpx; }
 .photo-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16rpx; }
-.photo-choice-grid .image-preview image { height: 210rpx; }
-.photo-choice-grid text { display: block; font-size: 22rpx; line-height: 1.6; overflow-wrap: anywhere; }
-.upload-hint { display: block; margin-top: 20rpx; color: #476b5d; font-size: 23rpx; line-height: 1.8; }
+.image-preview { position: relative; min-width: 0; margin-top: 16rpx; padding-bottom: 88rpx; border: 1rpx solid var(--border-subtle); border-radius: var(--radius-sm); overflow: hidden; background: var(--bg-main); }
+.image-preview image { display: block; width: 100%; height: 210rpx; }
+.image-preview .media-placeholder { min-height: 210rpx; border: 0; border-radius: 0; }
+.image-preview > text { display: block; min-height: 150rpx; padding: 20rpx; color: var(--text-secondary); font-size: 24rpx; line-height: 1.6; overflow-wrap: anywhere; }
+.image-preview button { position: absolute; bottom: 0; left: 0; right: 0; width: 100%; margin: 0; padding: 16rpx 8rpx; border-radius: 0; color: var(--text-danger); background: var(--bg-danger); font-size: 24rpx; }
+.ui-207 .photo-button { width: 100%; margin: 24rpx 0 0; border: 1rpx dashed var(--border-active); border-radius: var(--radius-md); background: transparent; color: var(--text-primary); }
+.upload-hint { display: block; margin-top: 20rpx; color: var(--text-secondary); font-size: 24rpx; line-height: 1.75; }
+.record-metadata { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20rpx; margin-top: 32rpx; padding-top: 28rpx; border-top: 1rpx solid var(--border-subtle); }
+.record-metadata > view { min-width: 0; }
+.metadata-picker { display: flex; align-items: center; justify-content: space-between; gap: 12rpx; min-height: 92rpx; padding: 18rpx; border: 1rpx solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 26rpx; line-height: 1.5; }
+.save-entry { margin-top: 32rpx; }
 .render-canvas { position: fixed; left: -10000px; top: 0; width: 720px; height: 900px; pointer-events: none; }
-/* The agree button keeps the platform open-type so WeChat records the agreement; the popup
-   only explains why it appeared. WeChat can show its own dialog, so this is the app's copy. */
-.privacy-mask { position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 40; display: flex; align-items: center; justify-content: center; padding: 0 46rpx; background: rgba(15, 28, 23, .55); }
-.privacy-dialog { width: 100%; padding: 40rpx 34rpx 30rpx; border: 2rpx solid rgba(18, 63, 49, .09); border-radius: 30rpx; background: #fbfaf6; box-shadow: 0 30rpx 80rpx rgba(18, 63, 49, .2); }
-.privacy-title { display: block; color: #123f31; font-size: 28rpx; line-height: 1.7; }
-.privacy-contract { margin: 20rpx 0 0; padding: 0; min-height: 56rpx; background: transparent; color: #365f50; font-size: 24rpx; text-align: left; text-decoration: underline; }
-.privacy-actions { display: flex; gap: 16rpx; margin-top: 28rpx; }
-.privacy-actions button { flex: 1; width: 0; min-width: 0; margin: 0; }
-.privacy-decline { min-height: 96rpx; border: 2rpx solid rgba(18, 63, 49, .22); border-radius: 48rpx; background: transparent; color: #51685d; font-size: 28rpx; font-weight: 650; }
-@media (prefers-color-scheme: dark) {
-  .inspiration-toggle { color: #b5c9bd; }
-  .metadata-picker { border-color: #728c7c; }
-  .record-intro, .upload-hint { color: #b5c9bd; }
-  .photo-button { border-color: rgba(237, 243, 239, .24); color: #d5e2da; }
-  .privacy-dialog { border-color: rgba(237, 243, 239, .12); background: #192a22; box-shadow: 0 30rpx 80rpx rgba(0, 0, 0, .5); }
-  .privacy-title { color: #edf3ef; }
-  .privacy-contract { color: #9fd0b6; }
-  .privacy-decline { border-color: rgba(237, 243, 239, .22); color: #d5e2da; }
-}
+.privacy-mask { position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 40; display: flex; align-items: center; justify-content: center; padding: 32rpx; background: rgba(0, 0, 0, .65); }
+.privacy-dialog { width: 100%; max-height: 80vh; overflow-y: auto; padding: 36rpx 28rpx; border: 1rpx solid var(--border-active); border-radius: var(--radius-lg); background: var(--bg-card); }
+.privacy-title { display: block; color: var(--text-primary); font-size: 28rpx; line-height: 1.75; }
+.privacy-dialog .privacy-contract { margin: 20rpx 0 0; width: 100%; padding: 16rpx 0; background: transparent; color: var(--accent-gold); text-align: left; text-decoration: underline; font-size: 26rpx; }
+.privacy-actions { display: flex; gap: 16rpx; margin-top: 24rpx; }
+.privacy-actions button { flex: 1; width: 0; min-width: 0; margin: 0; padding: 18rpx 12rpx; font-size: 27rpx; }
+.privacy-actions .privacy-decline { border: 1rpx solid var(--border-active); background: transparent; color: var(--text-primary); }

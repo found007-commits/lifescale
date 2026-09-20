@@ -1,11 +1,13 @@
 <wxs src="../../utils/locale.wxs" module="i18n" />
-<view class="page-shell record-page">
+<view class="page-shell ui-207 record-page">
+  <view class="record-header">
   <text class="eyebrow">{{i18n.t('TODAY · 只属于你', locale)}}</text>
   <view class="display-title record-title"><text>{{i18n.t('今天，发生了什么？', locale)}}</text></view>
   <text class="record-intro">{{i18n.t('一句话或一张照片，留给自己。', locale)}}</text>
+  </view>
 
   <view class="paper-card composer">
-    <textarea class="textarea" disabled="{{saving || persisted}}" value="{{content}}" bindinput="onContentInput" maxlength="12000" placeholder="{{i18n.t('写下你想记住的片刻……', locale)}}" auto-height="false" />
+    <textarea class="textarea content-input" disabled="{{saving || persisted}}" value="{{content}}" bindinput="onContentInput" maxlength="12000" placeholder="{{i18n.t('写下你想记住的片刻……', locale)}}" auto-height="false" />
     <button class="inspiration-toggle" bindtap="toggleInspiration" disabled="{{saving || persisted}}" aria-expanded="{{inspirationOpen}}">{{i18n.t(inspirationOpen ? '收起灵感' : '需要一点灵感？', locale)}}</button>
     <view wx:if="{{inspirationOpen}}" class="inspiration-options">
     <view class="choice-row inspiration-topics">
@@ -14,7 +16,7 @@
     </view>
     <view wx:if="{{prompt}}" class="inspiration-card"><text>{{i18n.t(prompt, locale)}}</text><button bindtap="nextPrompt">{{i18n.t('换一句', locale)}}</button></view>
     </view>
-    <view class="photo-choice-grid">
+    <view class="photo-choice-grid media-tray">
     <view wx:for="{{images}}" wx:key="id" class="image-preview">
       <view wx:if="{{item.kind === 'video'}}" class="media-placeholder">▶ {{i18n.t('视频已选好', locale)}}</view>
       <image wx:elif="{{item.tempFilePath}}" src="{{item.tempFilePath}}" mode="aspectFill" />

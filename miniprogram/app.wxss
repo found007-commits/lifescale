@@ -101,3 +101,79 @@ button::after { border: 0; }
 /* Heavy media is deliberately absent from list src attributes until opened. */
 .media-placeholder { display: flex; align-items: center; justify-content: center; min-height: 200rpx; padding: 24rpx; border-radius: 20rpx; background: #e3ece3; color: #123f31; font-size: 26rpx; }
 .entry-actions { flex-wrap: wrap; gap: 12rpx; }
+
+/* 2.0.7: shared design tokens. Legacy selectors above deliberately remain for
+   the pages outside this six-page visual revision. No network fonts or blur. */
+page {
+  --bg-main: #f5f5f7;
+  --bg-card: #ffffff;
+  --bg-card-hover: #ededf0;
+  --border-subtle: #e0e0e5;
+  --border-active: #a0a0aa;
+  --text-primary: #1c1c1e;
+  --text-secondary: #62626b;
+  --text-tertiary: #72727b;
+  --accent-gold: #80600b;
+  --accent-gold-glow: #f7f1df;
+  --text-danger: #a33737;
+  --bg-danger: #faeeee;
+  --font-mono: "DIN Alternate", "SF Pro Display", Menlo, monospace;
+  --radius-sm: 16rpx;
+  --radius-md: 24rpx;
+  --radius-lg: 36rpx;
+  --radius-full: 999rpx;
+}
+@media (prefers-color-scheme: dark) {
+  page {
+    --bg-main: #0a0a0c;
+    --bg-card: #151518;
+    --bg-card-hover: #222226;
+    --border-subtle: #303036;
+    --border-active: #62626b;
+    --text-primary: #f5f5f7;
+    --text-secondary: #b0b0b9;
+    --text-tertiary: #9898a3;
+    --accent-gold: #d4af37;
+    --accent-gold-glow: #282316;
+    --text-danger: #f0a3a3;
+    --bg-danger: #302022;
+  }
+}
+.ui-207 { background: var(--bg-main); color: var(--text-primary); padding: 40rpx 36rpx calc(48rpx + env(safe-area-inset-bottom)); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+.ui-207.safe-page { padding-bottom: calc(72rpx + env(safe-area-inset-bottom)); }
+.ui-207 .eyebrow { color: var(--accent-gold); font-size: 22rpx; letter-spacing: 3rpx; }
+.ui-207 .display-title, .ui-207 .section-title { color: var(--text-primary); font-family: inherit; font-weight: 650; letter-spacing: -1rpx; line-height: 1.3; overflow-wrap: break-word; }
+.ui-207 .display-title { font-size: 54rpx; }
+.ui-207 .display-title text { white-space: normal; }
+.ui-207 .section-title { font-size: 38rpx; }
+.ui-207 .muted, .ui-207 .field-help, .ui-207 .privacy-note { color: var(--text-secondary); }
+.ui-207 .gold { color: var(--accent-gold); }
+.ui-207 .paper-card { background: var(--bg-card); border: 1rpx solid var(--border-subtle); border-radius: var(--radius-lg); box-shadow: none; }
+.ui-207 button { box-sizing: border-box; min-height: 88rpx; padding: 18rpx 24rpx; border-radius: var(--radius-full); background: var(--bg-card-hover); color: var(--text-primary); font-size: 26rpx; line-height: 1.5; overflow-wrap: break-word; }
+.ui-207 .primary-button { min-height: 100rpx; background: var(--text-primary); color: var(--bg-main); box-shadow: none; font-size: 30rpx; }
+.ui-207 .secondary-button { background: transparent; border: 1rpx solid var(--border-active); color: var(--text-primary); box-shadow: none; }
+.ui-207 .danger-button { background: var(--bg-danger); border-color: var(--text-danger); color: var(--text-danger); }
+.ui-207 button[disabled] { opacity: .45; box-shadow: none; }
+.ui-207 .field-label { color: var(--text-secondary); font-size: 25rpx; }
+.ui-207 .field-help { display: block; font-size: 24rpx; line-height: 1.65; }
+.ui-207 .input, .ui-207 .textarea, .ui-207 .picker-field { background: var(--bg-card); border: 1rpx solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-primary); }
+.ui-207 .form-error { background: var(--bg-danger); border-left-color: var(--text-danger); color: var(--text-danger); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; overflow-wrap: anywhere; }
+.ui-207 .form-success { color: var(--text-primary); }
+.ui-207 .loading-copy { color: var(--text-secondary); font-size: 26rpx; letter-spacing: 1rpx; }
+.ui-207 .entry-actions { gap: 12rpx; }
+.ui-207 .entry-actions button { margin: 0; font-size: 24rpx; padding: 16rpx 20rpx; }
+.ui-207 .entry-actions .entry-delete { color: var(--text-danger); background: var(--bg-danger); }
+.ui-207 .entry-actions .entry-share { margin-left: auto; color: var(--text-primary); background: transparent; border-color: var(--border-active); }
+.ui-207 .media-placeholder { background: var(--bg-card-hover); color: var(--text-secondary); border: 1rpx solid var(--border-subtle); border-radius: var(--radius-sm); }
+.ui-207 .entry-photo-grid { margin: 0 0 24rpx; }
+.ui-207 .entry-photo-grid > view { min-width: 0; overflow: hidden; border-radius: var(--radius-sm); }
+.ui-207 .entry-photo-grid image { display: block; width: 100%; height: 240rpx; border-radius: var(--radius-sm); }
+.ui-207 .entry-photo-grid > view:only-child { grid-column: 1 / -1; }
+.ui-207 .entry-photo-grid > view:only-child image { height: 360rpx; }
+.ui-207 .entry-tags { display: flex; gap: 12rpx; flex-wrap: wrap; }
+.ui-207 .entry-tags text { background: var(--bg-card-hover); color: var(--text-secondary); padding: 8rpx 16rpx; font-size: 22rpx; border-radius: var(--radius-full); }
+@media (max-width: 360px) {
+  .ui-207 { padding-left: 24rpx; padding-right: 24rpx; }
+  .ui-207 .display-title { font-size: 48rpx; }
+  .ui-207 .entry-actions button { padding-left: 16rpx; padding-right: 16rpx; }
+}

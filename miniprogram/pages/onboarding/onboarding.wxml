@@ -1,8 +1,10 @@
 <wxs src="../../utils/locale.wxs" module="i18n" />
-<view class="page-shell onboarding-page">
+<view class="page-shell ui-207 onboarding-page">
+  <view class="hero-header">
   <text class="eyebrow">{{i18n.t('第一次设定', locale)}}</text>
   <view class="display-title onboarding-title"><text>{{i18n.t('请认真写下，', locale)}}</text><text>{{i18n.t('你想怎样生活。', locale)}}</text></view>
   <text class="onboarding-intro">{{i18n.t('LifeScale 的目标不是预测终点，而是让你看见有限的时间，并把今天留给真正重要的人和事。', locale)}}</text>
+  </view>
 
   <view class="warning-card">
     <text class="warning-label">{{i18n.t('填写前请注意', locale)}}</text>
@@ -10,27 +12,27 @@
   </view>
 
   <view class="paper-card onboarding-form">
-    <view class="field">
+    <view class="field name-field">
       <text class="field-label">{{i18n.t('怎么称呼你（选填）', locale)}}</text>
       <input class="input" value="{{displayName}}" bindinput="onNameInput" maxlength="30" placeholder="{{i18n.t('你的名字或昵称', locale)}}" />
     </view>
-    <view class="field">
+    <view class="field gender-field">
       <text class="field-label">{{i18n.t('性别（也可以选择保密）', locale)}}</text>
       <picker range="{{genderPickerLabels}}" value="{{genderIndex < 0 ? 0 : genderIndex}}" bindchange="chooseGender"><view class="picker-field">{{i18n.t(genderIndex >= 0 ? genderLabels[genderIndex] : '请选择', locale)}} ›</view></picker>
     </view>
-    <view class="field">
+    <view class="field birth-field">
       <text class="field-label">{{i18n.t('出生日期', locale)}}</text>
       <picker mode="date" value="{{birthDate}}" end="{{maxDate}}" bindchange="onBirthChange">
         <view class="picker-field"><text>{{i18n.t(birthLabel || '请选择出生日期', locale)}}</text><text>›</text></view>
       </picker>
     </view>
-    <view class="field">
+    <view class="field gauge-card">
       <text class="field-label">{{i18n.t('希望活到的年龄', locale)}}</text>
-      <input class="input" type="number" maxlength="3" value="{{targetAge}}" bindinput="onAgeInput" placeholder="{{i18n.t('请填写你自己的目标年龄', locale)}}" />
+      <input class="input age-input" type="number" maxlength="3" value="{{targetAge}}" bindinput="onAgeInput" placeholder-style="font-size:24rpx;font-weight:400;color:#80808a;" placeholder="{{i18n.t('请填写你自己的目标年龄', locale)}}" />
       <text class="field-help">{{i18n.t('可自由填写', locale)}} {{minimumAge}}{{i18n.t('-150 岁。这是你设定的人生目标，不是寿命预测。', locale)}}</text>
     </view>
     <checkbox-group bindchange="onConfirmChange">
-      <label class="confirm-row"><checkbox value="confirmed" checked="{{confirmed}}" color="#123f31" /><text>{{i18n.t('我已核对出生日期，并理解目标首年可改 3 次，之后每次间隔一年，累计最多 7 次。', locale)}}</text></label>
+      <label class="confirm-row"><checkbox value="confirmed" checked="{{confirmed}}" color="#997720" /><text>{{i18n.t('我已核对出生日期，并理解目标首年可改 3 次，之后每次间隔一年，累计最多 7 次。', locale)}}</text></label>
     </checkbox-group>
     <view wx:if="{{error}}" class="form-error">{{error}}</view>
     <button class="primary-button save-profile" bindtap="saveProfile" loading="{{saving}}" disabled="{{saving}}">{{i18n.t('确认并进入 LifeScale', locale)}}</button>

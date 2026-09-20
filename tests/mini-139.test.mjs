@@ -41,8 +41,8 @@ test('gentle and clear modes have different layouts; truthful target labels and 
   assert.match(clear,/metrics.isBonus \? '已超过设定目标'/);
   assert.match(clear,/wx:if="\{\{!metrics.isBonus\}\}"/);
   assert.match(wxml,/并非寿命预测/);assert.doesNotMatch(clear,/死亡|仅剩|寿命倒计时/);
-  assert.match(css,/\.life-gentle \{ background: #e3ece3/);
-  assert.match(css,/\.life-clear \{ background: #202923/);
+  assert.match(css,/\.life-gentle \{ background: #f4f4f6/);
+  assert.match(css,/\.life-clear \{ background: #111116/);
   assert.match(css,/\.today-title text \{ white-space: normal/);
 });
 test('new mode copy is translated in English and Traditional Chinese',()=>{

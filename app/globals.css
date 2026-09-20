@@ -794,3 +794,127 @@ input:focus, select:focus, textarea:focus { border-color: var(--gold); box-shado
 .entry-comments .comment { border-top: 1px solid #c7d1ca; padding: 1rem 0; }
 .entry-comments p { white-space: pre-wrap; overflow-wrap: anywhere; }
 .entry-comments button { min-height: 44px; margin: .25rem; }
+
+/* 2.0.7 presentation-only sync with the mini program. Legacy token names stay
+   intact so component markup, state, forms and account policies do not change. */
+:root {
+  --cream: #f5f5f7;
+  --paper: #ffffff;
+  --green: #1c1c1e;
+  --green-2: #62626b;
+  --gold: #80600b;
+  --line: #e0e0e5;
+  --muted: #62626b;
+  --button-bg: #1c1c1e;
+  --button-bg-hover: #37373d;
+  --button-text: #ffffff;
+  --shadow: 0 12px 32px rgba(28,28,30,.06);
+  --serif: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --surface-soft: #ededf0;
+  --accent-soft: #f7f1df;
+  --numeric: "DIN Alternate", "SF Pro Display", Menlo, monospace;
+}
+:root[data-theme="dark"] {
+  --cream: #0a0a0c;
+  --paper: #151518;
+  --green: #f5f5f7;
+  --green-2: #b0b0b9;
+  --gold: #d4af37;
+  --line: #303036;
+  --muted: #b0b0b9;
+  --button-bg: #f5f5f7;
+  --button-bg-hover: #dddddf;
+  --button-text: #151518;
+  --shadow: 0 12px 32px rgba(0,0,0,.18);
+  --surface-soft: #222226;
+  --accent-soft: #282316;
+}
+.app-shell { background: var(--cream); }
+.app-sidebar, .workspace-header,
+:root[data-theme="dark"] .app-sidebar,
+:root[data-theme="dark"] .workspace-header { background: var(--paper); }
+.workspace-header, .free-preview-card { backdrop-filter: none; }
+.onboarding-card, .free-preview-card, .settings-card, .report-block, .entry-card,
+:root[data-theme="dark"] .onboarding-card,
+:root[data-theme="dark"] .free-preview-card,
+:root[data-theme="dark"] .settings-card,
+:root[data-theme="dark"] .report-block,
+:root[data-theme="dark"] .entry-card {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 18px; box-shadow: none;
+}
+input, select, textarea,
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] textarea {
+  background: var(--paper); color: var(--green); border-color: var(--line); accent-color: var(--gold);
+}
+input::placeholder, textarea::placeholder { color: var(--muted); opacity: 1; }
+.primary-button, .outline-button, .light-button { border-radius: 12px; min-height: 44px; box-shadow: none; }
+.primary-button { white-space: normal; }
+.outline-button:hover { background: var(--button-bg); color: var(--button-text); }
+.app-sidebar nav button.active, .sidebar-account > b, .entry-share-button {
+  background: var(--button-bg); color: var(--button-text); box-shadow: none;
+}
+.entry-share-button { min-height: 44px; border-radius: 12px; }
+.entry-share-button:hover { background: var(--button-bg-hover); }
+.display-mode-control { border-color: var(--line); background: var(--surface-soft); box-shadow: none; }
+.display-mode-control button.active { box-shadow: none; }
+.display-mode-control button:hover:not(.active) { background: var(--paper); }
+.record-actions { min-height: 52px; height: auto; }
+.record-actions button { min-height: 44px; padding: 8px 12px; font-size: 12px; }
+.record-actions button:last-child { color: #a33737; }
+:root[data-theme="dark"] .record-actions button:last-child { color: #f0a3a3; }
+.record-actions button:disabled { opacity: .45; cursor: not-allowed; }
+.entry-tags span, .daily-prompt, .journey-reminder,
+:root[data-theme="dark"] .journey-reminder { background: var(--accent-soft); }
+.privacy-hint.private-only, .media-placeholder { background: var(--surface-soft); color: var(--green-2); }
+.life-focus { --dial-surface: #f4f4f6; background: var(--dial-surface); border-radius: 24px; gap: 40px; }
+:root[data-theme="dark"] .life-focus { --dial-surface: #1d1d23; }
+.life-dial {
+  background: conic-gradient(#d4af37 0 var(--progress), var(--line) var(--progress) 360deg);
+  box-shadow: none; padding: 10px;
+}
+.life-dial-inner {
+  width: 100%; height: 100%; background: var(--dial-surface); border: 0; color: var(--green);
+}
+.life-dial-inner strong, .life-summary dd, .report-hero strong, .preview-result > strong {
+  font-family: var(--numeric); font-variant-numeric: tabular-nums; letter-spacing: -.04em;
+}
+.life-dial-inner span { color: var(--muted); }
+.clear-mode .life-focus {
+  --dial-surface: #111116; --line: #3b3b43; --muted: #b0b0b9;
+  background: #111116; color: #f5f5f7;
+}
+.clear-mode .life-dial { border-radius: 0; background: none; padding: 0; min-height: 230px; height: auto; }
+.clear-mode .life-dial-inner { border-radius: 0; background: #111116; color: #f5f5f7; text-align: left; justify-items: start; }
+.clear-mode .life-dial-inner strong { font-size: clamp(60px, 6vw, 96px); }
+.clear-mode .life-dial-inner small { color: #d4af37; }
+.clear-mode .life-summary > p, .clear-mode .life-summary dt { color: #b0b0b9; }
+.today-checkin { border-radius: 14px; background: #d4af37; color: #1c1c1e; }
+.today-checkin.done { background: var(--surface-soft); color: var(--green); }
+.today-checkin small { opacity: 1; }
+.report-hero { background: #111116; color: #f5f5f7; border-radius: 18px; }
+.report-hero strong { color: #d4af37; }
+.report-hero span, .report-hero p { color: #b0b0b9; }
+.report-hero strong small { color: #f5f5f7; }
+.gallery-dialog { background: var(--paper); }
+.gallery-dialog > div, .gallery-dialog button { color: var(--green); }
+.gallery-dialog .media-viewer-close { color: #fff; }
+.gallery-dialog video, .entry-photo-grid .video-preview { background: #111116; color: #f5f5f7; }
+.video-preview small { color: #b0b0b9; }
+.entry-comments .comment { border-color: var(--line); }
+.modal-backdrop { backdrop-filter: none; background: rgba(10,10,12,.65); }
+.preview-result { background: #111116; color: #f5f5f7; }
+.preview-result .primary-button { background: #d4af37; color: #1c1c1e; }
+.time-ribbon, .preview-final-cta { background: var(--surface-soft); color: var(--green); }
+.preview-final-cta p { color: var(--muted); }
+.preview-final-cta .light-button { border-color: var(--green); color: var(--green); }
+.time-ribbon > span { color: var(--gold); }
+/* Keep the existing brand mark recognizable while reskinning the product. */
+.brand-mark::before { background: #143d2f; box-shadow: inset 0 0 0 5px #2d5d4b; }
+@media (max-width: 760px) {
+  .life-focus { padding: 24px 16px; gap: 28px; }
+  .life-dial { box-shadow: none; }
+  .clear-mode .life-dial { min-height: 160px; }
+  .clear-mode .life-dial-inner strong { font-size: clamp(56px, 15vw, 80px); }
+}
