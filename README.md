@@ -35,7 +35,29 @@ The service-role key is server-only and must never use a `NEXT_PUBLIC_` prefix.
 2. Link the CLI and run `supabase db push`.
 3. Configure the Auth Site URL as `https://app.lifescale.space` and include the six-digit `{{ .Token }}` in the email OTP template.
 4. Add the three environment variables to Vercel Production and Preview.
-5. Run `pnpm test`, then deploy the `lifescale-overseas` Vercel project.
+5. Release with `scripts/release-web.sh` (see below).
+
+## Releasing the website
+
+`scripts/release-web.sh` is the supported release channel. It runs eslint (web and mini
+program), `tsc --noEmit`, the full test suite and `next build`, then deploys to production
+and checks the live routes:
+
+```bash
+scripts/release-web.sh                 # refuses to run on a dirty working tree
+scripts/release-web.sh --allow-dirty   # deliberate hotfix only
+```
+
+It uses the Vercel CLI login already on the machine — on macOS that lives in
+`~/Library/Application Support/com.vercel.cli/auth.json`, and `npx vercel whoami` must print
+an account name. It deliberately does not run `vercel pull`, which would write the
+production environment, service-role key included, to `.vercel/.env.production.local`.
+
+`.github/workflows/deploy-overseas.yml` is **disabled**: its `VERCEL_TOKEN` secret was
+revoked on 21 August 2026, and a replacement can only be created by hand in the Vercel
+dashboard (the CLI's own session is refused with `Cannot create tokens for this app`). Pushes
+therefore do not deploy. To restore push-to-deploy, either create a token and re-enable the
+workflow, or connect the repository to the Vercel project and delete the workflow.
 
 ## Commands
 
