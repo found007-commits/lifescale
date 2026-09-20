@@ -54,6 +54,7 @@ const copy: { zh: GuideCopy; en: GuideCopy } = {
     note: "圣所是留给自己和少数朋友的，不是用来表演的地方。你可以只写墓志铭不写信条，也可以把它们放在那里很久不打开——它不会催你。",
     back: "返回余生有刻",
     privacy: "隐私说明",
+    language: "界面语言",
     footer: [
       { label: "双轨 1000 天", href: "/chapters" },
       { label: "精神圣所", href: "/sanctuary" },
@@ -108,6 +109,7 @@ const copy: { zh: GuideCopy; en: GuideCopy } = {
     note: "A sanctuary is kept for yourself and a few friends, not performed for an audience. You can write an epitaph without any creeds, and you can leave it untouched for a long time. Nothing here will chase you.",
     back: "Back to LifeScale",
     privacy: "Privacy",
+    language: "Interface language",
     footer: [
       { label: "1,000-day chapters", href: "/chapters" },
       { label: "The sanctuary", href: "/sanctuary" },

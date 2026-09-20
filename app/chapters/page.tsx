@@ -47,6 +47,7 @@ const copy: { zh: GuideCopy; en: GuideCopy } = {
     note: "提醒：这不是死亡预测。章节刻度回答的是「今天处在我设定的时间线里的哪一段」，而不是「我还剩多少时间」。目标可以随时重新理解，人生不该被一个数字绑架。",
     back: "返回余生有刻",
     privacy: "隐私说明",
+    language: "界面语言",
     footer: [
       { label: "双轨 1000 天", href: "/chapters" },
       { label: "精神圣所", href: "/sanctuary" },
@@ -94,6 +95,7 @@ const copy: { zh: GuideCopy; en: GuideCopy } = {
     note: "A reminder: this is not a prediction of death. A chapter answers “which part of the timeline I set for myself does today fall in”, not “how much time do I have left”. A target can be reconsidered at any time, and a life should never be ruled by one number.",
     back: "Back to LifeScale",
     privacy: "Privacy",
+    language: "Interface language",
     footer: [
       { label: "1,000-day chapters", href: "/chapters" },
       { label: "The sanctuary", href: "/sanctuary" },

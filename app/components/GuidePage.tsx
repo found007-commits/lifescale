@@ -6,6 +6,7 @@ import { isLocale } from "../../lib/i18n";
 import type { Locale } from "../../lib/types";
 import { useTraditionalChinese } from "../../lib/use-traditional-chinese";
 import { Brand } from "./Brand";
+import { LocaleSelect } from "./LocaleSelect";
 
 export type GuideSection = { heading: string; body: string; bullets?: readonly string[] };
 
@@ -20,13 +21,16 @@ export type GuideCopy = {
   note: string;
   back: string;
   privacy: string;
+  language: string;
   footer: readonly { label: string; href: string }[];
 };
 
 // A guide page is a static document, but it has to follow the visitor's language the same
-// way the landing page does: the server picks a starting locale from the request, and the
-// choice the visitor already made on the home page wins once the page is hydrated.
-// Traditional Chinese is produced by the shared OpenCC pass, so only zh and en copy exist.
+// way the landing page does: the server picks a starting locale from the request, the
+// choice the visitor already made on the home page wins once the page is hydrated, and the
+// header offers the same control the landing page does so the visitor does not have to go
+// back there to read this document in another language. Traditional Chinese is produced by
+// the shared OpenCC pass, so only zh and en copy exist.
 export function GuidePage({ initialLocale, copy }: { initialLocale: Locale; copy: { zh: GuideCopy; en: GuideCopy } }) {
   const [locale, setLocale] = useState<Locale>(initialLocale);
   const surfaceRef = useRef<HTMLElement>(null);
@@ -40,11 +44,21 @@ export function GuidePage({ initialLocale, copy }: { initialLocale: Locale; copy
     return () => window.cancelAnimationFrame(frame);
   }, []);
 
+  // The same key the landing page writes, so the two agree on which language the visitor
+  // asked for: switching here is remembered there, and the other way round.
+  function changeLocale(next: Locale) {
+    setLocale(next);
+    window.localStorage.setItem("lifescale:locale", next);
+  }
+
   return (
     <main className="guide-shell" key={locale} ref={surfaceRef} lang={locale === "zh-TW" ? "zh-TW" : locale === "zh" ? "zh-CN" : "en"}>
-      <header className="legal-header">
+      <header className="legal-header guide-header">
         <Brand />
-        <Link href="/">{t.back}</Link>
+        <div className="header-actions">
+          <LocaleSelect locale={locale} label={t.language} onChange={changeLocale} />
+          <Link href="/">{t.back}</Link>
+        </div>
       </header>
       <article className="guide-content">
         <p className="kicker">{t.eyebrow}</p>

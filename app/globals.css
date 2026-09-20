@@ -977,3 +977,16 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 1; }
   .clear-mode .life-dial { min-height: 160px; }
   .clear-mode .life-dial-inner strong { font-size: clamp(56px, 15vw, 80px); }
 }
+
+/* 2.0.10 website: the guide header carries the same language control the landing page
+   already has, so a visitor reading /chapters or /sanctuary can switch language where they
+   are instead of walking back to the home page first. The wrapper is the landing page's own
+   action row, reused so both headers lay out identically; the link keeps the colour the
+   header gave it as a direct child, which the wrapper would otherwise take away. */
+.guide-header .header-actions > a { color: var(--green-2); font-size: 12px; text-decoration: none; }
+
+@media (max-width: 760px) {
+  /* The same concession the landing header already makes: at this width the wordmark has to
+     give way, or the brand and the language control compete for about 300 pixels. */
+  .guide-header .brand-type { display: none; }
+}
