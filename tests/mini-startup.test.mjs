@@ -9,8 +9,11 @@ const tick = async () => { await Promise.resolve(); await Promise.resolve(); };
 
 test('cold launch opens public experience; primary action starts guest writing, not login', () => {
   assert.equal(JSON.parse(read('app.json')).pages[0], 'pages/index/index');
-  assert.match(read('pages/index/index.wxml'), /hero-button" bindtap="startWriting"/);
-  assert.doesNotMatch(read('pages/index/index.wxml'), /hero-button" bindtap="goLogin"/);
+  // 2.0.16: the hero buttons share a .cta-btn shell; primary leads with startWriting, the
+  // secondary is the sign-in entry. The structural intent — that "primary" is guest
+  // writing, never login — is what this fold pins down.
+  assert.match(read('pages/index/index.wxml'), /cta-btn primary"[^>]*bindtap="startWriting"/);
+  assert.doesNotMatch(read('pages/index/index.wxml'), /cta-btn primary"[^>]*bindtap="goLogin"/);
 });
 
 test('public runtime configuration is single-flight, whitelisted, and retryable after failure', async () => {

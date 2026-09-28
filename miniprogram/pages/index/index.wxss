@@ -1,15 +1,98 @@
 .landing-page { min-height: 100vh; padding-bottom: 100rpx; overflow: hidden; }
-.landing-nav { padding: calc(28rpx + env(safe-area-inset-top)) 34rpx 20rpx; display: flex; align-items: center; justify-content: space-between; }
-/* The sign-in entry used to live in the top nav, where it crammed against the brand and
-   the timer chip and disappeared. It now sits beside the primary CTA in the hero: same
-   filled green as before, slightly quieter padding so it does not pretend to be the page's
-   main action. The nav stays for the brand only. */
-.hero-actions { display: flex; flex-wrap: wrap; gap: 28rpx; align-items: center; margin-top: 52rpx; }
-.hero-button { width: 270rpx; margin: 0; }
-.mini-login { margin: 0; min-width: 128rpx; min-height: 60rpx; padding: 0 24rpx; border: none; border-radius: 32rpx; background: #123f31; color: #fbfaf6; font-size: 26rpx; font-weight: 600; line-height: 60rpx; box-shadow: 0 4rpx 12rpx rgba(18, 63, 49, .14); }
-.landing-hero { min-height: 720rpx; padding: 110rpx 40rpx 70rpx; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
-.hero-title { margin-top: 34rpx; font-size: 88rpx; }
-.hero-copy { max-width: 600rpx; margin-top: 42rpx; color: #476b5d; font-size: 30rpx; line-height: 1.75; }
+
+/* Custom top nav: brand on the left, right side intentionally empty so the WeChat
+   capsule (··· and ◎) can sit there without collision. Top padding pushes the brand
+   clear of the device status bar. */
+.custom-nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 100rpx 36rpx 20rpx;
+  box-sizing: border-box;
+}
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+.nav-logo {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 14rpx;
+}
+
+/* Hero content: tag line + serif title + description, then the dual-CTA row. */
+.hero-section {
+  padding: 40rpx 36rpx 20rpx;
+}
+.hero-tag {
+  display: block;
+  margin-bottom: 24rpx;
+  color: #c98a3c;
+  font-size: 22rpx;
+  font-weight: 600;
+  letter-spacing: 2rpx;
+}
+.hero-title {
+  margin-top: 0;
+  font-size: 64rpx;
+  font-weight: 800;
+  color: #17382b;
+  line-height: 1.25;
+  letter-spacing: -1rpx;
+}
+.hero-desc {
+  margin-top: 24rpx;
+  color: #5c6e65;
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+.hero-footnote {
+  display: block;
+  margin-top: 24rpx;
+  color: #9ba8a0;
+  font-size: 22rpx;
+  line-height: 1.5;
+}
+
+/* Dual-CTA: filled primary for "write today" (the dominant flow) plus a quiet outlined
+   "sign in" for returning users. Both buttons stretch to share the row, with the primary
+   given a slightly wider share so it still reads as the dominant action. */
+.hero-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin-top: 48rpx;
+}
+.cta-btn {
+  height: 96rpx !important;
+  line-height: 96rpx !important;
+  border-radius: 48rpx !important;
+  font-size: 30rpx !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+  padding: 0 40rpx !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+}
+.cta-btn::after { border: none; }
+.cta-btn.primary {
+  flex: 1.3;
+  background-color: #17382b !important;
+  color: #ffffff !important;
+  box-shadow: 0 12rpx 30rpx rgba(23, 56, 43, 0.2);
+  border: none !important;
+}
+.cta-btn.secondary {
+  flex: 1;
+  background-color: rgba(23, 56, 43, 0.05) !important;
+  color: #17382b !important;
+  border: 1.5rpx solid rgba(23, 56, 43, 0.22) !important;
+}
+
+/* Below the hero: keep the preview card and manifesto on the same dark/cream theme. */
 .preview-card { margin: 0 28rpx; padding: 42rpx 34rpx; }
 .preview-card .section-title { display: block; margin-top: 14rpx; }
 .preview-button { margin-top: 34rpx; }
@@ -23,6 +106,14 @@
 
 /* The page background already turns dark, so the landing chrome has to follow. */
 @media (prefers-color-scheme: dark) {
-  .mini-login { background: #3f7359; color: #fbfaf6; box-shadow: none; }
-  .hero-copy { color: #b5c9bd; }
+  .hero-tag { color: #d99b2f; }
+  .hero-title { color: #edf3ef; }
+  .hero-desc { color: #91a69b; }
+  .hero-footnote { color: #728c7c; }
+  .cta-btn.primary { background-color: #3f7359 !important; box-shadow: 0 12rpx 30rpx rgba(0, 0, 0, .35); }
+  .cta-btn.secondary {
+    background-color: rgba(237, 243, 239, 0.06) !important;
+    color: #edf3ef !important;
+    border-color: rgba(237, 243, 239, 0.22) !important;
+  }
 }
