@@ -126,6 +126,11 @@ Page({
     if (!item || this.sharing) return;
     this.sharing = true;
     try {
+      // Two distinct WeChat share APIs sit behind this branch. Their parameter names are
+      // not interchangeable: showShareImageMenu takes { filePath, path } but shareVideoMessage
+      // takes { videoPath, thumbPath? } — passing filePath to shareVideoMessage silently fails
+      // because videoPath is required and we never enter it. We saw it on iPhone 17 Pro: the
+      // video card never opened, only "下载失败" surfaced through the error handler.
       const method = item.kind === "video" ? "shareVideoMessage" : "showShareImageMenu";
       if (typeof wx[method] !== "function") throw new Error("当前微信暂不支持，请更新微信后重试。");
       const signed = await signEntryMedia(item);
@@ -133,7 +138,10 @@ Page({
       if (result.statusCode !== 200) throw new Error("下载失败，请重试。");
       this.files.add(result.tempFilePath);
       if (this.closed) { wx.getFileSystemManager().unlink({ filePath: result.tempFilePath, fail() {} }); return; }
-      await new Promise((resolve, reject) => wx[method]({ filePath: result.tempFilePath, path: result.tempFilePath, success: resolve, fail: reject }));
+      const args = item.kind === "video"
+        ? { videoPath: result.tempFilePath }
+        : { filePath: result.tempFilePath, path: result.tempFilePath };
+      await new Promise((resolve, reject) => wx[method]({ ...args, success: resolve, fail: reject }));
     } catch (error) { if (!this.closed && !/cancel/i.test(error.errMsg || "")) wx.showToast({ title: t(error.message || "分享失败，请重试。", this.data.locale), icon: "none" }); }
     finally { this.sharing = false; }
   },
