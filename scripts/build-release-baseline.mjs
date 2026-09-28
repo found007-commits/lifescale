@@ -26,6 +26,20 @@ import { createHash } from "node:crypto";
 const args = process.argv.slice(2);
 const flags = new Set(args.filter((arg) => arg.startsWith("--")));
 const [version, ref, ...additions] = args.filter((arg) => !arg.startsWith("--"));
+
+//   --markup-change=pages/example/example.wxml=why the template was rewritten
+//
+// A release may rewrite a watched template on purpose. Say so here and the reason travels in
+// the fixture, instead of living only in a commit message nobody will read in six months.
+// Everything else stays bound by the invariant: no page may disappear, and any page not
+// named here must keep its bindings exactly.
+const markupChanges = {};
+for (const arg of args.filter((arg) => arg.startsWith("--markup-change="))) {
+  const spec = arg.slice("--markup-change=".length);
+  const split = spec.indexOf("=");
+  if (split < 1) throw new Error("--markup-change expects <path>=<reason>: " + arg);
+  markupChanges[spec.slice(0, split)] = spec.slice(split + 1);
+}
 if (!/^\d+\.\d+\.\d+$/.test(version || "")) throw new Error("usage: build-release-baseline.mjs <version> <commit-sha> [path ...]");
 if (!/^[0-9a-f]{40}$/.test(ref || "")) throw new Error("the second argument must be the full commit sha the baseline describes");
 
@@ -84,11 +98,15 @@ for (const file of additions) {
   (isMarkup ? added.markup : added.protectedFiles).push(file);
 }
 
+for (const file of Object.keys(markupChanges)) {
+  if (!markup.has(file)) throw new Error("not a watched template: " + file);
+}
 const hash = (file) => sha(fs.readFileSync(path.join(root, file), "utf8"));
 const fixture = {
   ref,
   protectedFiles: Object.fromEntries([...protectedFiles].sort().map((file) => [file, hash(file)])),
   markup: Object.fromEntries([...markup].sort().map((file) => [file, contract(fs.readFileSync(path.join(root, file), "utf8"))])),
+  ...(Object.keys(markupChanges).length ? { markupChanges } : {}),
 };
 
 // Protection is only ever widened here, because the watch list starts as a copy of the parent

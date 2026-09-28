@@ -64,10 +64,16 @@ test('no release ever shrank the watch list', () => {
     // new and a new page brings its own contract. What must never happen is a contract being
     // dropped, or an existing one changing: that means a binding target moved on a page nobody
     // meant to touch, which is precisely the accident this watch list exists to catch.
+    //
+    // The one escape is a release that says so. If the newer fixture declares the page in
+    // `markupChanges`, its template was rewritten on purpose and the reason sits next to the
+    // fingerprint; an undeclared page is still bound exactly as before.
+    const declared = JSON.parse(read('tests/fixtures/' + fixtures[i].name)).markupChanges || {};
     const beforeMarkup = JSON.parse(read('tests/fixtures/' + fixtures[i - 1].name)).markup;
     const afterMarkup = JSON.parse(read('tests/fixtures/' + fixtures[i].name)).markup;
     for (const [page, fingerprint] of Object.entries(beforeMarkup)) {
       assert.ok(page in afterMarkup, fixtures[i].name + ' dropped the contract for ' + page);
+      if (declared[page]) continue;
       assert.equal(afterMarkup[page], fingerprint, fixtures[i].name + ' changed the contract for ' + page);
     }
   }

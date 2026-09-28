@@ -1,10 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { readFileSync, readdirSync } from "node:fs";
 import { createRequire } from "node:module";
 import vm from "node:vm";
 const require = createRequire(import.meta.url);
 const read = name => readFileSync(new URL("../miniprogram/" + name, import.meta.url), "utf8");
+// The helpers above are rooted in miniprogram/; the fixtures live at the project root.
+const readRoot = name => readFileSync(new URL("../" + name, import.meta.url), "utf8");
 const { localDateString } = require("../miniprogram/utils/life.js");
 const freshness = require("../miniprogram/utils/data-freshness.js");
 
@@ -237,4 +240,61 @@ test("a failure that is not the token keeps its status so the page can decide", 
   assert.ok(api.bootstrapUnsupported(error), "a missing endpoint is what the fallback is for");
   const real = Object.assign(new Error("down"), { status: 500 });
   assert.equal(api.bootstrapUnsupported(real), false, "a broken server must not masquerade as an old one");
+});
+
+// ── What this release changed, and what it must not have disturbed ───────────────────────
+// The behaviour above is written in the present tense and always runs. These four describe a
+// diff, so they belong to 2.0.15 only and retire themselves with the next version number.
+const baseline = JSON.parse(readRoot("tests/fixtures/ui-2015-baseline.json"));
+const previous = JSON.parse(readRoot("tests/fixtures/ui-2014-baseline.json"));
+const release = JSON.parse(readRoot("miniprogram/package.json")).version === "2.0.15";
+const sha = source => createHash("sha256").update(source).digest("hex");
+const changed = () => Object.entries(previous.protectedFiles).filter(([file, hash]) => sha(readRoot(file)) !== hash).map(([file]) => file).sort();
+
+test("2.0.15 changes exactly the files this release had a reason to touch", { skip: !release }, () => {
+  assert.deepEqual(changed(), [
+    "app/components/Dashboard.tsx",
+    "lib/supabase/client.ts",
+    "miniprogram/app.js",
+    "miniprogram/pages/dashboard/dashboard.js",
+    "miniprogram/utils/supabase.js",
+  ]);
+});
+
+test("2.0.15 adds its three runtime files to the watch list and loses none", { skip: !release }, () => {
+  assert.deepEqual(changed().length, 5, "the changed set above must not become empty through a rename");
+  const lost = Object.keys(previous.protectedFiles).filter(file => !(file in baseline.protectedFiles));
+  assert.deepEqual(lost, [], "files dropped from the watch list: " + lost.join(", "));
+  const gained = Object.keys(baseline.protectedFiles).filter(file => !(file in previous.protectedFiles));
+  assert.deepEqual(gained.sort(), ["app/api/miniprogram/bootstrap/route.ts", "lib/dashboard-bootstrap.ts", "lib/network-fetch.ts"]);
+});
+
+test("2.0.15 declares the one template it rewrote and changes no other contract", { skip: !release }, () => {
+  const moved = Object.entries(previous.markup).filter(([file, hash]) => baseline.markup[file] !== hash).map(([file]) => file);
+  assert.deepEqual(moved, ["miniprogram/pages/dashboard/dashboard.wxml"]);
+  assert.deepEqual(Object.keys(baseline.markupChanges), moved, "the reason must travel with the fixture, not with a commit message");
+  assert.match(baseline.markupChanges[moved[0]], /skeleton/);
+  assert.equal(Object.keys(previous.markup).length, 9, "the whole markup set must still be watched");
+});
+
+test("2.0.15 moves the mini program version to 2.0.15", { skip: !release }, () => {
+  assert.equal(JSON.parse(readRoot("miniprogram/package.json")).version, "2.0.15");
+});
+
+// No release may quietly inherit a shorter watch list than its parent. Comparing neighbours
+// only would miss a baseline whose parent was chosen wrong, so every pair is compared here.
+test("no release drops a watched file, whatever the patch numbers do", () => {
+  const fixtures = readdirSync(new URL("../tests/fixtures", import.meta.url))
+    .filter(name => /^ui-\d+-baseline\.json$/.test(name))
+    .map(name => ({ name, version: Number(/^ui-(\d+)-baseline\.json$/.exec(name)[1]) }))
+    .sort((a, b) => a.version - b.version);
+  assert.ok(fixtures.length >= 8, "expected the accumulated fixtures, got " + fixtures.length);
+  for (let index = 1; index < fixtures.length; index += 1) {
+    const before = JSON.parse(readRoot("tests/fixtures/" + fixtures[index - 1].name));
+    const after = JSON.parse(readRoot("tests/fixtures/" + fixtures[index].name));
+    for (const group of ["protectedFiles", "markup"]) {
+      const lost = Object.keys(before[group]).filter(file => !(file in after[group]));
+      assert.deepEqual(lost, [], fixtures[index - 1].name + " -> " + fixtures[index].name + ": " + group + " lost " + lost.join(", "));
+    }
+  }
 });
