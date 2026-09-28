@@ -59,18 +59,26 @@ pages/dashboard.onShow
 - **本版改动了一个被盯着的模板** `dashboard.wxml`（骨架屏 + 重新加载按钮），仓库里那条「现有绑定契约不得变更」的跨版本不变量因此报警。经确认引入最小豁免： release 可以在自己的夹具里用 `markupChanges` 写明「改了哪个模板、为什么」，理由跟着夹具走而不是藏在提交信息里；**未声明的页面依旧逐字节受锁**。为此给 `scripts/build-release-baseline.mjs` 增加了 `--markup-change=<路径>=<原因>`，并修改了 `tests/web-legal-theme-213.test.mjs` 的判定（一处，不是三处；另外两处只比较键集合，未受影响）。豁免有效性已反向验证。
 - `dashboard.wxss` 未按既有惯例纳入保护清单（历版只冻结 `pages/*.js` 与 `*.json`），本报告明确记录这一事实。
 
-## 五、发布凭证与未完成事项
+## 五、发布状态：小程序已上传，服务端尚未上线
 
-**已验证**：源码提交 `6e5f68d`（分支 `codex/overseas-app`，尚未推送远端）；上述全部测试、lint、类型检查、接口本地实测。
+**已验证：**
 
-**未验证，需要你执行**：
+1. **源码已推送远端**：`b2978a2..72a0b1d` → `https://github.com/found007-commits/lifescale.git`（分支 `codex/overseas-app`）。
+2. **小程序 2.0.15 已上传**（`cli upload`，appid `wxa1ad4ff408b7727d`）：主包 448.8 KB + 分包 23.8 KB = 总计 472.6 KB，结果 `✔ upload`。**上传的是开发版本，尚未提交审核、尚未发布。**
+3. **CI 已在干净环境独立复核**：`gh run 36381622365`（`.github/workflows/deploy-overseas.yml`）——`Lint ✓`、`Type-check ✓`、`Run focused tests ✓` 全部通过，与本机结论一致。该工作流此前被手动禁用，本次临时启用执行，事后已恢复禁用状态。
 
-1. **部署 `app.lifescale.space`**：本会话没有 Vercel 凭证，无法部署。服务端没上线之前，小程序会走回退路径（表现与 2.0.14 相同），不会报错，但也拿不到加速。
-2. **上传小程序并提交审核**：本会话无法操作微信后台。可用 `/Applications/wechatwebdevtools.app` 上传 2.0.15。
-3. **真机复测**：你原来的 5G / Wi-Fi 环境下分别测冷启动体感，以及微信后台「体验评分」的启动耗时数据。
-4. 图片缩略图（列表仍在拉原图）未做，可留到下一版。
+**未完成（阻塞在生产部署）：**
+
+- CI 的 `Pull Vercel production settings` 失败：`The token provided via --token argument is not valid`。仓库 secrets 里三个 Vercel 变量都在，但 **Vercel 令牌已失效**（创建于 2026-08-21）。本机也没有任何可用的 Vercel 登录态（无 `~/.vercel`、无钥匙串条目、`.env.local` 里的 VERCEL_OIDC_TOKEN 同样过期）。
+- 因此生产环境**目前还没有这个接口**：实测 `POST https://app.lifescale.space/api/miniprogram/bootstrap` → **404**。在这个状态下，刚上传的小程序会走回退路径（表现与 2.0.14 相同），**不会报错，但也拿不到提速**。这一路径本身已经在 localStorage 测试里覆盖，行为符合预期。
+- **换取新令牌后即可部署**：在 Vercel 生成新令牌 → 更新仓库 secret → 启用工作流触发一次（流水线自带 lint/类型/测试三道闸，通过后才 `vercel deploy --prod`）。
+
+**需要你手动做的两件事：**
+
+1. 提交审核并发布：微信管理后台认的是你自己的登录态，上传动作能做，提审与发布按钮必须你点。
+2. 真机复测冷启动体感，以及后台「体验评分」的启动耗时数据。
 
 ## 六、回滚
 
-- 服务端：回退到上一生产部署 `dpl_DAVPM6Vct2q8xzUZt5mfVZfX7T5B`（若已部署新版）。
+- 服务端：回退到上一生产部署 `dpl_DAVPM6Vct2q8xzUZt5mfVZfX7T5B`（本版尚未部署，生产仍在该版本上）。
 - 小程序：回退到已发布的 2.0.14。旧版小程序不会调用新接口；新版小程序在旧服务端上自动回退到逐项读取，**两条路径都经过测试**。
