@@ -5,14 +5,16 @@
       <image class="brand-logo" src="/images/lifescale-icon.png" mode="aspectFill" />
       <view><text class="brand-name">{{i18n.t('余生有刻', locale)}}</text><text class="brand-note">LIFESCALE</text></view>
     </view>
-    <button class="mini-login" bindtap="goLogin" hover-class="button-press">{{i18n.t('登录', locale)}}</button>
   </view>
 
   <view class="landing-hero">
     <text class="eyebrow">{{i18n.t('把时间还给自己', locale)}}</text>
     <view class="display-title hero-title"><text>{{i18n.t('看见余生，', locale)}}</text><text>{{i18n.t('认真今天。', locale)}}</text></view>
     <text class="hero-copy">{{i18n.t('看见仍可书写的时间，留下今天真实发生的事。', locale)}}</text>
-    <button class="primary-button hero-button" bindtap="startWriting" hover-class="button-press">{{i18n.t('先写下今天', locale)}}</button>
+    <view class="hero-actions">
+      <button class="primary-button hero-button" bindtap="startWriting" hover-class="button-press">{{i18n.t('先写下今天', locale)}}</button>
+      <button class="mini-login" bindtap="goLogin" hover-class="button-press">{{i18n.t('登录', locale)}}</button>
+    </view>
     <text class="field-help">{{i18n.t('无需登录即可试写、预览刻度。保存到账号时，再由你选择登录。', locale)}}</text>
   </view>
 

@@ -1,13 +1,15 @@
 .landing-page { min-height: 100vh; padding-bottom: 100rpx; overflow: hidden; }
 .landing-nav { padding: calc(28rpx + env(safe-area-inset-top)) 34rpx 20rpx; display: flex; align-items: center; justify-content: space-between; }
-/* The entry to signing in is the page's one filled control, so it reads as a button at a
-   glance instead of a faded label floating beside the brand. Same green as the primary
-   button, one step quieter in size. */
-.mini-login { margin: 0; min-width: 128rpx; min-height: 64rpx; padding: 0 26rpx; border: none; border-radius: 34rpx; background: #123f31; color: #fbfaf6; font-size: 26rpx; font-weight: 600; line-height: 64rpx; box-shadow: 0 6rpx 16rpx rgba(18, 63, 49, .16); }
+/* The sign-in entry used to live in the top nav, where it crammed against the brand and
+   the timer chip and disappeared. It now sits beside the primary CTA in the hero: same
+   filled green as before, slightly quieter padding so it does not pretend to be the page's
+   main action. The nav stays for the brand only. */
+.hero-actions { display: flex; flex-wrap: wrap; gap: 28rpx; align-items: center; margin-top: 52rpx; }
+.hero-button { width: 270rpx; margin: 0; }
+.mini-login { margin: 0; min-width: 128rpx; min-height: 60rpx; padding: 0 24rpx; border: none; border-radius: 32rpx; background: #123f31; color: #fbfaf6; font-size: 26rpx; font-weight: 600; line-height: 60rpx; box-shadow: 0 4rpx 12rpx rgba(18, 63, 49, .14); }
 .landing-hero { min-height: 720rpx; padding: 110rpx 40rpx 70rpx; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
 .hero-title { margin-top: 34rpx; font-size: 88rpx; }
 .hero-copy { max-width: 600rpx; margin-top: 42rpx; color: #476b5d; font-size: 30rpx; line-height: 1.75; }
-.hero-button { width: 270rpx; margin: 52rpx 0 0; }
 .preview-card { margin: 0 28rpx; padding: 42rpx 34rpx; }
 .preview-card .section-title { display: block; margin-top: 14rpx; }
 .preview-button { margin-top: 34rpx; }
