@@ -13,7 +13,8 @@ const listMediaUrls = new Map();
 let sessionMemo = null;
 let sessionMemoReady = false;
 
-function wxRequest(options) {
+function wxRequest(options, attempt = 0) {
+  const readOnly = ["GET", "HEAD"].includes((options.method || "GET").toUpperCase());
   return new Promise((resolve, reject) => {
     wx.request({
       timeout: 20000,
@@ -27,7 +28,13 @@ function wxRequest(options) {
         }
       },
       fail(error) {
-        reject(new Error(error.errMsg || "网络连接失败。"));
+        const message = error.errMsg || "网络连接失败。";
+        // Replay reads only, once. Never replay saves, deletes or token refreshes.
+        if (readOnly && attempt === 0 && /CONNECTION_RESET|CONNECTION_CLOSED|TIMED_OUT|timeout|network|网络/i.test(message)) {
+          setTimeout(() => wxRequest(options, 1).then(resolve, reject), 400);
+          return;
+        }
+        reject(new Error("网络连接暂时中断，请重试；若仍无法连接，请切换 Wi-Fi 或移动网络。"));
       },
     });
   });
@@ -224,6 +231,76 @@ async function getEntries(userId, limit = 100, offset = 0, { includeMedia = true
 
 async function getCheckins(userId, limit = 100) {
   return request(`/rest/v1/checkins?user_id=eq.${encodeURIComponent(userId)}&select=*&order=checkin_date.desc&limit=${limit}`);
+}
+
+const BOOTSTRAP_PATH = "/api/miniprogram/bootstrap";
+
+// Statuses that mean "this server does not have the bootstrap endpoint", so a page can fall
+// back to the reads it already knows instead of showing an error the user cannot act on.
+function bootstrapUnsupported(error) {
+  return [404, 405, 501].includes(error?.status);
+}
+
+async function usableSession() {
+  let session = restoreSession();
+  if (!session?.user?.id) return null;
+  if (session?.expires_at && session.expires_at * 1000 < Date.now() + 60000) session = await refreshSession(session);
+  return session;
+}
+
+function bootstrapCall(session, body) {
+  return wxRequest({
+    url: `${config.apiBase}${BOOTSTRAP_PATH}`,
+    method: "POST",
+    data: body,
+    header: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token || ""}` },
+  });
+}
+
+// A cold start used to cost four sequential round trips: the profile first, because a WeChat
+// account may not have one yet, then three reads, then one batch of signed URLs for the
+// photos those reads named. This asks our own API to do that sequencing in one request.
+// The request carries this device's access token, so RLS filters exactly as it does today —
+// this removes waiting, never a check.
+async function bootstrapDashboard({ entryLimit = 3, checkinLimit = 7 } = {}) {
+  const session = await usableSession();
+  if (!session?.user?.id) return null;
+  // An expired token must not cost the user a restart: refresh once, then let the caller
+  // deal with whatever is still wrong.
+  let payload;
+  try {
+    payload = await bootstrapCall(session, { entryLimit, checkinLimit });
+  } catch (error) {
+    if (error?.status !== 401 || !session.refresh_token) throw error;
+    payload = await bootstrapCall(await refreshSession(session), { entryLimit, checkinLimit });
+  }
+  const profile = payload?.profile || null;
+  if (restoreSession()?.user?.id === session.user.id) getApp().globalData.profile = profile;
+  rememberBootstrapMedia(session.user.id, payload?.entries);
+  return {
+    userId: session.user.id,
+    profile,
+    setupRequired: Boolean(payload?.setupRequired),
+    entries: Array.isArray(payload?.entries) ? payload.entries : [],
+    checkins: Array.isArray(payload?.checkins) ? payload.checkins : [],
+    checkinCount: Number.isFinite(Number(payload?.checkinCount)) ? Number(payload.checkinCount) : 0,
+  };
+}
+
+// Those URLs are already signed; keeping them saves the next list a second signing request.
+// Memory only, and scoped to one account like every other URL here.
+async function rememberBootstrapMedia(userId, entries) {
+  if (!userId || !Array.isArray(entries)) return;
+  const service = await ensureConfig().catch(() => null);
+  if (!service) return;
+  const scope = `${service.supabaseUrl}|${userId}|`;
+  for (const entry of entries) {
+    for (const media of entry?.entry_media || []) {
+      if (!media?.storage_path || !media.signed_url) continue;
+      if (listMediaUrls.size >= 256) listMediaUrls.delete(listMediaUrls.keys().next().value);
+      listMediaUrls.set(scope + media.storage_path, { url: media.signed_url, until: Date.now() + 3000000 });
+    }
+  }
 }
 
 async function getEntry(entryId, userId) {
@@ -454,6 +531,8 @@ async function deleteSanctuaryTribute(tributeId) {
 }
 
 module.exports = {
+  bootstrapDashboard,
+  bootstrapUnsupported,
   clearSession,
   createEntry,
   createProfile,

@@ -1,5 +1,6 @@
-const { restoreSession } = require("./utils/supabase");
+const { restoreSession, bootstrapDashboard } = require("./utils/supabase");
 const { loadRuntimeConfig } = require("./utils/runtime-config");
+const freshness = require("./utils/data-freshness");
 
 App({
   globalData: {
@@ -20,5 +21,22 @@ App({
     // the signed-in profile decide it. This request only warms the connection cache; pages
     // await it so their first paint is not gated by it.
     this.localeReady = loadRuntimeConfig().catch(() => {});
+    this.startDashboard();
+  },
+
+  // Start the dashboard's round trip now, not after the tab switch: someone who is already
+  // signed in lands on "今天" anyway, and the index page still has to render before it can
+  // switch tabs. This only moves the request earlier — it changes no permission and reads
+  // nothing the page would not read a moment later.
+  startDashboard() {
+    const session = this.globalData.session;
+    if (!session?.user?.id || typeof bootstrapDashboard !== "function") return;
+    const revision = freshness.state.revision;
+    // Rejected here deliberately: the page decides what a failure means, including falling
+    // back to reading one thing at a time. A write before the first paint invalidates the
+    // answer, so a stale bundle is dropped rather than replayed.
+    this.dashboardBootstrap = bootstrapDashboard()
+      .then(bundle => (bundle && freshness.state.revision === revision ? bundle : null))
+      .catch(() => null);
   },
 });

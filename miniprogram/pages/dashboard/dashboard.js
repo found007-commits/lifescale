@@ -1,6 +1,6 @@
 const Page = require("../../utils/localized-page");
 const { calculateLifeMetrics } = require("../../utils/life");
-const { getCheckins, getCheckinCount, getEntries, getProfile, updateProfile, requireSession } = require("../../utils/supabase");
+const { getCheckins, getCheckinCount, getEntries, getProfile, updateProfile, requireSession, bootstrapDashboard, bootstrapUnsupported } = require("../../utils/supabase");
 const { journeyMessage, openShare } = require("../../utils/preferences");
 const { formatDate } = require("../../utils/share-card");
 const { confirmDeleteEntry } = require("../../utils/entry-actions");
@@ -10,6 +10,16 @@ const { stamp, reusable } = require("../../utils/data-freshness");
 
 const moodLabels = { calm: "平静", happy: "开心", grateful: "感恩", tired: "疲惫", sad: "难过", anxious: "焦虑", hopeful: "充满希望" };
 const categoryLabels = { daily: "日常", family: "家人", work: "工作", growth: "成长", health: "健康", travel: "旅行", reflection: "感悟", other: "其他" };
+
+// app.js starts the dashboard's request at launch, before this page exists. Taking it once
+// keeps a second load from reusing an answer a write has already invalidated.
+function takeWarmBootstrap() {
+  const app = getApp();
+  const warm = app?.dashboardBootstrap;
+  if (!warm) return null;
+  app.dashboardBootstrap = null;
+  return warm;
+}
 
 function decorateEntry(entry) {
   return {
@@ -28,6 +38,7 @@ Page({
 
   onShow() { return this.load(); },
   onPullDownRefresh() { this.load(true); },
+  retryLoad() { return this.load(true); },
 
   async load(fromPull = false) {
     const session = requireSession();
@@ -39,12 +50,13 @@ Page({
     if (this.data.profile?.id !== session.user.id) this.setData({ profile: null, metrics: null, recentEntries: [] });
     this.setData({ loading: !fromPull && !this.data.profile, error: "" });
     try {
-      // A WeChat account must prove its profile is complete before any entry is read, so the
-      // profile lookup stays ahead of the reads. Email accounts have no such gate, but the
-      // three reads below already run together, so this is one round trip either way.
-      const profile = await getProfile(session.user.id);
+      const bundle = await this.openToday(fromPull, session);
       if (!current()) return;
-      if (requiresWechatSetup(session, profile)) {
+      // A WeChat account must prove its profile is complete before any entry is read. The
+      // merged endpoint enforces the same order server-side and reports it back; the check
+      // stays here too, so neither path can become the weaker one.
+      const profile = bundle.profile;
+      if (bundle.setupRequired || requiresWechatSetup(session, profile)) {
         wx.reLaunch({ url: "/pages/onboarding/onboarding?required=1" });
         return;
       }
@@ -65,13 +77,11 @@ Page({
           progressText: metrics.progress.toFixed(2),
         },
       });
-      const [entries, checkins, checkinCount] = await Promise.all([getEntries(session.user.id, 3), getCheckins(session.user.id, 7), getCheckinCount(session.user.id)]);
-      if (!current()) return;
       this.setData({
-        recentEntries: entries.map(decorateEntry),
-        checkedToday: checkins.some((item) => item.checkin_date === metrics.today),
-        checkinCount,
-        journeyMessage: journeyMessage(checkinCount),
+        recentEntries: bundle.entries.map(decorateEntry),
+        checkedToday: bundle.checkins.some((item) => item.checkin_date === metrics.today),
+        checkinCount: bundle.checkinCount,
+        journeyMessage: journeyMessage(bundle.checkinCount),
       });
       this.freshness = started;
     } catch (error) {
@@ -80,6 +90,41 @@ Page({
       if (this.loadGeneration === generation) this.setData({ loading: false });
       if (fromPull) wx.stopPullDownRefresh();
     }
+  },
+
+  // The first paint asks for everything at once. A launch-time request (started in app.js,
+  // before this page existed) is reused when it belongs to this account; pulls always ask
+  // again, because the point of a pull is to see what changed.
+  async openToday(fromPull, session) {
+    const warm = fromPull ? null : takeWarmBootstrap();
+    if (warm) {
+      const bundle = await warm.catch(() => null);
+      if (bundle && bundle.userId === session.user.id) return bundle;
+    }
+    return this.readToday(session);
+  },
+
+  // Two ways to reach the same bundle. The merged endpoint is one round trip; the per-read
+  // path is what every released build used. Keeping both is not defensive decoration: the
+  // server and the uploaded package ship independently, so either one can be the older one.
+  async readToday(session) {
+    if (typeof bootstrapDashboard === "function") {
+      try {
+        const bundle = await bootstrapDashboard();
+        if (bundle) return bundle;
+      } catch (error) {
+        if (!bootstrapUnsupported(error)) throw error;
+      }
+    }
+    const profile = await getProfile(session.user.id);
+    if (requiresWechatSetup(session, profile)) {
+      return { userId: session.user.id, profile, setupRequired: true, entries: [], checkins: [], checkinCount: 0 };
+    }
+    if (!profile?.onboarding_completed) {
+      return { userId: session.user.id, profile, setupRequired: false, entries: [], checkins: [], checkinCount: 0 };
+    }
+    const [entries, checkins, checkinCount] = await Promise.all([getEntries(session.user.id, 3), getCheckins(session.user.id, 7), getCheckinCount(session.user.id)]);
+    return { userId: session.user.id, profile, setupRequired: false, entries, checkins, checkinCount };
   },
 
   previewPhoto(event) {

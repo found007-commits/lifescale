@@ -1,6 +1,7 @@
 "use client";
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { resilientFetch } from "../network-fetch";
 
 let browserClient: SupabaseClient | null = null;
 
@@ -13,6 +14,7 @@ export function getSupabaseBrowserClient() {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
     const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "sb_publishable_placeholder";
     browserClient = createClient(url, key, {
+      global: { fetch: resilientFetch },
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
     });
   }

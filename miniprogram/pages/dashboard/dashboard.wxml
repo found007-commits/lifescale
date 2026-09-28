@@ -1,8 +1,18 @@
 <wxs src="../../utils/locale.wxs" module="i18n" />
 <view class="page-shell safe-page ui-207 dashboard-page">
-  <view wx:if="{{loading}}" class="loading-copy">{{i18n.t('正在打开今天', locale)}}</view>
+  <view wx:if="{{loading}}" class="today-skeleton" aria-label="{{i18n.t('正在打开今天', locale)}}">
+    <view class="skeleton-row"><view class="skeleton-chip"></view><view class="skeleton-chip short"></view></view>
+    <view class="skeleton-line wide"></view>
+    <view class="skeleton-line"></view>
+    <view class="skeleton-block"></view>
+    <view class="skeleton-line"></view>
+    <view class="skeleton-block tall"></view>
+  </view>
   <block wx:else>
-    <view wx:if="{{error}}" class="form-error">{{error}}</view>
+    <view wx:if="{{error}}" class="form-error">
+      <text>{{error}}</text>
+      <button class="secondary-button" bindtap="retryLoad">{{i18n.t('重新加载', locale)}}</button>
+    </view>
     <view wx:if="{{!profile && !error}}" class="paper-card empty-state">
       <text class="eyebrow">TODAY · JUST FOR YOU</text>
       <text class="section-title">{{i18n.t('先留下今天', locale)}}</text>
